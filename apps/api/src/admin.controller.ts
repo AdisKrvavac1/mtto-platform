@@ -86,7 +86,7 @@ export class AdminController {
     if (q.status) w.add(`"status"=?`, q.status);
     if (q.type) w.add(`"type"=?`, q.type);
     if (q.q) w.add(`"title" ILIKE ?`, `%${q.q}%`);
-    return this.db.q(`SELECT "id","slug","title","status","type","category","publishedAt","updatedAt","views","authorName","coverImage","isDemo" FROM posts ${w.sql} ORDER BY "updatedAt" DESC LIMIT 200`, w.params);
+    return this.db.q(`SELECT "id","slug","title","excerpt","status","type","category","publishedAt","updatedAt","views","authorName","coverImage","isDemo" FROM posts ${w.sql} ORDER BY "updatedAt" DESC LIMIT 200`, w.params);
   }
 
   @Get('posts/:id')

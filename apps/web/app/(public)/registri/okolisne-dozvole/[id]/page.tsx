@@ -1,11 +1,15 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { api, type Permit } from '@/lib/api';
-import { DocRow, DemoBadge } from '@/components/site/ui';
-import { PERMIT_STATUS, dateLong, daysUntil } from '@/lib/format';
+import { DemoBadge } from '@/components/site/ui';
+import { PERMIT_STATUS, dateLong, dateShort, dateTime, daysUntil, fileExt, fileSize } from '@/lib/format';
 import MapSection from '@/components/site/MapSection';
+import StitchTabs from '@/components/stitch/StitchTabs';
+import { DossierBody } from '@/components/stitch/Dossier';
 
 export const dynamic = 'force-dynamic';
+
+const chip = 'inline-flex items-center gap-1 px-space-sm py-1 rounded font-label-badge text-label-badge uppercase tracking-wider';
 
 export default async function PermitDossier({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -18,79 +22,79 @@ export default async function PermitDossier({ params }: { params: Promise<{ id: 
   }
   const st = PERMIT_STATUS[p.status] ?? PERMIT_STATUS.VAZECA;
   const left = daysUntil(p.validUntil)!;
+  const m = Math.max(0, Math.round(left / 30.4));
+  const docs = p.documents ?? [];
+  const stat = (k: string, v: string, note: string, cls = 'text-text-heading') => (
+    <div key={k} className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+      <span className="font-label-kicker text-label-kicker text-on-surface-variant uppercase">{k}</span>
+      <div className="my-space-xs"><span className={`font-headline-sm text-headline-sm font-bold ${cls}`}>{v}</span></div>
+      <span className="font-body-sm text-body-sm text-outline">{note}</span>
+    </div>
+  );
 
   return (
     <>
-      <div className="w-full bg-surface-container-low py-space-sm">
-        <nav className="max-w-7xl mx-auto px-margin-mobile md:px-margin flex items-center gap-space-xs font-body-sm text-body-sm text-on-surface-variant flex-wrap" aria-label="Putanja">
-          <Link className="hover:text-primary" href="/">Naslovna</Link>
-          <span className="material-symbols-outlined text-[14px] text-outline">chevron_right</span>
-          <Link className="hover:text-primary" href="/registri/okolisne-dozvole">Registar okolišnih dozvola</Link>
-          <span className="material-symbols-outlined text-[14px] text-outline">chevron_right</span>
-          <span className="text-on-surface font-semibold">{p.registerNumber}</span>
-        </nav>
-      </div>
-      <section className="max-w-7xl mx-auto px-margin-mobile md:px-margin py-space-xl space-y-space-lg">
-        <div className="bg-surface-container-lowest rounded-xl shadow-md p-space-md md:p-space-lg border-t-[3px] border-eko-green">
-          <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-space-md">
-            <div className="space-y-space-xs">
-              <div className="flex flex-wrap items-center gap-space-xs">
-                <span className="font-label-kicker text-label-kicker text-secondary uppercase tracking-wider">Dosje okolišne dozvole</span>
-                <span className={`px-2.5 py-0.5 rounded-full font-label-badge text-label-badge font-bold ${st.cls}`}>{st.label}</span>
-                <DemoBadge show={p.isDemo} />
-              </div>
-              <h1 className="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary font-bold">{p.operator}</h1>
-              <p className="font-body-lead text-body-lead text-text-body">{p.facility}</p>
-              <p className="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1"><span className="material-symbols-outlined text-[16px]">location_on</span>{p.address || p.municipality}</p>
-            </div>
-            <div className="flex flex-wrap gap-space-sm">
-              {p.documents?.[0] && (
-                <a href={`/api/documents/${p.documents[0].id}/file`} target="_blank" rel="noopener" className="inline-flex items-center gap-space-xs px-space-md py-2 rounded bg-mtto-primary text-white font-button text-button"><span className="material-symbols-outlined text-[18px]">picture_as_pdf</span>Preuzmi rješenje</a>
-              )}
-              <Link href="/registri/okolisne-dozvole" className="inline-flex items-center gap-space-xs px-space-md py-2 rounded border-[1.5px] border-mtto-primary text-mtto-primary font-button text-button"><span className="material-symbols-outlined text-[18px]">arrow_back</span>Registar</Link>
-            </div>
+      <StitchTabs buttons="#monitoringTabs button" panels={{ air: 'tab-air', water: 'tab-water', noise: 'tab-noise' }} on={['bg-surface-container-lowest', 'text-primary', 'shadow-sm']} off={['text-on-surface-variant']} />
+      <DossierBody
+        reg={p.registerNumber}
+        updated={dateTime(new Date())}
+        title={<>{p.operator} – {p.facility}</>}
+        badges={
+          <div className="flex flex-wrap items-center gap-space-xs">
+            <span className={`${chip} shadow-sm ${st.cls}`}><span className="material-symbols-outlined text-[14px]">check_circle</span>{st.label} (do {dateShort(p.validUntil)})</span>
+            <span className={`${chip} bg-surface-container-high text-institutional-navy-deep`}><span className="material-symbols-outlined text-[14px]">factory</span>{p.activity}</span>
+            {p.lat != null && <span className={`${chip} bg-surface-container-low text-primary`}><span className="material-symbols-outlined text-[14px]">pin_drop</span>Lokacija na mapi</span>}
+            <DemoBadge show={p.isDemo} />
           </div>
-          <div className="mt-space-lg grid grid-cols-2 lg:grid-cols-5 gap-space-md">
-            {[
-              ['Broj rješenja', p.registerNumber, 'font-mono'],
-              ['Datum izdavanja', dateLong(p.issuedAt), ''],
-              ['Važi do', dateLong(p.validUntil), ''],
-              ['Preostalo', left >= 0 ? `${left} dana` : 'Isteklo', left < 60 ? 'text-error' : 'text-eko-green'],
-              ['Djelatnost', p.activity, ''],
-            ].map(([k, v, cls]) => (
-              <div key={k} className="p-space-sm rounded-lg bg-slate-surface border border-slate-border">
-                <p className="font-label-badge text-label-badge uppercase text-[#80807e]">{k}</p>
-                <p className={`font-title-md text-[15px] font-bold text-primary ${cls}`}>{v}</p>
-              </div>
+        }
+        meta={
+          <p className="font-body-regular text-body-regular text-text-body flex flex-wrap items-center gap-y-1 gap-x-space-md pt-1">
+            <span className="inline-flex items-center gap-1"><span className="material-symbols-outlined text-[16px] text-primary">location_city</span>{p.address ? `${p.address}, ` : ''}{p.municipality}</span>
+            {p.description && <><span className="text-outline-variant">•</span><span>{p.description}</span></>}
+          </p>
+        }
+        actions={
+          <div className="pt-space-sm flex flex-wrap items-center gap-space-sm" id="dokumenti">
+            {docs.map((d, i) => (
+              <a key={d.id} href={`/api/documents/${d.id}/file`} target="_blank" rel="noopener" className={`inline-flex items-center gap-space-xs px-space-md py-2.5 rounded font-button text-button transition-all ${i === 0 ? 'bg-primary text-on-primary hover:bg-institutional-navy-deep shadow-sm hover:-translate-y-0.5' : 'bg-surface-container-high text-institutional-navy-deep hover:bg-surface-container-highest'}`}>
+                <span className="material-symbols-outlined text-[18px]">{i === 0 ? 'download' : 'menu_book'}</span><span>{d.title} ({fileExt(d.fileName)} • {fileSize(d.size)})</span>
+              </a>
             ))}
+            <Link className="inline-flex items-center gap-space-xs px-space-md py-2.5 bg-surface-container-low text-primary hover:bg-surface-container rounded font-button text-button transition-all" href="/registri/okolisne-dozvole"><span className="material-symbols-outlined text-[18px]">list</span><span>Svi zapisi registra</span></Link>
+            <Link className="inline-flex items-center gap-space-xs px-space-md py-2.5 bg-error text-on-error hover:bg-on-error-container rounded font-button text-button ml-auto transition-all shadow-sm" href="/e-usluge/eko-prijava"><span className="material-symbols-outlined text-[18px]">notification_important</span><span>Prijavi nepravilnost</span></Link>
           </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
-          <div className="lg:col-span-7 space-y-space-lg">
-            <div className="bg-surface-container-lowest rounded-xl shadow-md p-space-lg space-y-space-sm">
-              <h2 className="font-headline-sm text-headline-sm font-bold text-primary flex items-center gap-2"><span className="material-symbols-outlined text-primary">factory</span>Opis postrojenja</h2>
-              <p className="font-body-regular text-body-regular text-text-body whitespace-pre-line">{p.description || 'Opis nije unesen.'}</p>
-            </div>
-            <div className="bg-surface-container-lowest rounded-xl shadow-md p-space-lg space-y-space-md">
-              <h2 className="font-headline-sm text-headline-sm font-bold text-primary flex items-center gap-2"><span className="material-symbols-outlined text-primary">folder_open</span>Rješenja i dokumentacija</h2>
-              {p.documents?.length ? <div className="grid gap-space-sm">{p.documents.map((d) => <DocRow key={d.id} d={d} />)}</div> : <p className="font-body-sm text-body-sm text-on-surface-variant">Nema priloženih dokumenata.</p>}
-            </div>
+        }
+        stats={
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-space-sm mb-space-xl">
+            {stat('Broj rješenja', p.registerNumber, 'Upravni postupak MTTO', 'text-institutional-navy-deep')}
+            {stat('Datum izdavanja', dateLong(p.issuedAt), 'Proveden javni uvid')}
+            {stat('Rok važenja', dateLong(p.validUntil), left < 0 ? 'Istekla' : `Preostalo: ${Math.floor(m / 12)} god. ${m % 12} mj.`, left < 60 ? 'text-error' : 'text-secondary')}
+            {stat('Djelatnost', p.activity, p.facility)}
+            {stat('Nadležno tijelo', 'MTTO HNK', 'Sektor za zaštitu okoliša', 'text-primary')}
           </div>
-          <div className="lg:col-span-5 space-y-space-lg">
-            {p.lat && p.lng ? (
-              <MapSection title={false} compact height={320} points={[{ id: p.id, layer: 'DOZVOLA', name: p.operator, description: p.facility, lat: p.lat, lng: p.lng, link: null }]} />
-            ) : null}
-            <div className="bg-institutional-navy-deep text-on-primary rounded-xl shadow-md p-space-lg space-y-space-sm">
-              <span className="font-label-kicker text-label-kicker text-secondary-fixed uppercase tracking-wider">Nadležno tijelo</span>
-              <h3 className="font-title-md text-title-md font-bold">Sektor za zaštitu prirode i okoliša</h3>
-              <p className="font-body-sm text-body-sm text-surface-container-high">Ministarstvo trgovine, turizma i zaštite okoliša HNK</p>
-              <a href="tel:036551324" className="block font-body-sm text-body-sm">036 551 324</a>
-              <a href="mailto:okolis@mtto.gov.ba" className="block font-body-sm text-body-sm underline">okolis@mtto.gov.ba</a>
-            </div>
+        }
+        intro={
+          <div className="flex items-start gap-space-sm p-space-md rounded-lg bg-herzeg-gold-soft border border-herzeg-gold text-[#786000] font-body-sm text-body-sm">
+            <span className="material-symbols-outlined">science</span>
+            <span>Sekcije 01–04 pokazuju strukturu punog dosjea (tehnologija, emisije, otpad, inspekcija) s primjerom podataka. Povezivanje s monitoringom i inspekcijom je dio Faze 2.</span>
           </div>
-        </div>
-      </section>
+        }
+        map={
+          <div className="bg-surface-container-lowest p-space-md md:p-space-lg rounded-xl shadow-sm space-y-space-md">
+            <div className="flex items-center justify-between">
+              <h3 className="font-title-md text-title-md text-institutional-navy-deep flex items-center gap-2"><span className="material-symbols-outlined text-secondary">explore</span><span>Lokacija postrojenja</span></h3>
+              <span className="font-label-badge text-label-badge px-2 py-0.5 bg-surface-container text-primary rounded">GIS</span>
+            </div>
+            {p.lat != null && p.lng != null ? (
+              <>
+                <MapSection compact title={false} height={210} points={[{ id: p.id, layer: 'DOZVOLA', name: p.operator, description: p.facility, lat: p.lat, lng: p.lng, link: null }]} />
+                <div className="flex items-center gap-1 font-mono text-[12px] text-on-surface-variant"><span className="material-symbols-outlined text-[16px] text-secondary">my_location</span>{p.lat.toFixed(4)}° N, {p.lng.toFixed(4)}° E</div>
+              </>
+            ) : <p className="font-body-sm text-body-sm text-outline">Lokacija nije unesena.</p>}
+            <Link className="w-full inline-flex items-center justify-center gap-space-xs px-space-md py-2 bg-surface-container-high hover:bg-surface-container-highest text-institutional-navy-deep rounded font-button text-button transition-colors" href="/mapa"><span className="material-symbols-outlined text-[18px]">map</span><span>Otvori interaktivnu mapu</span></Link>
+          </div>
+        }
+      />
     </>
   );
 }

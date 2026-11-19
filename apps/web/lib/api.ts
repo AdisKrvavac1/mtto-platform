@@ -22,7 +22,7 @@ export type PostListItem = {
 };
 export type Doc = {
   id: string; title: string; docType: string; sector: string; number: string | null; issuedAt: string | null; status: string;
-  description: string; fileName: string; mimeType: string; size: number; downloads: number; isDemo: boolean;
+  description: string; fileName: string; mimeType: string; size: number; downloads: number; isDemo: boolean; createdAt: string;
 };
 export type Permit = {
   id: string; registerNumber: string; operator: string; facility: string; activity: string; municipality: string; address: string;

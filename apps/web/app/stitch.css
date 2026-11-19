@@ -1,0 +1,32 @@
+/* Pomoćne klase iz Stitch ekrana */
+.font-roboto-flex{font-family:var(--font-display) !important;}
+.font-roboto-condensed{font-family:var(--font-condensed) !important;}
+.sidebar-mtto-navy{background-color:#1e2570 !important;}
+.header-mtto-navy{background-color:#234696 !important;}
+.badge-cyan{background-color:#e0f7fe !important;color:#0077a8 !important;border-color:#b3e9fc !important;}
+.badge-emerald{background-color:#eaf7f0 !important;color:#13693f !important;border-color:#b9e8cd !important;}
+.badge-gold{background-color:#fffde6 !important;color:#8d6f00 !important;border-color:#fceea7 !important;}
+.badge-valid { background-color: #eaf8f1 !important; color: #13693f !important; border: 1px solid rgba(19, 105, 63, 0.2) !important; font-family: var(--font-mono-cond) !important; font-weight: 600 !important; }
+.badge-valid .dot { background-color: #13693f !important; }
+.badge-renewal { background-color: #fef9c3 !important; color: #7a6100 !important; border: 1px solid rgba(250, 220, 18, 0.6) !important; font-family: var(--font-mono-cond) !important; font-weight: 600 !important; }
+.badge-renewal .dot { background-color: #fadc12 !important; }
+.metric-number { font-family: var(--font-mono-cond) !important; font-weight: 700 !important; letter-spacing: -0.02em !important; }
+.upi-number { font-family: var(--font-mono-cond) !important; font-weight: 600 !important; letter-spacing: 0.04em !important; }
+.font-roboto-condensed, .font-condensed { font-family: 'Roboto Condensed', sans-serif !important; }
+.bg-mtto-emerald { background-color: #13693f !important; }
+.bg-mtto-emerald-subtle { background-color: #e6f6ee !important; }
+.text-mtto-emerald { color: #13693f !important; }
+.text-mtto-gold { color: #fadc12 !important; }
+.bg-mtto-cyan { background-color: #00abeb !important; }
+.text-mtto-cyan { color: #00abeb !important; }
+.bg-mtto-cyan-subtle { background-color: #e5f6fd !important; }
+.btn-primary-ds { background: #234696; color: #fff; }
+.btn-primary-ds:hover { background: #2e318f; }
+.condensed-text { font-family: 'Roboto Condensed', var(--font-sans), sans-serif; }
+.font-condensed, .font-roboto-condensed { font-family: 'Roboto Condensed', sans-serif; }
+.font-roboto-flex { font-family: 'Roboto Flex', 'Roboto', sans-serif; }
+.badge-env { background:#eaf7f0; color:#13693f; border:1px solid #9ad1b4; }
+.badge-hospitality { background:#e0f6ff; color:#007ba8; border:1px solid rgba(0,171,235,.25); }
+.badge-trade { background:#fffde6; color:#786000; border:1px solid #fadc12; }
+.download-accent-btn { background:#ffdad6; color:#93000a; }
+.download-accent-btn:hover { background:#ba1a1a; color:#fff; }
