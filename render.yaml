@@ -27,12 +27,11 @@ services:
         value: Urednik MTTO
       - key: ADMIN_PASSWORD
         generateValue: true
-      - key: NEXT_PUBLIC_GOOGLE_MAPS_KEY
-        sync: false
 
 databases:
   - name: mtto-db
     plan: free
     region: frankfurt
-    databaseName: mtto
-    user: mtto
+    databaseName: mtto_db
+    user: mtto_db_user
+    postgresMajorVersion: "16"
