@@ -5,7 +5,7 @@ import { toInt } from './util';
 
 export const DOC_COLS = `"id","title","docType","sector","number","issuedAt","status","description","fileName","mimeType","size","downloads","isDemo","postId","permitId","createdAt"`;
 const POST_LIST_COLS = `"id","slug","type","category","title","excerpt","coverImage","publishedAt","deadline","views","authorName","isDemo"`;
-const PUBLISHED = `"status"='OBJAVLJENO' AND "publishedAt" <= now()`;
+const PUBLISHED = `"status" IN ('OBJAVLJENO','ZAKAZANO') AND "publishedAt" <= now()`;
 
 @Controller()
 export class PublicController {

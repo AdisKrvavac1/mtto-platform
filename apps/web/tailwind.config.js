@@ -4,6 +4,17 @@ module.exports = {
   theme: {
     extend: {
   "colors": {
+      "mtto-primary": "#234696",
+      "mtto-navy": "#2e318f",
+      "mtto-navy-dark": "#1a1e5c",
+      "neretva-cyan": "#00abeb",
+      "neretva-cyan-light": "#e0f6ff",
+      "eko-green": "#13693f",
+      "eko-green-light": "#eaf7f0",
+      "eko-green-border": "#9ad1b4",
+      "herzeg-gold": "#fadc12",
+      "herzeg-gold-bright": "#fcec02",
+      "herzeg-gold-soft": "#fffde6",
     "outline-variant": "#c3c6d0",
     "primary-fixed-dim": "#a6c8fe",
     "background": "#f8f9ff",
