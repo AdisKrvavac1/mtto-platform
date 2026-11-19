@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: 'Public Sans';
+  --font-kicker: 'Space Grotesk';
+}
+
+@layer base {
+  html { scroll-behavior: smooth; }
+  body { overscroll-behavior: none; -webkit-font-smoothing: antialiased; }
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  font-feature-settings: 'liga';
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  user-select: none;
+}
+.icon-fill { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+/* Tekst objava (markdown) */
+.prose-mtto { color: #334155; font-size: 16px; line-height: 1.75; }
+.prose-mtto h2 { font-size: 22px; line-height: 30px; font-weight: 700; color: #0F172A; margin: 2rem 0 0.75rem; }
+.prose-mtto h3 { font-size: 18px; font-weight: 700; color: #0F172A; margin: 1.5rem 0 0.5rem; }
+.prose-mtto p { margin: 0 0 1rem; }
+.prose-mtto ul, .prose-mtto ol { margin: 0 0 1rem 1.25rem; }
+.prose-mtto ul { list-style: disc; }
+.prose-mtto ol { list-style: decimal; }
+.prose-mtto li { margin: 0.25rem 0; }
+.prose-mtto a { color: #234696; text-decoration: underline; text-underline-offset: 2px; }
+.prose-mtto strong { color: #0F172A; }
+.prose-mtto blockquote { border-left: 3px solid #234696; padding-left: 1rem; color: #444b5d; }
+
+.leaflet-container { font-family: var(--font-sans), system-ui, sans-serif; }
