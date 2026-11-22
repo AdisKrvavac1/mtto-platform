@@ -165,7 +165,24 @@ export class RiskService implements OnModuleInit {
       });
     }, []);
   }
+
+  /** Kvalitet zraka: Copernicus CAMS (Europski AQI, PM2.5, PM10, O3) putem Open-Meteo Air Quality API-ja. */
+  air() {
+    return this.cached<Air[]>('air', 30 * 60_000, async () => {
+      const j = await getJson(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${AIR_POINTS.map((p) => p.lat).join(',')}&longitude=${AIR_POINTS.map((p) => p.lng).join(',')}&current=european_aqi,pm2_5,pm10,ozone&timezone=Europe%2FSarajevo`);
+      const arr: any[] = Array.isArray(j) ? j : [j];
+      const r = (v: any) => (typeof v === 'number' ? Math.round(v) : null);
+      return AIR_POINTS.map((p, i) => { const c = arr[i]?.current ?? {}; return { key: p.key, name: p.name, aqi: r(c.european_aqi), pm25: r(c.pm2_5), pm10: r(c.pm10), o3: r(c.ozone), time: c.time ?? null }; });
+    }, []);
+  }
 }
+
+export type Air = { key: string; name: string; aqi: number | null; pm25: number | null; pm10: number | null; o3: number | null; time: string | null };
+const AIR_POINTS = [
+  { key: 'mostar', name: 'Mostar', lat: 43.343, lng: 17.808 },
+  { key: 'konjic', name: 'Konjic', lat: 43.652, lng: 17.961 },
+  { key: 'capljina', name: 'Čapljina', lat: 43.121, lng: 17.684 },
+];
 
 /** Samo za lokalni razvoj (RISK_FIXTURE=1) – nikad u produkciji. */
 function fixture(key: string): any {
@@ -178,6 +195,7 @@ function fixture(key: string): any {
   if (key === 'warnings') return [
     { region: 'Mostar', event: 'Vjetar žuto upozorenje', level: 2, color: 'yellow', type: 'Wind', onset: new Date().toISOString(), expires: new Date(Date.now() + 86400000).toISOString(), headline: 'Umjereno upozorenje: vjetar', description: 'Udari bure do 70 km/h.', instruction: '' },
   ];
+  if (key === 'air') return AIR_POINTS.map((p, i) => ({ key: p.key, name: p.name, aqi: [32, 28, 44][i], pm25: [9, 7, 14][i], pm10: [18, 14, 25][i], o3: [42, 36, 48][i], time: new Date().toISOString() }));
   if (key === 'rivers') return STATIONS.map((s, i) => {
     const days = Array.from({ length: 70 }, (_, k) => d(k - 60));
     const discharge = days.map((_, k) => Math.round((120 + 60 * Math.sin(k / 6) + (k > 60 ? (k - 60) * 25 * (i + 1) / 2 : 0)) * 10) / 10 / (i === 3 ? 4 : 1));
@@ -204,8 +222,8 @@ export class RiskController {
 
   @Get('risk/summary')
   async summary() {
-    const [f, w, r, landslides, reports] = await Promise.all([
-      this.risk.fires(), this.risk.warnings(), this.risk.rivers(),
+    const [f, w, r, a, landslides, reports] = await Promise.all([
+      this.risk.fires(), this.risk.warnings(), this.risk.rivers(), this.risk.air(),
       this.db.q(`SELECT * FROM landslides ORDER BY "risk" DESC, "updatedAt" DESC`),
       this.db.q(`SELECT * FROM eco_reports WHERE "isPublic" AND "createdAt" > now() - interval '60 days' ORDER BY "createdAt" DESC LIMIT 100`),
     ]);
@@ -219,6 +237,7 @@ export class RiskController {
       fires: { items: f.data, updatedAt: new Date(f.at).toISOString(), error: f.error ?? null, last24h: fires24 },
       warnings: { items: w.data, updatedAt: new Date(w.at).toISOString(), error: w.error ?? null },
       rivers: { items: r.data, updatedAt: new Date(r.at).toISOString(), error: r.error ?? null },
+      air: { items: a.data, updatedAt: new Date(a.at).toISOString(), error: a.error ?? null },
       landslides,
       reports: reports.map(publicReport),
       reportKinds: REPORT_KINDS,

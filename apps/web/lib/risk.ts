@@ -5,9 +5,19 @@ export type River = { key: string; name: string; lat: number; lng: number; days:
 export type Landslide = { id: string; name: string; municipality: string; lat: number; lng: number; status: 'AKTIVNO' | 'PRACENJE' | 'SANIRANO'; risk: number; description: string; source: string; isDemo: boolean; updatedAt: string };
 export type PublicReport = { id: string; code: string; kind: string; kindLabel: string; municipality: string; location: string; lat: number | null; lng: number | null; description: string; status: string; createdAt: string };
 type Feed<T> = { items: T[]; updatedAt: string; error: string | null };
+export type Air = { key: string; name: string; aqi: number | null; pm25: number | null; pm10: number | null; o3: number | null; time: string | null };
+/** Europski AQI (EEA) razredi */
+export function aqiClass(v: number | null): { label: string; tone: 'success' | 'warning' | 'error' | 'gray' } {
+  if (v == null) return { label: 'Nema podataka', tone: 'gray' };
+  if (v <= 20) return { label: 'Dobar', tone: 'success' };
+  if (v <= 40) return { label: 'Prihvatljiv', tone: 'success' };
+  if (v <= 60) return { label: 'Umjeren', tone: 'warning' };
+  if (v <= 80) return { label: 'Loš', tone: 'error' };
+  return { label: 'Vrlo loš', tone: 'error' };
+}
 export type RiskSummary = {
   generatedAt: string; today: string; level: 1 | 2 | 3;
-  fires: Feed<Fire> & { last24h: number }; warnings: Feed<Warning>; rivers: Feed<River>;
+  fires: Feed<Fire> & { last24h: number }; warnings: Feed<Warning>; rivers: Feed<River>; air?: Feed<Air>;
   landslides: Landslide[]; reports: PublicReport[]; reportKinds: Record<string, string>;
 };
 

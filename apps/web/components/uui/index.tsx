@@ -11,10 +11,12 @@ const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).jo
 
 /* ── Raspored ─────────────────────────────────────────── */
 export function Container({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <div className={cx('mx-auto w-full max-w-[1280px] px-4 md:px-8', className)}>{children}</div>;
+  return <div className={cx('mx-auto w-full max-w-[1376px] px-4 md:px-8', className)}>{children}</div>;
 }
+/** Gradijent iz MTTO Figme: tamna plava baza, zeleni sjaj gore lijevo, plavi dolje desno (Untitled Blue + Green). */
+export const GRAD = 'bg-[#062343] bg-[radial-gradient(ellipse_at_0%_0%,rgba(9,146,80,0.32)_0%,transparent_45%),radial-gradient(ellipse_at_100%_100%,rgba(21,112,239,0.28)_0%,transparent_55%)]';
 export function Section({ children, className = '', id, tone = 'white' }: { children: ReactNode; className?: string; id?: string; tone?: 'white' | 'gray' | 'brand' | 'dark' }) {
-  const bg = { white: 'bg-white', gray: 'bg-[#fafafa]', brand: 'bg-[var(--br-800)] text-white', dark: 'bg-[#0a0a0a] text-white' }[tone];
+  const bg = { white: 'bg-white', gray: 'bg-[#fafafa]', brand: 'bg-[var(--br-800)] text-white', dark: `${GRAD} text-white` }[tone];
   return <section id={id} className={cx('py-16 md:py-24 scroll-mt-24', bg, className)}><Container>{children}</Container></section>;
 }
 export const Divider = () => <Container><hr className="border-[#e5e5e5]" /></Container>;

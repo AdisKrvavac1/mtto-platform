@@ -1,17 +1,13 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { AlertCircle, CheckCircle, CloudRaining01, Target04, Droplets02, DotsHorizontal, LayersThree01, PhoneCall01, Send01, ThermometerWarm, Trash03, Wind01, Scissors01 } from '@untitledui/icons';
+import { AlertCircle, CheckCircle, PhoneCall01, Send01, Target04 } from '@untitledui/icons';
+import { KINDS } from '@/lib/reportKinds';
 import type { FC, SVGProps } from 'react';
 
 const LocationPicker = dynamic(() => import('@/components/admin/LocationPicker'), { ssr: false, loading: () => <div className="h-[280px] rounded-[8px] bg-[#f5f5f5] animate-pulse" /> });
 
-const KINDS: [string, string, FC<SVGProps<SVGSVGElement> & { size?: number }>][] = [
-  ['POZAR', 'Požar ili dim', ThermometerWarm], ['DEPONIJA', 'Divlja deponija', Trash03], ['VODA', 'Zagađenje vode', Droplets02],
-  ['ZRAK', 'Zrak / neugodni mirisi', Wind01], ['KLIZISTE', 'Klizište / odron', LayersThree01], ['POPLAVA', 'Poplava / bujica', CloudRaining01],
-  ['SJECA', 'Nelegalna sječa', Scissors01], ['OSTALO', 'Ostalo', DotsHorizontal],
-];
 const MUNICIPALITIES = ['Čapljina', 'Čitluk', 'Jablanica', 'Konjic', 'Mostar', 'Neum', 'Prozor-Rama', 'Ravno', 'Stolac'];
 const label = 'text-[14px] leading-5 font-medium text-[#404040]';
 const field = 'bg-white h-11 px-[14px] rounded-[8px] border border-[#d4d4d4] shadow-[0_1px_2px_rgba(10,13,18,0.05)] text-[16px] leading-6 text-[#171717] placeholder:text-[#737373] focus:outline-none focus:border-[var(--br-300)] focus:ring-4 focus:ring-[var(--br-ring)] w-full';
@@ -22,6 +18,7 @@ const btnS = 'inline-flex items-center justify-center gap-1.5 rounded-[8px] font
 
 export default function EcoReportForm() {
   const [kind, setKind] = useState('');
+  useEffect(() => { const v = new URLSearchParams(window.location.search).get('vrsta'); if (v && KINDS.some(([k]) => k === v)) setKind(v); }, []);
   const [pos, setPos] = useState<{ lat: number | null; lng: number | null }>({ lat: null, lng: null });
   const [pickKey, setPickKey] = useState(0);
   const [busy, setBusy] = useState(false);
