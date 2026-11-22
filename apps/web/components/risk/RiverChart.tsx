@@ -1,5 +1,5 @@
 import type { River } from '@/lib/risk';
-import { RIVER_STATUS } from '@/lib/risk';
+import { RIVER_STATUS, peakForecast } from '@/lib/risk';
 
 /** Mali SVG grafikon: zadnjih 60 dana (puna linija) i prognoza 10 dana (isprekidano) s gornjom granicom ansambla. */
 export default function RiverChart({ r, dark = false }: { r: River; dark?: boolean }) {
@@ -23,7 +23,7 @@ export default function RiverChart({ r, dark = false }: { r: River; dark?: boole
       <figcaption className="flex items-start justify-between gap-[8px]">
         <span className="flex flex-col">
           <span className={`font-pub font-semibold text-[15px] leading-[22px] ${dark ? 'text-white' : 'text-[#002042]'}`}>{r.name}</span>
-          <span className={`font-rob text-[12px] leading-[18px] ${dark ? 'text-white/60' : 'text-[#737780]'}`}>Danas {isNaN(today) ? '—' : `${Math.round(today)} m³/s`}{r.ratio != null ? ` · vrh prognoze ${r.ratio}× uobičajeno` : ''}</span>
+          <span className={`font-rob text-[12px] leading-[18px] ${dark ? 'text-white/60' : 'text-[#737780]'}`}>Danas {isNaN(today) ? '—' : `${Math.round(today)} m³/s`}{` · vrh prognoze ${peakForecast(r)} m³/s`}</span>
         </span>
         <span className={`shrink-0 px-[8px] py-[2px] rounded-[2px] font-pub font-bold text-[11px] tracking-[0.44px] uppercase leading-[14px] ${st.cls}`}>{st.label}</span>
       </figcaption>

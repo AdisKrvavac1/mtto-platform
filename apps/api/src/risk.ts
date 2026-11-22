@@ -126,28 +126,41 @@ export class RiskService implements OnModuleInit {
           out.push({ region, event: info.event ?? '', level: Number(n) || 1, color: color || 'green', type, onset: info.onset ?? info.effective ?? '', expires: info.expires ?? '', headline: info.headline ?? '', description: info.description ?? '', instruction: info.instruction ?? '' });
         }
       }
-      return out.sort((a, b) => b.level - a.level || a.onset.localeCompare(b.onset));
+      const seen = new Set<string>();
+      return out.filter((w) => { const k = [w.region, w.event, w.onset, w.expires, w.description].join('|'); if (seen.has(k)) return false; seen.add(k); return true; })
+        .sort((a, b) => b.level - a.level || a.onset.localeCompare(b.onset));
     }, []);
   }
 
-  /** Open-Meteo Flood API (Copernicus GloFAS) – protok Neretve i Bune */
+  /** Open-Meteo Flood API (Copernicus GloFAS) – protok Neretve i Bune.
+   *  Model ima mrežu ~5 km, pa se za svaku tačku ispituje 3×3 susjednih ćelija i uzima ona s najvećim
+   *  prosječnim protokom (ćelija kojom teče glavni tok rijeke). */
   rivers() {
     return this.cached<River[]>('rivers', 60 * 60_000, async () => {
-      const lat = STATIONS.map((s) => s.lat).join(','), lng = STATIONS.map((s) => s.lng).join(',');
-      const j = await getJson(`https://flood-api.open-meteo.com/v1/flood?latitude=${lat}&longitude=${lng}&daily=river_discharge,river_discharge_max&past_days=60&forecast_days=10`);
-      const arr = Array.isArray(j) ? j : [j];
+      const OFF = [-0.04, 0, 0.04];
+      const pts = STATIONS.flatMap((s) => OFF.flatMap((dy) => OFF.map((dx) => ({ s: s.key, lat: +(s.lat + dy).toFixed(3), lng: +(s.lng + dx).toFixed(3) }))));
+      const j = await getJson(`https://flood-api.open-meteo.com/v1/flood?latitude=${pts.map((p) => p.lat).join(',')}&longitude=${pts.map((p) => p.lng).join(',')}&daily=river_discharge,river_discharge_max&past_days=60&forecast_days=10`, 25000);
+      const arr: any[] = Array.isArray(j) ? j : [j];
       const today = new Date().toISOString().slice(0, 10);
-      return STATIONS.map((s, i) => {
-        const d = arr[i]?.daily ?? {};
+      return STATIONS.map((s) => {
+        let best: any = null, bestMean = -1;
+        pts.forEach((p, i) => {
+          if (p.s !== s.key) return;
+          const q: (number | null)[] = arr[i]?.daily?.river_discharge ?? [];
+          const vals = q.filter((v): v is number => v != null);
+          const mean = vals.length ? vals.reduce((x, y) => x + y, 0) / vals.length : -1;
+          if (mean > bestMean) { bestMean = mean; best = arr[i]; }
+        });
+        const d = best?.daily ?? {};
         const days: string[] = d.time ?? [];
         const q: (number | null)[] = d.river_discharge ?? [];
         const mx: (number | null)[] = d.river_discharge_max ?? [];
         const ti = Math.max(0, days.indexOf(today));
-        const past = q.slice(0, ti).filter((v): v is number => v != null).sort((a, b) => a - b);
-        const median = past.length ? past[Math.floor(past.length / 2)] : null;
-        const peak = Math.max(...q.slice(ti).map((v) => v ?? 0), ...mx.slice(ti).map((v) => v ?? 0));
-        const ratio = median && peak ? Math.round((peak / median) * 10) / 10 : null;
-        const status: River['status'] = ratio == null ? 'NEPOZNATO' : ratio >= 3 ? 'VISOKO' : ratio >= 1.8 ? 'POVISENO' : 'NORMALNO';
+        const past = q.slice(0, ti).filter((v): v is number => v != null).sort((x, y) => x - y);
+        const p90 = past.length ? past[Math.floor(past.length * 0.9)] : null;
+        const peak = Math.max(0, ...q.slice(ti).map((v) => v ?? 0));
+        const ratio = p90 && peak ? Math.round((peak / p90) * 10) / 10 : null;
+        const status: River['status'] = ratio == null ? 'NEPOZNATO' : ratio >= 2.5 ? 'VISOKO' : ratio >= 1.5 ? 'POVISENO' : 'NORMALNO';
         return { ...s, days, discharge: q, max: mx, todayIndex: ti, status, ratio };
       });
     }, []);
@@ -200,7 +213,7 @@ export class RiskController {
     const fires24 = f.data.filter((x: Fire) => x.date >= new Date(Date.now() - 86400000).toISOString().slice(0, 10)).length;
     const maxWarn = w.data.reduce((m: number, x: Warning) => Math.max(m, x.level), 0);
     const worstRiver = (r.data as River[]).reduce<River | null>((m, x) => (!m || (x.ratio ?? 0) > (m.ratio ?? 0) ? x : m), null);
-    const level = Math.max(maxWarn >= 3 ? 3 : maxWarn >= 2 ? 2 : 1, fires24 >= 5 ? 3 : fires24 > 0 ? 2 : 1, worstRiver?.status === 'VISOKO' ? 3 : worstRiver?.status === 'POVISENO' ? 2 : 1);
+    const level = Math.max(maxWarn >= 4 ? 3 : maxWarn >= 2 ? 2 : 1, fires24 >= 10 ? 3 : fires24 > 0 ? 2 : 1, worstRiver?.status === 'VISOKO' ? 3 : worstRiver?.status === 'POVISENO' ? 2 : 1);
     return {
       generatedAt: new Date().toISOString(), today, level,
       fires: { items: f.data, updatedAt: new Date(f.at).toISOString(), error: f.error ?? null, last24h: fires24 },

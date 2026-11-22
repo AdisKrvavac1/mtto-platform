@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { apiSafe } from '@/lib/api';
-import { EMPTY, LEVEL, LS_STATUS, REPORT_STATUS, WARN_COLOR, fireConfidence, fireTime, fmtTime, type RiskSummary } from '@/lib/risk';
+import { EMPTY, LEVEL, LS_STATUS, REPORT_STATUS, WARN_COLOR, fireConfidence, fireTime, fmtTime, peakForecast, type RiskSummary } from '@/lib/risk';
 import RiverChart from '@/components/risk/RiverChart';
 import RiskMap from '@/components/risk/RiskMapLazy';
 
@@ -28,7 +28,7 @@ export default async function EkoRizikPage() {
   const kpis = [
     { icon: 'local_fire_department', label: 'Satelitska žarišta (72 h)', value: d.fires.error ? '—' : String(fires.length), sub: d.fires.error ? 'NASA FIRMS nedostupan' : `${d.fires.last24h} u zadnja 24 sata`, tone: fires.length ? 'text-[#ba1a1a]' : 'text-[#002042]' },
     { icon: 'thunderstorm', label: 'Meteo upozorenja', value: d.warnings.error ? '—' : String(warn.length), sub: warn[0] ? `${warn[0].event} · ${warn[0].region}` : 'Nema aktivnih upozorenja', tone: warn.some((w) => w.level >= 3) ? 'text-[#ba1a1a]' : warn.length ? 'text-[#8a4a00]' : 'text-[#002042]' },
-    { icon: 'water', label: 'Neretva kod Mostara', value: mostar ? `${Math.round(mostar.discharge[mostar.todayIndex] ?? 0)} m³/s` : '—', sub: mostar?.ratio != null ? `Vrh prognoze ${mostar.ratio}× uobičajeno` : 'Model GloFAS', tone: mostar?.status === 'VISOKO' ? 'text-[#ba1a1a]' : mostar?.status === 'POVISENO' ? 'text-[#8a4a00]' : 'text-[#002042]' },
+    { icon: 'water', label: 'Neretva kod Mostara', value: mostar ? `${Math.round(mostar.discharge[mostar.todayIndex] ?? 0)} m³/s` : '—', sub: mostar ? `Vrh prognoze ${peakForecast(mostar)} m³/s (10 dana)` : 'Model GloFAS', tone: mostar?.status === 'VISOKO' ? 'text-[#ba1a1a]' : mostar?.status === 'POVISENO' ? 'text-[#8a4a00]' : 'text-[#002042]' },
     { icon: 'landslide', label: 'Klizišta u registru', value: String(d.landslides.length), sub: `${activeLs} aktivno ili u praćenju`, tone: activeLs ? 'text-[#8a4a00]' : 'text-[#002042]' },
   ];
 
@@ -92,7 +92,7 @@ export default async function EkoRizikPage() {
                 <p className="font-pub text-[14px] text-[#43474f]">{d.warnings.error ? 'Upozorenja trenutno nije moguće preuzeti. Provjerite meteoalarm.org.' : 'Za regije Mostar, Livno i Trebinje trenutno nema aktivnih upozorenja.'}</p>
               </div>
             )}
-            {warn.map((w, i) => (
+            {warn.slice(0, 5).map((w, i) => (
               <article key={i} className="bg-white rounded-[8px] p-[16px] flex gap-[12px] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] border-l-[6px]" style={{ borderLeftColor: WARN_COLOR[w.color] ?? '#fadc12' }}>
                 <div className="flex flex-col gap-[4px] min-w-0">
                   <p className="font-pub font-bold text-[#002042] text-[15px] leading-[22px]">{w.event}</p>
@@ -102,6 +102,23 @@ export default async function EkoRizikPage() {
                 </div>
               </article>
             ))}
+            {warn.length > 5 && (
+              <details className="group">
+                <summary className="cursor-pointer font-pub font-semibold text-[14px] text-[#002042] py-[6px]">Prikaži još {warn.length - 5} upozorenja</summary>
+                <div className="flex flex-col gap-[8px] pt-[8px]">
+                {warn.slice(5).map((w, i) => (
+              <article key={i} className="bg-white rounded-[8px] p-[16px] flex gap-[12px] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] border-l-[6px]" style={{ borderLeftColor: WARN_COLOR[w.color] ?? '#fadc12' }}>
+                <div className="flex flex-col gap-[4px] min-w-0">
+                  <p className="font-pub font-bold text-[#002042] text-[15px] leading-[22px]">{w.event}</p>
+                  <p className="font-rob text-[12px] text-[#737780]">Regija {w.region} · {fmtTime(w.onset)} – {fmtTime(w.expires)}</p>
+                  {w.description && <p className="font-pub text-[13px] leading-[20px] text-[#334155]">{w.description}</p>}
+                  {w.instruction && <p className="font-pub text-[13px] leading-[20px] text-[#006c4a]">{w.instruction}</p>}
+                </div>
+              </article>
+                ))}
+                </div>
+              </details>
+            )}
             <SourceNote err={d.warnings.error} at={d.warnings.updatedAt} src="Meteoalarm" />
           </div>
         </div>
@@ -111,7 +128,7 @@ export default async function EkoRizikPage() {
             {d.rivers.items.map((r) => <RiverChart key={r.key} r={r} />)}
             {d.rivers.items.length === 0 && <p className="font-pub text-[14px] text-[#43474f]">Model protoka trenutno nije dostupan.</p>}
           </div>
-          <p className="font-pub text-[12px] leading-[18px] text-[#737780]">Vrijednosti su procjena hidrološkog modela GloFAS (rezolucija ~5 km), a ne mjerenja vodomjernih stanica. Službene informacije o vodostajima daju FHMZ i Agencija za vodno područje Jadranskog mora.</p>
+          <p className="font-pub text-[12px] leading-[18px] text-[#737780]">Vrijednosti su procjena hidrološkog modela GloFAS (rezolucija ~5 km), a ne mjerenja vodomjernih stanica. Status se računa u odnosu na protok iz zadnjih 60 dana. Službene informacije o vodostajima daju FHMZ i Agencija za vodno područje Jadranskog mora.</p>
           <SourceNote err={d.rivers.error} at={d.rivers.updatedAt} src="GloFAS" />
         </div>
       </section>

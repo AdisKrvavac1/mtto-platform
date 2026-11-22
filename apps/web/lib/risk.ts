@@ -53,3 +53,6 @@ export const fireTime = (f: Fire) => {
   return fmtTime(iso);
 };
 export const fireConfidence = (c: string) => ({ l: 'niska', n: 'nominalna', h: 'visoka' } as Record<string, string>)[c.toLowerCase()] ?? (c ? `${c}%` : '—');
+
+/** Najveći prognozirani dnevni protok (srednja prognoza modela) od danas nadalje. */
+export const peakForecast = (r: River) => Math.round(Math.max(0, ...r.discharge.slice(r.todayIndex).map((v) => v ?? 0)));

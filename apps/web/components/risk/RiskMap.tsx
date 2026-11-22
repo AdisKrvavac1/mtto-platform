@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import type { RiskSummary } from '@/lib/risk';
-import { LS_STATUS, fireConfidence, fireTime, fmtTime } from '@/lib/risk';
+import { LS_STATUS, fireConfidence, fireTime, fmtTime, peakForecast } from '@/lib/risk';
 
 const CENTER: [number, number] = [43.42, 17.82];
 const EFFIS_WMS = 'https://maps.effis.emergency.copernicus.eu/effis';
@@ -88,7 +88,7 @@ export default function RiskMap({ data, height = 560, dark = false }: { data: Ri
     for (const s of data.rivers.items) {
       const q = s.discharge[s.todayIndex];
       L.circleMarker([s.lat, s.lng], { radius: 8, color: '#fff', weight: 2, fillColor: s.status === 'VISOKO' ? '#ba1a1a' : s.status === 'POVISENO' ? '#eb851c' : '#00abeb', fillOpacity: 1 })
-        .bindPopup(pop('Model protoka · GloFAS', '#00abeb', s.name, `Danas: <b>${q != null ? Math.round(q) : '—'} m³/s</b>${s.ratio != null ? `<br/>Vrh prognoze: ${s.ratio}× od uobičajenog` : ''}`))
+        .bindPopup(pop('Model protoka · GloFAS', '#00abeb', s.name, `Danas: <b>${q != null ? Math.round(q) : '—'} m³/s</b><br/>Vrh prognoze (10 dana): ${peakForecast(s)} m³/s`))
         .addTo(rv);
     }
     groups.current.rivers = rv;
