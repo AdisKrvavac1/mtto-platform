@@ -25,7 +25,7 @@ export default function HeroSlider({ slides, interval = 10000 }: { slides: Slide
     <>
       <div className="absolute inset-0" aria-hidden>
         {slides.map((s, k) => (
-          <img key={s.src} src={s.src} alt="" loading={k === 0 ? 'eager' : 'lazy'} fetchPriority={k === 0 ? 'high' : 'low'}
+          <img key={s.src} src={s.src} srcSet={`${s.src.replace('.jpg', '-m.jpg')} 1080w, ${s.src} 2000w`} sizes="100vw" alt="" loading={k === 0 ? 'eager' : 'lazy'} fetchPriority={k === 0 ? 'high' : 'low'}
             className={`absolute inset-0 size-full object-cover transition-[opacity,transform] ease-out ${k === i ? 'opacity-100 scale-[1.06] duration-[2000ms,12000ms]' : 'opacity-0 scale-100 duration-[2000ms,0ms]'}`}
             style={{ transitionDuration: k === i ? '2000ms, 12000ms' : '2000ms, 2000ms' }} />
         ))}

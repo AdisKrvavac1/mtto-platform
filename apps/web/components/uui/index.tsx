@@ -254,7 +254,7 @@ export function FilterField({ label, children, className = '' }: { label: string
 export function FeaturedPost({ href, image, title, excerpt, category, date, badge }: { href: string; image?: string | null; title: string; excerpt?: string | null; category?: string; date?: string; badge?: ReactNode }) {
   return (
     <Link href={href} className="group relative flex min-h-[420px] items-end overflow-hidden rounded-[24px] bg-[var(--br-950)] md:min-h-[520px]">
-      <img src={image || '/hero/prenj.jpg'} alt="" className="absolute inset-0 size-full object-cover transition-transform duration-700 group-hover:scale-[1.02]" />
+      <img src={image || '/hero/neretva-m.jpg'} alt="" className="absolute inset-0 size-full object-cover transition-transform duration-700 group-hover:scale-[1.02]" />
       <span className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
       <span className="relative m-3 flex w-full max-w-[760px] flex-col gap-3 rounded-[16px] bg-white/15 p-5 text-white ring-1 ring-inset ring-white/30 backdrop-blur-md md:m-6 md:p-8">
         <span className="flex flex-wrap items-center gap-2 text-[14px] leading-5">

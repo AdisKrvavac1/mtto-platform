@@ -14,11 +14,11 @@ type Stats = { posts: number; calls: number; documents: number; permits: number;
 type Risk = { level: 1 | 2 | 3; warnings: { items: unknown[] }; fires: { last24h: number } };
 const fmt = (n: number) => n.toLocaleString('bs-BA');
 const SLIDES: Slide[] = [
-  { src: '/hero/neretva.jpg', alt: 'Kanjon Neretve', place: 'Kanjon Neretve' },
+  { src: '/hero/mostar.jpg', alt: 'Stari most u Mostaru', place: 'Stari most, Mostar' },
+  { src: '/hero/blagaj.jpg', alt: 'Tekija na vrelu Bune u Blagaju', place: 'Vrelo Bune, Blagaj' },
+  { src: '/hero/pocitelj.jpg', alt: 'Počitelj', place: 'Počitelj' },
   { src: '/hero/neum.jpg', alt: 'Neum', place: 'Neum' },
-  { src: '/hero/hutovo.jpg', alt: 'Park prirode Hutovo blato', place: 'Hutovo blato' },
-  { src: '/hero/prenj.jpg', alt: 'Planina Prenj', place: 'Prenj' },
-  { src: '/hero/blidinje.jpg', alt: 'Park prirode Blidinje', place: 'Blidinje' },
+  { src: '/hero/neretva.jpg', alt: 'Dolina Neretve', place: 'Dolina Neretve' },
 ];
 
 export default async function HomePage() {
@@ -41,7 +41,7 @@ export default async function HomePage() {
       {/* HERO – Untitled "Hero header" s punom pozadinom: slider fotografija, plavi prelaz, staklena traka s brojkama */}
       <section className="relative isolate flex min-h-[760px] flex-col overflow-hidden bg-[var(--br-950)] md:min-h-[860px]">
         <HeroSlider slides={SLIDES} />
-        <div aria-hidden className="absolute inset-0 bg-[linear-gradient(90deg,rgba(16,42,86,0.95)_0%,rgba(16,42,86,0.8)_40%,rgba(16,42,86,0.2)_100%)]" />
+        <div aria-hidden className="absolute inset-0 bg-[linear-gradient(90deg,rgba(16,42,86,0.92)_0%,rgba(16,42,86,0.7)_40%,rgba(16,42,86,0.1)_100%)]" />
         <div aria-hidden className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-[rgba(16,42,86,0.85)] to-transparent" />
         <Container className="relative flex flex-1 flex-col justify-center pb-12 pt-36 md:pt-40">
           <Link href="/eko-rizik" className="inline-flex w-max max-w-full items-center gap-2 rounded-full bg-white/10 py-1 pl-1 pr-3 text-[14px] leading-5 font-medium text-white ring-1 ring-inset ring-white/20 backdrop-blur-md hover:bg-white/15">
