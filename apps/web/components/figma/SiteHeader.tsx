@@ -29,6 +29,7 @@ function useActive() {
     if (href.includes('#')) return false;
     if (base === '/') return path === '/';
     if (base === '/e-usluge') return REGISTRI.some((r) => path.startsWith(r));
+    if (base === '/zastita-okolisa') return path.startsWith('/zastita-okolisa') || path.startsWith('/eko-rizik');
     if (base === '/vijesti') return path.startsWith('/vijesti') && (q ? sp.toString() === q : sp.get('type') !== 'JAVNI_POZIV');
     return path.startsWith(base);
   };

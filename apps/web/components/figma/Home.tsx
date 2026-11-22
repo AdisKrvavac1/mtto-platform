@@ -611,7 +611,7 @@ export function HomeBody(props: any) {
                     <p className="font-pub font-normal min-w-0 max-w-full text-[#002042] text-[13px] leading-[20px]">Priloži foto dokaz</p>
                   </div>
                 </div>
-                <a href="/e-usluge/eko-prijava" className="bg-[#006c4a] flex flex-col lg:flex-row gap-[4px] lg:items-center justify-center py-[12px] relative rounded-[4px] min-w-0 max-w-full w-full flex-wrap">
+                <a href="/eko-rizik/prijava" className="bg-[#006c4a] flex flex-col lg:flex-row gap-[4px] lg:items-center justify-center py-[12px] relative rounded-[4px] min-w-0 max-w-full w-full flex-wrap">
                   <div className="absolute bg-[rgba(255,255,255,0)] inset-[0_-0.33px_0_0] rounded-[4px] shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)] w-full lg:w-auto lg:flex-[469_1_0%] min-w-0" />
                   <span className="material-symbols-outlined shrink-0 leading-none text-white" style={{ fontSize: 17 }}>send</span>
                   <div className="flex flex-col items-center relative w-full lg:w-auto lg:flex-[198_1_0%] min-w-0">
@@ -1582,7 +1582,7 @@ export function HomeBody(props: any) {
                     <p className="font-pub font-normal text-[#002042] text-[13px] leading-[20px]">Priloži foto dokaz</p>
                   </div>
                 </div>
-                <a href="/e-usluge/eko-prijava" className="bg-[#006c4a] flex gap-[4px] items-center justify-center py-[12px] relative rounded-[4px] shrink-0 w-full overflow-x-auto snap-x [scrollbar-width:none]">
+                <a href="/eko-rizik/prijava" className="bg-[#006c4a] flex gap-[4px] items-center justify-center py-[12px] relative rounded-[4px] shrink-0 w-full overflow-x-auto snap-x [scrollbar-width:none]">
                   <div className="absolute bg-[rgba(255,255,255,0)] inset-[0_-0.33px_0_0] rounded-[4px] shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)]" />
                   <span className="material-symbols-outlined shrink-0 leading-none text-white" style={{ fontSize: 17 }}>send</span>
                   <div className="flex flex-col items-center relative shrink-0">

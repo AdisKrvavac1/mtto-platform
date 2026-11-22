@@ -61,7 +61,7 @@ export default async function PermitDossier({ params }: { params: Promise<{ id: 
               </a>
             ))}
             <Link className="inline-flex items-center gap-space-xs px-space-md py-2.5 bg-surface-container-low text-primary hover:bg-surface-container rounded font-button text-button transition-all" href="/registri/okolisne-dozvole"><span className="material-symbols-outlined text-[18px]">list</span><span>Svi zapisi registra</span></Link>
-            <Link className="inline-flex items-center gap-space-xs px-space-md py-2.5 bg-error text-on-error hover:bg-on-error-container rounded font-button text-button ml-auto transition-all shadow-sm" href="/e-usluge/eko-prijava"><span className="material-symbols-outlined text-[18px]">notification_important</span><span>Prijavi nepravilnost</span></Link>
+            <Link className="inline-flex items-center gap-space-xs px-space-md py-2.5 bg-error text-on-error hover:bg-on-error-container rounded font-button text-button ml-auto transition-all shadow-sm" href="/eko-rizik/prijava"><span className="material-symbols-outlined text-[18px]">notification_important</span><span>Prijavi nepravilnost</span></Link>
           </div>
         }
         stats={

@@ -55,7 +55,7 @@ export function SiteFooter(props: any) {
                   <a href="/turisticki-vodici" className="hover:underline"><p className="font-pub font-normal min-w-0 max-w-full text-[#43474f] text-[13px] w-full leading-[20px]">Registar turističkih vodiča</p></a>
                 </div>
                 <div className="flex flex-col items-start relative min-w-0 max-w-full">
-                  <a href="/e-usluge/eko-prijava" className="hover:underline"><p className="font-pub font-normal min-w-0 max-w-full text-[#43474f] text-[13px] w-full leading-[20px]">Eko-alarm prijava incidenta</p></a>
+                  <a href="/eko-rizik/prijava" className="hover:underline"><p className="font-pub font-normal min-w-0 max-w-full text-[#43474f] text-[13px] w-full leading-[20px]">Eko-alarm prijava incidenta</p></a>
                 </div>
                 <div className="flex flex-col items-start relative min-w-0 max-w-full">
                   <a href="/o-nama#upit" className="hover:underline"><p className="font-pub font-normal min-w-0 max-w-full text-[#43474f] text-[13px] w-full leading-[20px]">Sloboda pristupa informacijama</p></a>
@@ -164,7 +164,7 @@ export function SiteFooter(props: any) {
                     <a href="/turisticki-vodici" className="hover:underline"><p className="font-pub font-normal text-[#43474f] text-[13px] w-full leading-[20px]">Registar turističkih vodiča</p></a>
                   </div>
                   <div className="flex flex-col items-start relative shrink-0">
-                    <a href="/e-usluge/eko-prijava" className="hover:underline"><p className="font-pub font-normal text-[#43474f] text-[13px] w-full leading-[20px]">Eko-alarm prijava incidenta</p></a>
+                    <a href="/eko-rizik/prijava" className="hover:underline"><p className="font-pub font-normal text-[#43474f] text-[13px] w-full leading-[20px]">Eko-alarm prijava incidenta</p></a>
                   </div>
                   <div className="flex flex-col items-start relative shrink-0 w-full">
                     <a href="/o-nama#upit" className="hover:underline"><p className="font-pub font-normal text-[#43474f] text-[13px] w-full leading-[20px]">Sloboda pristupa informacijama</p></a>

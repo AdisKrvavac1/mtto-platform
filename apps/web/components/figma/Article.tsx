@@ -267,7 +267,7 @@ export function ArticleBody(props: any) {
                       <p className="leading-[20px] max-lg:inline">kantonalnoj inspekciji.</p>
                     </div>
                   </div>
-                  <a href="/e-usluge/eko-prijava" className="bg-[#fef2f2] flex gap-[8px] items-center justify-center px-[12px] py-[8px] relative rounded-[2px] min-w-0 max-w-full w-full flex-wrap">
+                  <a href="/eko-rizik/prijava" className="bg-[#fef2f2] flex gap-[8px] items-center justify-center px-[12px] py-[8px] relative rounded-[2px] min-w-0 max-w-full w-full flex-wrap">
                     <span className="material-symbols-outlined shrink-0 leading-none text-[#ba1a1a]" style={{ fontSize: 20 }}>report_problem</span>
                     <div className="flex flex-col items-start relative min-w-0 max-w-full">
                       <p className="font-pub font-semibold min-w-0 max-w-full text-[#ba1a1a] text-[14px] tracking-[0.14px] leading-[20px]">Otvori Eko-alarm prijavu</p>
@@ -535,7 +535,7 @@ export function ArticleBody(props: any) {
                   <p className="leading-[20px] max-lg:inline">kantonalnoj inspekciji.</p>
                 </div>
               </div>
-              <a href="/e-usluge/eko-prijava" className="bg-[#fef2f2] flex gap-[8px] items-center justify-center px-[12px] py-[8px] relative rounded-[2px] shrink-0 w-full">
+              <a href="/eko-rizik/prijava" className="bg-[#fef2f2] flex gap-[8px] items-center justify-center px-[12px] py-[8px] relative rounded-[2px] shrink-0 w-full">
                 <span className="material-symbols-outlined shrink-0 leading-none text-[#ba1a1a]" style={{ fontSize: 20 }}>report_problem</span>
                 <div className="flex flex-col items-start relative shrink-0">
                   <p className="font-pub font-semibold text-[#ba1a1a] text-[14px] tracking-[0.14px] leading-[20px]">Otvori Eko-alarm prijavu</p>

@@ -44,7 +44,7 @@ export default async function EkoRizikPage() {
             <h1 className="font-pub font-bold text-white text-[34px] md:text-[44px] lg:text-[52px] tracking-[-0.9px] leading-[1.1]">Eko-rizik HNK</h1>
             <p className="font-pub text-[#d3e4fe] text-[16px] md:text-[18px] leading-[28px]">Požari, poplave i klizišta na jednom mjestu: satelitska žarišta, upozorenja Federalnog hidrometeorološkog zavoda, prognoza protoka Neretve i prijave građana.</p>
             <div className="flex flex-wrap gap-[8px] pt-[4px]">
-              <Link href="/e-usluge/eko-prijava" className="bg-[#ba1a1a] hover:bg-[#93000a] text-white flex gap-[8px] items-center px-[20px] py-[12px] rounded-[4px] font-pub font-semibold text-[15px]"><Icon n="campaign" s={18} />Prijavi incident</Link>
+              <Link href="/eko-rizik/prijava" className="bg-[#ba1a1a] hover:bg-[#93000a] text-white flex gap-[8px] items-center px-[20px] py-[12px] rounded-[4px] font-pub font-semibold text-[15px]"><Icon n="campaign" s={18} />Prijavi incident</Link>
               <Link href="/eko-rizik/krizni" className="bg-white/10 hover:bg-white/20 text-white flex gap-[8px] items-center px-[20px] py-[12px] rounded-[4px] font-pub font-semibold text-[15px]"><Icon n="monitor_heart" s={18} />Krizni prikaz</Link>
             </div>
           </div>
@@ -176,7 +176,7 @@ export default async function EkoRizikPage() {
         <div className="bg-white rounded-[8px] p-[24px] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] flex flex-col gap-[16px]">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-[12px]">
             <div className="flex flex-col gap-[4px]"><Eyebrow>Građani kao senzori</Eyebrow><h2 className="font-pub font-bold text-[#002042] text-[24px] leading-[32px]">Potvrđene prijave građana</h2></div>
-            <Link href="/e-usluge/eko-prijava" className="self-start bg-[#002042] hover:bg-[#062343] text-white flex gap-[8px] items-center px-[16px] py-[10px] rounded-[4px] font-pub font-semibold text-[14px]"><Icon n="add_location_alt" s={18} />Nova prijava</Link>
+            <Link href="/eko-rizik/prijava" className="self-start bg-[#002042] hover:bg-[#062343] text-white flex gap-[8px] items-center px-[16px] py-[10px] rounded-[4px] font-pub font-semibold text-[14px]"><Icon n="add_location_alt" s={18} />Nova prijava</Link>
           </div>
           {d.reports.length === 0 ? (
             <p className="font-pub text-[14px] text-[#43474f]">Prijave se ovdje prikazuju nakon što ih službenik Ministarstva provjeri, bez ličnih podataka prijavitelja.</p>

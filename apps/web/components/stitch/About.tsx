@@ -566,7 +566,7 @@ export function AboutLinks(props: any) {
 <p className="font-body-sm text-body-sm text-outline">Subvencije za turizam i eko-projekte</p>
 </div>
 </a>
-<a className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-shadow flex items-center gap-space-md" data-path="ekoloska-prijava-eko-alarm" href="/e-usluge/eko-prijava">
+<a className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-shadow flex items-center gap-space-md" data-path="ekoloska-prijava-eko-alarm" href="/eko-rizik/prijava">
 <div className="w-10 h-10 rounded-lg bg-surface-container-high text-primary flex items-center justify-center shrink-0">
 <span className="material-symbols-outlined text-[20px]">warning</span>
 </div>

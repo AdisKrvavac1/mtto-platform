@@ -314,7 +314,7 @@ export function HomeEko(props: any) {
 <p className="font-body-sm text-body-sm text-text-body">
             Uočili ste divlje odlagalište otpada, nelegalnu sječu šuma ili zagađenje vodotoka? Prijavite izravno kantonalnoj inspekciji za zaštitu okoliša.
           </p>
-<form className="space-y-space-sm" id="eko-alarm-form" action="/e-usluge/eko-prijava" method="get">
+<form className="space-y-space-sm" id="eko-alarm-form" action="/eko-rizik/prijava" method="get">
 <div>
 <label className="block font-label-kicker text-label-kicker text-primary uppercase mb-1">Vrsta incidenta</label>
 <select className="w-full h-11 px-3 rounded bg-surface-container-low text-on-surface font-body-regular text-body-regular focus:outline-none focus:bg-surface-container transition-all">

@@ -761,7 +761,7 @@ export function TurizamBody(props: any) {
                         </div>
                       </div>
                     </div>
-                    <a href="/e-usluge/eko-prijava" className="bg-[#00714e] drop-shadow-[0px_1px_1px_rgba(0,0,0,0.05)] flex gap-[6px] h-[36px] items-center justify-center relative rounded-[2px] min-w-0 max-w-full w-full flex-wrap">
+                    <a href="/eko-rizik/prijava" className="bg-[#00714e] drop-shadow-[0px_1px_1px_rgba(0,0,0,0.05)] flex gap-[6px] h-[36px] items-center justify-center relative rounded-[2px] min-w-0 max-w-full w-full flex-wrap">
                       <span className="material-symbols-outlined shrink-0 leading-none text-white" style={{ fontSize: 15 }}>send</span>
                       <div className="flex flex-col items-center relative min-w-0 max-w-full">
                         <p className="font-rob font-bold min-w-0 max-w-full text-[12px] text-center text-white leading-[18px]">Pošalji hitnu prijavu inspekciji</p>

@@ -88,7 +88,7 @@ export default function EcoReportForm() {
           <button type="button" onClick={locate} className="bg-[#eff4ff] hover:bg-[#dce9ff] text-[#002042] px-[12px] py-[6px] rounded-[4px] font-pub font-semibold text-[13px] flex items-center gap-[6px]"><span aria-hidden className="material-symbols-outlined text-[16px]">my_location</span>Koristi moju lokaciju</button>
         </div>
         <LocationPicker key={pickKey} lat={pos.lat} lng={pos.lng} onChange={(lat, lng) => setPos({ lat, lng })} height={280} />
-        <p className="font-rob text-[12px] text-[#737780]">{pos.lat != null ? `Odabrano: ${pos.lat}° N, ${pos.lng}° E` : 'Kliknite na kartu da označite mjesto.'}</p>
+        <p className="font-rob text-[12px] text-[#737780]">{pos.lat != null ? `Odabrano: ${pos.lat}° N, ${pos.lng}° E` : ''}</p>
       </div>
       <label className="flex flex-col gap-[4px]"><span className={label}>Opis <span className="text-[#ba1a1a]">*</span></span>
         <textarea required name="description" rows={5} minLength={15} maxLength={2000} placeholder="Šta ste uočili, kada i koliko je izraženo…" className={`${field} h-auto py-[12px] leading-[24px]`} /></label>

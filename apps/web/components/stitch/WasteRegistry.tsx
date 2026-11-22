@@ -38,7 +38,7 @@ export function WasteF2(props: any) {
 <span className="material-symbols-outlined text-[18px]">post_add</span>
 <span>Podnošenje zahtjeva</span>
 </a>
-<a className="flex items-center justify-center gap-1 px-4 py-2.5 rounded bg-secondary hover:bg-secondary-fixed hover:text-on-secondary-fixed text-on-secondary font-button text-button transition-colors shadow-sm" data-path="eko-alarm" href="/e-usluge/eko-prijava" style={{backgroundColor: 'rgb(0, 171, 235)', color: 'rgb(255, 255, 255)'}}>
+<a className="flex items-center justify-center gap-1 px-4 py-2.5 rounded bg-secondary hover:bg-secondary-fixed hover:text-on-secondary-fixed text-on-secondary font-button text-button transition-colors shadow-sm" data-path="eko-alarm" href="/eko-rizik/prijava" style={{backgroundColor: 'rgb(0, 171, 235)', color: 'rgb(255, 255, 255)'}}>
 <span className="material-symbols-outlined text-[18px]">report</span>
 <span>Prijava incidenta</span>
 </a>
@@ -659,7 +659,7 @@ export function WasteF2(props: any) {
               </p>
 </div>
 <div className="flex flex-col gap-space-xs">
-<a className="w-full bg-on-secondary text-secondary hover:bg-secondary-fixed hover:text-on-secondary-fixed py-2.5 px-4 rounded text-center font-button text-button transition-colors shadow-sm flex items-center justify-center gap-2" data-path="eko-alarm" href="/e-usluge/eko-prijava" style={{backgroundColor: 'rgb(250, 220, 18)', color: 'rgb(28, 36, 107)', fontWeight: '700'}}>
+<a className="w-full bg-on-secondary text-secondary hover:bg-secondary-fixed hover:text-on-secondary-fixed py-2.5 px-4 rounded text-center font-button text-button transition-colors shadow-sm flex items-center justify-center gap-2" data-path="eko-alarm" href="/eko-rizik/prijava" style={{backgroundColor: 'rgb(250, 220, 18)', color: 'rgb(28, 36, 107)', fontWeight: '700'}}>
 <span className="material-symbols-outlined text-[18px]">notifications_active</span>
 <span>Podnesi anonimnu Eko-prijavu</span>
 </a>
