@@ -344,3 +344,7 @@ export function Head({ k, t, s, dark, action }: { k?: string; t: ReactNode; s?: 
     </div>
   );
 }
+
+/** Gumbi za tamni (GRAD) hero: primarni zeleni i staklasti sekundarni */
+export const HB1 = 'inline-flex h-11 items-center justify-center gap-1.5 rounded-[8px] border-2 border-white/10 bg-[var(--gr-600)] px-4 text-[16px] font-semibold text-white transition-colors hover:bg-[var(--gr-700)]';
+export const HB2 = 'inline-flex h-11 items-center justify-center gap-1.5 rounded-[8px] bg-white/10 px-4 text-[16px] font-semibold text-white ring-1 ring-inset ring-white/25 backdrop-blur-md transition-colors hover:bg-white/15';

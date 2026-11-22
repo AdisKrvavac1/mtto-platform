@@ -4,7 +4,7 @@ import { apiSafe } from '@/lib/api';
 import { EMPTY, LEVEL, LS_STATUS, REPORT_STATUS, WARN_COLOR, fireConfidence, fireTime, fmtTime, peakForecast, type RiskSummary } from '@/lib/risk';
 import RiverChart from '@/components/risk/RiverChart';
 import RiskMap from '@/components/risk/RiskMapLazy';
-import { Badge, BadgeGroup, Button, Card, Container, FeaturedIcon, Section, SectionHeader } from '@/components/uui';
+import { GRAD, HB1, HB2, Badge, BadgeGroup, Button, Card, Container, FeaturedIcon, Section, SectionHeader } from '@/components/uui';
 import { Activity, AlertTriangle, CheckCircle, CloudOff, CloudRaining01, ThermometerWarm, MarkerPin04, LayersThree01, Phone01, RefreshCw01, Waves } from '@untitledui/icons';
 
 export const dynamic = 'force-dynamic';
@@ -54,21 +54,21 @@ export default async function EkoRizikPage() {
   return (
     <>
       {/* Hero */}
-      <section className="relative overflow-hidden bg-white pt-12 pb-16 md:pt-16 md:pb-20">
-        <div aria-hidden className="absolute inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_at_top,black_30%,transparent_70%)]" />
+      <section className={`relative isolate overflow-hidden pt-10 pb-14 text-white md:pt-14 md:pb-16 ${GRAD}`}>
+        <div aria-hidden className="absolute inset-0 opacity-25 [background-image:radial-gradient(rgba(255,255,255,0.14)_1px,transparent_1px)] [background-size:24px_24px] [mask-image:radial-gradient(ellipse_at_top,black_30%,transparent_70%)]" />
         <Container className="relative">
-          <nav aria-label="Putanja" className="mb-8 flex items-center gap-2 text-[14px] font-medium text-[#525252]"><Link href="/" className="hover:text-[#262626]">Naslovna</Link><span className="text-[#d4d4d4]">/</span><span className="font-semibold text-[var(--br-700)]" aria-current="page">Eko-rizik HNK</span></nav>
+          <nav aria-label="Putanja" className="mb-8 flex items-center gap-2 text-[14px] font-medium text-[var(--br-200)]"><Link href="/" className="hover:text-white">Naslovna</Link><span className="text-white/30">/</span><span className="font-semibold text-white" aria-current="page">Eko-rizik HNK</span></nav>
           <div className="flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-[768px]">
               <BadgeGroup label={lv.short} tone={LV_TONE[lvKey]}>Ažurirano {fmtTime(d.generatedAt)}</BadgeGroup>
-              <h1 className="mt-4 text-[36px] leading-[44px] md:text-[60px] md:leading-[72px] font-semibold tracking-[-0.02em] text-[#171717]">Eko-rizik HNK</h1>
-              <p className="mt-4 md:mt-6 text-[18px] leading-7 md:text-[20px] md:leading-[30px] text-[#525252]">Požari, poplave i klizišta na jednom mjestu: satelitska žarišta, upozorenja Federalnog hidrometeorološkog zavoda, prognoza protoka Neretve i prijave građana.</p>
+              <h1 className="mt-4 text-[36px] leading-[44px] md:text-[60px] md:leading-[72px] font-semibold tracking-[-0.02em] text-white">Eko-rizik HNK</h1>
+              <p className="mt-4 md:mt-6 text-[18px] leading-7 md:text-[20px] md:leading-[30px] text-[var(--br-100)]">Požari, poplave i klizišta na jednom mjestu: satelitska žarišta, upozorenja Federalnog hidrometeorološkog zavoda, prognoza protoka Neretve i prijave građana.</p>
               <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row">
-                <Button href="/eko-rizik/krizni" variant="secondary" size="xl" icon={Activity}>Krizni prikaz</Button>
-                <Button href="/eko-rizik/prijava" size="xl" icon={MarkerPin04}>Prijavi incident</Button>
+                <Link href="/eko-rizik/krizni" className={HB2}><Activity size={20} />Krizni prikaz</Link>
+                <Link href="/eko-rizik/prijava" className={HB1}><MarkerPin04 size={20} />Prijavi incident</Link>
               </div>
             </div>
-            <div role="status" aria-live="polite" className="flex items-center gap-4 self-start rounded-[16px] bg-white p-5 pr-8 ring-1 ring-inset ring-[#e5e5e5] shadow-[0_12px_16px_-4px_rgba(10,13,18,0.08),0_4px_6px_-2px_rgba(10,13,18,0.03)] lg:self-auto">
+            <div role="status" aria-live="polite" className="flex items-center gap-4 self-start rounded-[16px] bg-white p-5 pr-8 shadow-[0_20px_24px_-4px_rgba(0,0,0,0.25)] lg:self-auto">
               <FeaturedIcon icon={lvKey === 1 ? CheckCircle : AlertTriangle} tone={LV_TONE[lvKey]} size="xl" />
               <div><p className="text-[14px] font-medium text-[#525252]">Procjena stanja</p><p className={`text-[24px] leading-8 font-semibold ${lvKey === 1 ? 'text-[#079455]' : lvKey === 2 ? 'text-[#dc6803]' : 'text-[#d92d20]'}`}>{lv.label}</p></div>
             </div>

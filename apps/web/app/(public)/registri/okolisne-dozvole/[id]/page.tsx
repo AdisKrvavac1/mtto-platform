@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { api, type Permit } from '@/lib/api';
 import { PERMIT_STATUS, dateLong, dateShort, daysUntil, fileExt, fileSize } from '@/lib/format';
 import MapSection from '@/components/site/MapSection';
-import { Badge, Button, Card, Container, Feature, Section, SectionHeader, TableCard, td, th } from '@/components/uui';
+import { GRAD, HB1, HB2, Badge, Button, Card, Container, Feature, Section, SectionHeader, TableCard, td, th } from '@/components/uui';
 import { AlertTriangle, ArrowLeft, Building07, Calendar, ClipboardCheck, Download01, File06, Map01, MarkerPin02, Trash03, Wind01 } from '@untitledui/icons';
 
 export const dynamic = 'force-dynamic';
@@ -32,15 +32,15 @@ export default async function PermitDossier({ params }: { params: Promise<{ id: 
   const stats: [string, string, string, string?][] = [
     ['Broj rješenja', p.registerNumber, 'Upravni postupak MTTO'],
     ['Datum izdavanja', dateLong(p.issuedAt), 'Nakon javnog uvida'],
-    ['Rok važenja', dateLong(p.validUntil), left < 0 ? 'Dozvola je istekla' : `Još ${Math.floor(m / 12)} god. ${m % 12} mj.`, left < 60 ? 'text-[#d92d20]' : undefined],
+    ['Rok važenja', dateLong(p.validUntil), left < 0 ? 'Dozvola je istekla' : `Još ${Math.floor(m / 12)} god. ${m % 12} mj.`, left < 60 ? 'text-[#fda29b]' : undefined],
     ['Nadležno tijelo', 'MTTO HNK', 'Sektor za zaštitu okoliša'],
   ];
 
   return (
     <>
-      <section className="bg-white pt-12 pb-12 md:pt-16 md:pb-16">
+      <section className={`relative isolate overflow-hidden pt-10 pb-12 text-white md:pt-14 md:pb-14 ${GRAD}`}>
         <Container>
-          <Link href="/registri/okolisne-dozvole" className="inline-flex items-center gap-1.5 text-[14px] font-semibold text-[#525252] hover:text-[#262626]"><ArrowLeft size={20} />Registar okolišnih dozvola</Link>
+          <Link href="/registri/okolisne-dozvole" className="inline-flex items-center gap-1.5 text-[14px] font-semibold text-[var(--br-200)] hover:text-white"><ArrowLeft size={20} />Registar okolišnih dozvola</Link>
           <div className="mt-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-[768px]">
               <div className="flex flex-wrap gap-2">
@@ -48,18 +48,18 @@ export default async function PermitDossier({ params }: { params: Promise<{ id: 
                 <Badge tone="gray" size="md">{p.activity}</Badge>
                 {p.isDemo && <Badge tone="warning" size="md">Demo</Badge>}
               </div>
-              <h1 className="mt-4 text-[30px] leading-[38px] md:text-[48px] md:leading-[60px] font-semibold tracking-[-0.02em] text-[#171717]">{p.operator}</h1>
-              <p className="mt-3 text-[18px] leading-7 md:text-[20px] md:leading-[30px] text-[#525252]">{p.facility}</p>
-              <p className="mt-3 flex items-center gap-1.5 text-[16px] text-[#525252]"><MarkerPin02 size={20} className="text-[#a3a3a3]" />{p.address ? `${p.address}, ` : ''}{p.municipality}</p>
+              <h1 className="mt-4 text-[30px] leading-[38px] md:text-[48px] md:leading-[60px] font-semibold tracking-[-0.02em] text-white">{p.operator}</h1>
+              <p className="mt-3 text-[18px] leading-7 md:text-[20px] md:leading-[30px] text-[var(--br-100)]">{p.facility}</p>
+              <p className="mt-3 flex items-center gap-1.5 text-[16px] text-[var(--br-100)]"><MarkerPin02 size={20} className="text-[var(--gr-300)]" />{p.address ? `${p.address}, ` : ''}{p.municipality}</p>
             </div>
             <div className="flex flex-col-reverse gap-3 sm:flex-row">
-              <Button href="/eko-rizik/prijava" variant="secondary" size="lg" icon={AlertTriangle}>Prijavi nepravilnost</Button>
-              {docs[0] && <Button href={`/api/documents/${docs[0].id}/file`} size="lg" icon={Download01} external>Preuzmi rješenje</Button>}
+              <Link href="/eko-rizik/prijava" className={HB2}><AlertTriangle size={20} />Prijavi nepravilnost</Link>
+              {docs[0] && <a href={`/api/documents/${docs[0].id}/file`} className={HB1}><Download01 size={20} />Preuzmi rješenje</a>}
             </div>
           </div>
-          <div className="mt-10 grid grid-cols-2 gap-6 border-t border-[#e5e5e5] pt-8 lg:grid-cols-4">
+          <div className="mt-10 grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
             {stats.map(([k, v, n, c]) => (
-              <div key={k}><p className="text-[14px] font-medium text-[#525252]">{k}</p><p className={`mt-1 text-[20px] leading-[30px] font-semibold text-[#171717] break-words ${c ?? ''}`}>{v}</p><p className="text-[14px] text-[#737373]">{n}</p></div>
+              <div key={k} className="rounded-[12px] bg-white/10 p-4 ring-1 ring-inset ring-white/15 backdrop-blur-md"><p className="text-[14px] font-medium text-[var(--br-200)]">{k}</p><p className={`mt-1 text-[20px] leading-[30px] font-semibold text-white break-words ${c ?? ''}`}>{v}</p><p className="text-[12px] text-[var(--gr-300)]">{n}</p></div>
             ))}
           </div>
         </Container>

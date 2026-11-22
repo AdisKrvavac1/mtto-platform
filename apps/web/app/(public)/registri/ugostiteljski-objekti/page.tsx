@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { apiSafe, type Facility } from '@/lib/api';
 import { dateShort } from '@/lib/format';
-import { Badge, Button, Card, Container, FilterField, Metric, PageHeader, Section, TableCard, inputCls, td, th } from '@/components/uui';
+import { HB1, HB2, Badge, Button, Card, Container, FilterField, Metric, PageHero, Section, TableCard, inputCls, td, th } from '@/components/uui';
 import { Download01, FilterLines, MarkerPin04, SearchLg, Star01, Table, XClose } from '@untitledui/icons';
 
 export const dynamic = 'force-dynamic';
@@ -35,24 +35,15 @@ export default async function FacilitiesPage({ searchParams }: { searchParams: P
 
   return (
     <>
-      <PageHeader
+      <PageHero
         crumbs={[{ label: 'Naslovna', href: '/' }, { label: 'E-usluge', href: '/e-usluge' }, { label: 'Ugostiteljski objekti' }]}
         eyebrow="Javni registar smještaja"
         title="Kategorizirani ugostiteljski objekti"
-        actions={<><Button href={csv} variant="secondary" size="lg" icon={Table} external>Za Excel</Button><Button href={csv} size="lg" icon={Download01} external>Preuzmi CSV</Button></>}
+        actions={<><a href={csv} className={HB2}><Table size={20} />Za Excel</a><a href={csv} className={HB1}><Download01 size={20} />Preuzmi CSV</a></>}
+        stats={[{ label: 'Ukupno objekata', value: fmt(all.length) }, { label: 'Registriranih ležaja', value: fmt(beds) }, { label: 'Hoteli 4★ i 5★', value: fmt(hotels) }, { label: 'Moteli i pansioni', value: fmt(motels) }]}
       >
         Hoteli, moteli, pansioni, kampovi i objekti za iznajmljivanje s dodijeljenom kategorijom na području 9 općina i gradova kantona.
-      </PageHeader>
-
-      <Section tone="gray" className="!py-12 md:!py-16">
-        <div className="grid grid-cols-2 gap-8 lg:grid-cols-5">
-          <Metric value={fmt(all.length)} label="Ukupno objekata" />
-          <Metric value={fmt(beds)} label="Registriranih ležaja" />
-          <Metric value={fmt(hotels)} label="Hoteli 4★ i 5★" />
-          <Metric value={fmt(motels)} label="Moteli i pansioni" />
-          <Metric value={fmt(priv)} label="Apartmani i kampovi" />
-        </div>
-      </Section>
+      </PageHero>
 
       <section id="rezultati" className="bg-white py-12 md:py-16 scroll-mt-24">
         <Container>

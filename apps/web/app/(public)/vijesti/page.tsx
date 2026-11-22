@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { apiSafe, type PostListItem } from '@/lib/api';
 import { POST_TYPE, dateLong, daysUntil } from '@/lib/format';
-import { Badge, Button, Container, PageHeader, PostCard, Section } from '@/components/uui';
+import { Badge, Button, Container, HeroInfo, PageHero, PostCard, Section } from '@/components/uui';
 import { ArrowLeft, ArrowRight, ArrowUpRight, Calendar, Mail01, SearchLg } from '@untitledui/icons';
 
 export const dynamic = 'force-dynamic';
@@ -18,8 +18,9 @@ export default async function NewsPage({ searchParams }: { searchParams: Promise
   const data = await apiSafe<List>(`/posts?${qs}`, { items: [], total: 0, page: 1, pages: 1 });
   const isCalls = sp.type === 'JAVNI_POZIV';
   const firstPage = !sp.page || sp.page === '1';
-  const showFeatured = firstPage && !sp.q && data.items.length > 0;
-  const [featured, ...rest] = showFeatured ? data.items : [undefined, ...data.items];
+  const items = data.items.filter((p) => !/^test/i.test(p.title));
+  const showFeatured = firstPage && !sp.q && items.length > 0;
+  const [featured, ...rest] = showFeatured ? items : [undefined, ...items];
   const link = (patch: Record<string, string | undefined>) => {
     const p = new URLSearchParams();
     for (const [k, v] of Object.entries({ type: sp.type, category: sp.category, q: sp.q, ...patch })) if (v) p.set(k, v);
@@ -34,26 +35,30 @@ export default async function NewsPage({ searchParams }: { searchParams: Promise
 
   return (
     <>
-      <PageHeader
-        eyebrow={isCalls ? 'Javni pozivi' : 'Vijesti'}
-        title={isCalls ? 'Javni pozivi i natječaji' : 'Vijesti i obavijesti'}
-        align="center"
-        after={
-          <form action="/vijesti" role="search" className="mx-auto flex w-full max-w-[480px] flex-col gap-3 sm:flex-row">
+      <PageHero
+        crumbs={[{ label: 'Naslovna', href: '/' }, { label: isCalls ? 'Javni pozivi' : 'Vijesti' }]}
+        eyebrow={isCalls ? 'Javni pozivi i natječaji' : 'Press centar Ministarstva'}
+        title={isCalls ? 'Javni pozivi i natječaji' : 'Vijesti, saopćenja i javni pozivi'}
+        actions={
+          <form action="/vijesti" role="search" className="flex w-full max-w-[560px] flex-col gap-3 sm:flex-row">
             {sp.type && <input type="hidden" name="type" value={sp.type} />}
             {sp.category && <input type="hidden" name="category" value={sp.category} />}
-            <label className="flex h-11 flex-1 items-center gap-2 rounded-[8px] bg-white px-3.5 ring-1 ring-inset ring-[#d4d4d4] shadow-[0_1px_2px_rgba(10,13,18,0.05)] focus-within:ring-2 focus-within:ring-[var(--br-500)]">
+            <label className="flex h-11 flex-1 items-center gap-2 rounded-[8px] bg-white px-3.5 shadow-[0_1px_2px_rgba(10,13,18,0.05)] focus-within:ring-2 focus-within:ring-[var(--gr-400)]">
               <SearchLg size={20} className="text-[#a3a3a3]" />
-              <input name="q" defaultValue={sp.q} aria-label="Pretraga vijesti" placeholder="Pretraži vijesti" className="min-w-0 flex-1 border-0 bg-transparent p-0 text-[16px] leading-6 text-[#171717] placeholder:text-[#737373] shadow-none focus:outline-none focus:ring-0" />
+              <input name="q" defaultValue={sp.q} aria-label="Pretraga vijesti" placeholder="Pretraži vijesti i pozive" className="min-w-0 flex-1 border-0 bg-transparent p-0 text-[16px] leading-6 text-[#171717] placeholder:text-[#737373] shadow-none focus:outline-none focus:ring-0" />
             </label>
-            <Button type="submit" size="lg">Pretraži</Button>
+            <button type="submit" className="inline-flex h-11 items-center justify-center rounded-[8px] border-2 border-white/10 bg-[var(--gr-600)] px-4 text-[16px] font-semibold text-white hover:bg-[var(--gr-700)]">Pretraži</button>
           </form>
+        }
+        aside={
+          <HeroInfo icon={Mail01} label="Služba za odnose s javnošću" value="036 552 922">Izjave, akreditacije i dodatne informacije za medije: info@mtto.gov.ba</HeroInfo>
         }
       >
         {isCalls ? 'Otvoreni i završeni pozivi za sufinansiranje, s tekstom poziva, obrascima i rokovima prijave.' : `Aktuelnosti iz rada Ministarstva trgovine, turizma i zaštite okoliša HNK. Ukupno ${data.total} objava.`}
-      </PageHeader>
+      </PageHero>
 
-      <section className="bg-white pb-16 md:pb-24">
+      <section className="bg-white py-12 md:py-16">
+
         <Container>
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <nav aria-label="Vrsta objave" className="flex gap-1 overflow-x-auto rounded-[10px] bg-[#fafafa] p-1 ring-1 ring-inset ring-[#e5e5e5] [scrollbar-width:none] self-start max-w-full">
@@ -92,7 +97,7 @@ export default async function NewsPage({ searchParams }: { searchParams: Promise
           )}
 
           <div className={`grid gap-x-8 gap-y-12 md:grid-cols-2 lg:grid-cols-3 ${featured ? 'mt-16 border-t border-[#e5e5e5] pt-12' : 'mt-12'}`}>
-            {rest.filter(Boolean).map((p) => (
+            {rest.filter((p) => p && !/^test/i.test(p.title)).map((p) => (
               <PostCard key={p!.id} href={`/vijesti/${p!.slug}`} image={p!.coverImage} category={p!.category || POST_TYPE[p!.type]} title={p!.title} excerpt={p!.excerpt}
                 badge={<>{p!.type === 'JAVNI_POZIV' && <CallBadge p={p!} />}{p!.isDemo && <Badge tone="warning">Demo</Badge>}</>}
                 meta={<span className="flex items-center gap-2"><Calendar size={16} className="text-[#a3a3a3]" />{dateLong(p!.publishedAt)}</span>} />

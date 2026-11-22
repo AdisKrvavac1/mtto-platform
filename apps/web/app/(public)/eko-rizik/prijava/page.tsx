@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import EcoReportForm from '@/components/risk/EcoReportForm';
-import { Card, Container, FeaturedIcon, PageHeader } from '@/components/uui';
+import { Card, Container, FeaturedIcon, PageHero } from '@/components/uui';
 import { AlertTriangle, ArrowRight, Edit05, FileSearch02, Map01, PhoneCall01 } from '@untitledui/icons';
 
 export const metadata = { title: 'Prijava incidenta – Eko-rizik HNK', description: 'Prijavite požar, divlju deponiju, zagađenje, klizište ili bujicu na području Hercegovačko-neretvanskog kantona.' };
@@ -14,11 +14,11 @@ const STEPS = [
 export default function PrijavaIncidentaPage() {
   return (
     <>
-      <PageHeader crumbs={[{ label: 'Naslovna', href: '/' }, { label: 'Eko-rizik HNK', href: '/eko-rizik' }, { label: 'Prijava incidenta' }]} eyebrow="Eko-alarm · prijava građana" title="Prijavite ekološki incident">
+      <PageHero crumbs={[{ label: 'Naslovna', href: '/' }, { label: 'Eko-rizik HNK', href: '/eko-rizik' }, { label: 'Prijava incidenta' }]} eyebrow="Eko-alarm · prijava građana" title="Prijavite ekološki incident">
         Požar, divlja deponija, zagađenje vode ili zraka, klizište ili bujica. Prijava stiže direktno službenicima Ministarstva i, nakon provjere, na kartu Eko-rizik HNK.
-      </PageHeader>
+      </PageHero>
 
-      <section className="bg-white pb-16 md:pb-24">
+      <section className="bg-white py-12 md:py-16">
         <Container>
           <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
             <div className="min-w-0 lg:col-span-8"><EcoReportForm /></div>

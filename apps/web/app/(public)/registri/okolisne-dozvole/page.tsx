@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { apiSafe, type Permit } from '@/lib/api';
 import { dateShort, daysUntil } from '@/lib/format';
-import { Badge, Button, Card, Container, Feature, FilterField, Metric, PageHeader, Section, SectionHeader, TableCard, inputCls, td, th } from '@/components/uui';
+import { HB1, HB2, Badge, Button, Card, Container, Feature, FilterField, Metric, PageHero, Section, SectionHeader, TableCard, inputCls, td, th } from '@/components/uui';
 import { Code02, Database01, Eye, File06, FilterLines, Map01, MarkerPin04, SearchLg, Table, XClose } from '@untitledui/icons';
 
 export const dynamic = 'force-dynamic';
@@ -37,24 +37,15 @@ export default async function PermitsPage({ searchParams }: { searchParams: Prom
 
   return (
     <>
-      <PageHeader
+      <PageHero
         crumbs={[{ label: 'Naslovna', href: '/' }, { label: 'E-usluge', href: '/e-usluge' }, { label: 'Okolišne dozvole' }]}
         eyebrow="Javni registar"
         title="Registar okolišnih dozvola"
-        actions={<><Button href="/registri/okolisne-dozvole/izvoz?format=csv" variant="secondary" size="lg" icon={Table}>Izvoz CSV</Button><Button href="/mapa" size="lg" icon={Map01}>Prikaži na karti</Button></>}
+        actions={<><Link href="/registri/okolisne-dozvole/izvoz?format=csv" className={HB2}><Table size={20} />Izvoz CSV</Link><Link href="/mapa" className={HB1}><Map01 size={20} />Prikaži na karti</Link></>}
+        stats={[{ label: 'Ukupno dozvola', value: String(all.length) }, { label: 'Industrija', value: String(by('Industrija')) }, { label: 'Energetika', value: String(by('Energetika')) }, { label: 'Otpad', value: String(by('Otpad')) }]}
       >
         Dozvole izdane prema Zakonu o zaštiti okoliša HNK, s rokom važenja, operaterom i lokacijom postrojenja.
-      </PageHeader>
-
-      <Section tone="gray" className="!py-12 md:!py-16">
-        <div className="grid gap-8 grid-cols-2 lg:grid-cols-5">
-          <Metric value={String(all.length)} label="Ukupno dozvola" />
-          <Metric value={String(by('Industrija'))} label="Industrija" />
-          <Metric value={String(by('Energetika'))} label="Energetika" />
-          <Metric value={String(by('Otpad'))} label="Otpad" />
-          <Metric value={String(all.filter((p) => p.status === 'U_OBNOVI').length)} label="U postupku obnove" />
-        </div>
-      </Section>
+      </PageHero>
 
       <section id="rezultati" className="bg-white py-12 md:py-16 scroll-mt-24">
         <Container>
