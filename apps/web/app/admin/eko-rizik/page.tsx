@@ -2,10 +2,11 @@
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import { adminFetch } from '@/lib/adminApi';
-import { Card, Field, PageTitle, btnGreen, btnSecondary, input, useToast } from '@/components/admin/ui';
+import { Avatar, Badge, Card, CardHeader, EmptyState, Field, MetricCard, PageTitle, Tabs, btnPrimary, btnSecondary, iconBtn, input, useToast } from '@/components/admin/ui';
+import { Activity, AlertTriangle, Edit01, Eye, EyeOff, Globe01, LayersThree01, MarkerPin02, Plus, ReverseLeft, Save01, Trash01 } from '@untitledui/icons';
 import { LS_STATUS, REPORT_STATUS, fmtTime, type Landslide } from '@/lib/risk';
 
-const LocationPicker = dynamic(() => import('@/components/admin/LocationPicker'), { ssr: false, loading: () => <div className="h-[320px] rounded-lg bg-surface-container-low animate-pulse" /> });
+const LocationPicker = dynamic(() => import('@/components/admin/LocationPicker'), { ssr: false, loading: () => <div className="h-[320px] rounded-lg bg-[#f5f5f5] animate-pulse" /> });
 
 const MUNICIPALITIES = ['Čapljina', 'Čitluk', 'Jablanica', 'Konjic', 'Mostar', 'Neum', 'Prozor-Rama', 'Ravno', 'Stolac'];
 const KIND: Record<string, string> = { POZAR: 'Požar ili dim', DEPONIJA: 'Divlja deponija', VODA: 'Zagađenje vode', ZRAK: 'Zrak / mirisi', KLIZISTE: 'Klizište / odron', POPLAVA: 'Poplava / bujica', SJECA: 'Nelegalna sječa', OSTALO: 'Ostalo' };
@@ -43,74 +44,88 @@ export default function RiskAdmin() {
   }
   const fresh = reports.filter((r) => r.status === 'NOVO').length;
 
+  const RTONE: Record<string, 'error' | 'warning' | 'success' | 'gray'> = { NOVO: 'error', U_OBRADI: 'warning', RIJESENO: 'success', ODBACENO: 'gray' };
+  const LTONE: Record<string, 'error' | 'warning' | 'success'> = { AKTIVNO: 'error', PRACENJE: 'warning', SANIRANO: 'success' };
+
   return (
     <>
-      <PageTitle kicker="Sistem ranog informisanja" title="Eko-rizik HNK: prijave i klizišta">
-        <a href="/eko-rizik" target="_blank" rel="noopener" className={btnSecondary}><span className="material-symbols-outlined text-[18px]">public</span>Javni prikaz</a>
-        <a href="/eko-rizik/krizni" target="_blank" rel="noopener" className={btnSecondary}><span className="material-symbols-outlined text-[18px]">monitor_heart</span>Krizni prikaz</a>
+      <PageTitle kicker="Prijave građana i registar klizišta za javnu kartu rizika." crumbs={['Eko-rizik i prijave']} title="Eko-rizik i prijave">
+        <a href="/eko-rizik/krizni" target="_blank" rel="noopener" className={btnSecondary}><Activity />Krizni prikaz</a>
+        <a href="/eko-rizik" target="_blank" rel="noopener" className={btnSecondary}><Globe01 />Javni prikaz</a>
       </PageTitle>
-      <div className="flex gap-2 mb-space-md" role="tablist">
-        {([['prijave', `Prijave građana${fresh ? ` (${fresh} novih)` : ''}`], ['klizista', `Registar klizišta (${ls.length})`]] as const).map(([k, l]) => (
-          <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)} className={`px-4 py-2 rounded-lg font-button text-button ${tab === k ? 'bg-primary text-on-primary' : 'bg-surface-container-lowest text-primary hover:bg-surface-container-low'}`}>{l}</button>
-        ))}
+
+      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+        <MetricCard title="Nove prijave" value={fresh} footer={fresh ? <Badge tone="error" dot>Čeka obradu</Badge> : 'Sve obrađeno'} />
+        <MetricCard title="Ukupno prijava" value={reports.length} footer={`${reports.filter((r) => r.isPublic).length} javno na karti`} />
+        <MetricCard title="Aktivna klizišta" value={ls.filter((l) => l.status === 'AKTIVNO').length} footer={`${ls.filter((l) => l.status === 'PRACENJE').length} u praćenju`} />
+        <MetricCard title="Registar klizišta" value={ls.length} footer={`${ls.filter((l) => l.isDemo).length} demo zapisa`} />
+      </div>
+
+      <div className="mt-8">
+        <Tabs value={tab} onChange={setTab} items={[{ value: 'prijave', label: 'Prijave građana', count: reports.length }, { value: 'klizista', label: 'Registar klizišta', count: ls.length }]} />
       </div>
 
       {tab === 'prijave' && (
-        <Card className="overflow-hidden">
-          {reports.length === 0 && <p className="p-space-lg text-center text-outline font-body-sm">Nema prijava.</p>}
-          <ul className="divide-y divide-slate-border">
-            {reports.map((r) => (
-              <li key={r.id} className="p-space-md grid grid-cols-1 lg:grid-cols-12 gap-space-sm">
-                <div className="lg:col-span-7 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2"><span className="font-mono text-[12px] text-outline">{r.code}</span><span className="font-button text-button font-bold text-text-heading">{KIND[r.kind] ?? r.kind}</span><span className="font-body-sm text-[12px] text-outline">{r.municipality}{r.location ? ` · ${r.location}` : ''} · {fmtTime(r.createdAt)}</span></div>
-                  <p className="font-body-sm text-body-sm text-text-body mt-1 whitespace-pre-line">{r.description}</p>
-                  <p className="font-body-sm text-[12px] text-outline mt-1">{r.contactName || r.contactEmail ? `Prijavitelj: ${r.contactName ?? ''} ${r.contactEmail ? `<${r.contactEmail}>` : ''}` : 'Anonimna prijava'}{r.lat != null ? ` · ${r.lat}, ${r.lng}` : ' · bez koordinata'}</p>
-                </div>
-                <div className="lg:col-span-5 flex flex-wrap items-start lg:justify-end gap-2">
-                  <select aria-label="Status prijave" className={`${input} !w-auto`} value={r.status} onChange={(e) => patchReport(r, { status: e.target.value })}>{Object.entries(REPORT_STATUS).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
-                  <button type="button" onClick={() => patchReport(r, { isPublic: !r.isPublic })} className={r.isPublic ? btnGreen : btnSecondary} title="Prikaz na javnoj karti, bez ličnih podataka">
-                    <span className="material-symbols-outlined text-[18px]">{r.isPublic ? 'visibility' : 'visibility_off'}</span>{r.isPublic ? 'Javno' : 'Nije javno'}
-                  </button>
-                  {r.contactEmail && <a className={btnSecondary} href={`mailto:${r.contactEmail}?subject=${encodeURIComponent(`Vaša eko-prijava ${r.code}`)}`}><span className="material-symbols-outlined text-[18px]">reply</span>Odgovori</a>}
-                </div>
-              </li>
-            ))}
-          </ul>
+        <Card className="mt-6 overflow-hidden">
+          <CardHeader title="Prijave građana" badge={fresh ? <Badge tone="error">{fresh} novih</Badge> : undefined} description="Javne prijave prikazuju se na karti bez ličnih podataka prijavitelja." />
+          {reports.length === 0 ? <EmptyState icon={AlertTriangle} title="Nema prijava">Prijave s obrasca na portalu pojavit će se ovdje.</EmptyState> : (
+            <ul className="divide-y divide-[#e5e5e5]">
+              {reports.map((r) => (
+                <li key={r.id} className="grid gap-4 px-4 py-5 md:px-6 lg:grid-cols-12">
+                  <div className="flex min-w-0 gap-3 lg:col-span-7">
+                    <Avatar name={r.contactName || 'Anonimno'} />
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2"><span className="text-[14px] font-semibold text-[#171717]">{KIND[r.kind] ?? r.kind}</span><Badge tone={RTONE[r.status] ?? 'gray'} dot>{REPORT_STATUS[r.status] ?? r.status}</Badge><span className="text-[12px] text-[#737373]">{r.code} · {fmtTime(r.createdAt)}</span></div>
+                      <p className="mt-0.5 flex items-center gap-1 text-[14px] text-[#525252]"><MarkerPin02 size={14} className="text-[#a3a3a3]" />{r.municipality}{r.location ? ` · ${r.location}` : ''}{r.lat == null ? ' · bez koordinata' : ''}</p>
+                      <p className="mt-2 whitespace-pre-line rounded-[8px] bg-[#fafafa] px-3 py-2 text-[14px] leading-5 text-[#404040] ring-1 ring-inset ring-[#e5e5e5]">{r.description}</p>
+                      <p className="mt-2 text-[12px] text-[#737373]">{r.contactName || r.contactEmail ? `Prijavitelj: ${r.contactName ?? ''} ${r.contactEmail ? `<${r.contactEmail}>` : ''}` : 'Anonimna prijava'}</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-start gap-2 lg:col-span-5 lg:justify-end">
+                    <select aria-label="Status prijave" className={`${input} !w-auto`} value={r.status} onChange={(e) => patchReport(r, { status: e.target.value })}>{Object.entries(REPORT_STATUS).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
+                    <button type="button" onClick={() => patchReport(r, { isPublic: !r.isPublic })} className={r.isPublic ? btnPrimary : btnSecondary} title="Prikaz na javnoj karti, bez ličnih podataka">{r.isPublic ? <Eye /> : <EyeOff />}{r.isPublic ? 'Javno' : 'Nije javno'}</button>
+                    {r.contactEmail && <a className={btnSecondary} href={`mailto:${r.contactEmail}?subject=${encodeURIComponent(`Vaša eko-prijava ${r.code}`)}`}><ReverseLeft />Odgovori</a>}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </Card>
       )}
 
       {tab === 'klizista' && (
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-space-lg items-start">
-          <Card className="xl:col-span-7 p-space-md md:p-space-lg">
-            <form onSubmit={saveLs} className="space-y-space-md">
-              <h2 className="font-title-md text-title-md font-bold text-text-heading">{f.id ? 'Uredi klizište' : 'Dodaj klizište'}</h2>
-              <LocationPicker key={pk} lat={f.lat} lng={f.lng} height={320} onChange={(lat, lng) => setF((s) => ({ ...s, lat, lng }))} />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-space-sm">
+        <div className="mt-6 grid items-start gap-6 xl:grid-cols-12">
+          <Card className="xl:col-span-7">
+            <CardHeader title={f.id ? 'Uredi klizište' : 'Dodaj klizište'} description="Kliknite na kartu da postavite lokaciju." />
+            <form onSubmit={saveLs} className="space-y-5 p-4 md:p-6">
+              <div className="overflow-hidden rounded-[8px]"><LocationPicker key={pk} lat={f.lat} lng={f.lng} height={320} onChange={(lat, lng) => setF((s) => ({ ...s, lat, lng }))} /></div>
+              <div className="grid gap-4 md:grid-cols-2">
                 <Field label="Naziv" required><input className={input} value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} required /></Field>
                 <Field label="Općina" required><select className={input} value={f.municipality} onChange={(e) => setF({ ...f, municipality: e.target.value })}>{MUNICIPALITIES.map((m) => <option key={m}>{m}</option>)}</select></Field>
                 <Field label="Status"><select className={input} value={f.status} onChange={(e) => setF({ ...f, status: e.target.value })}>{Object.entries(LS_STATUS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select></Field>
                 <Field label="Nivo rizika"><select className={input} value={f.risk} onChange={(e) => setF({ ...f, risk: +e.target.value })}><option value={1}>1 – nizak</option><option value={2}>2 – srednji</option><option value={3}>3 – visok</option></select></Field>
               </div>
               <Field label="Opis"><textarea className={input} rows={3} value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} /></Field>
-              <Field label="Izvor podatka" hint="npr. općinska civilna zaštita, terenski obilazak"><input className={input} value={f.source} onChange={(e) => setF({ ...f, source: e.target.value })} /></Field>
-              <div className="flex items-center justify-between gap-2">
-                <span className="font-mono text-[12px] text-on-surface-variant">{f.lat != null ? `${f.lat}° N, ${f.lng}° E` : 'Lokacija nije postavljena'}</span>
-                <span className="flex gap-2">{f.id && <button type="button" className={btnSecondary} onClick={() => { setF(BLANK); setPk((k) => k + 1); }}>Odustani</button>}<button className={btnGreen} disabled={busy}><span className="material-symbols-outlined text-[18px]">save</span>{f.id ? 'Spremi izmjene' : 'Dodaj u registar'}</button></span>
+              <Field label="Izvor podatka" hint="npr. općinska civilna zaštita"><input className={input} value={f.source} onChange={(e) => setF({ ...f, source: e.target.value })} /></Field>
+              <div className="flex flex-col-reverse gap-3 border-t border-[#e5e5e5] pt-5 sm:flex-row sm:items-center sm:justify-between">
+                <span className="flex items-center gap-1.5 text-[14px] text-[#525252]"><MarkerPin02 size={16} className={f.lat != null ? 'text-[#7f56d9]' : 'text-[#d4d4d4]'} />{f.lat != null ? `${f.lat}° N, ${f.lng}° E` : 'Lokacija nije postavljena'}</span>
+                <span className="flex gap-3">{f.id && <button type="button" className={btnSecondary} onClick={() => { setF(BLANK); setPk((k) => k + 1); }}>Odustani</button>}<button className={btnPrimary} disabled={busy}>{f.id ? <Save01 /> : <Plus />}{f.id ? 'Spremi izmjene' : 'Dodaj u registar'}</button></span>
               </div>
             </form>
           </Card>
-          <Card className="xl:col-span-5 overflow-hidden">
-            <div className="p-space-md border-b border-slate-border"><h2 className="font-title-md text-title-md font-bold text-text-heading">Registar ({ls.length})</h2></div>
-            <ul className="divide-y divide-slate-border">
-              {ls.map((l) => (
-                <li key={l.id} className="flex items-start gap-space-sm p-space-md">
-                  <span className="mt-1.5 w-3 h-3 rounded-sm shrink-0" style={{ background: LS_STATUS[l.status]?.color }} />
-                  <span className="flex-1 min-w-0"><span className="block font-button text-button font-bold text-text-heading">{l.name}{l.isDemo && <span className="ml-1.5 text-[10px] font-bold uppercase text-[#786000] bg-herzeg-gold-soft px-1.5 rounded">Demo</span>}</span><span className="block font-body-sm text-[12px] text-on-surface-variant">{l.municipality} · {LS_STATUS[l.status]?.label} · rizik {l.risk}/3</span></span>
-                  <button type="button" onClick={() => { setF({ id: l.id, name: l.name, municipality: l.municipality, status: l.status, risk: l.risk, description: l.description, source: l.source, lat: l.lat, lng: l.lng }); setPk((k) => k + 1); }} className="w-8 h-8 rounded bg-surface-container-low text-primary inline-flex items-center justify-center" title="Uredi"><span className="material-symbols-outlined text-[18px]">edit</span></button>
-                  <button type="button" onClick={() => removeLs(l)} className="w-8 h-8 rounded bg-error-container text-on-error-container inline-flex items-center justify-center" title="Ukloni"><span className="material-symbols-outlined text-[18px]">delete</span></button>
-                </li>
-              ))}
-            </ul>
+          <Card className="overflow-hidden xl:col-span-5">
+            <CardHeader title="Registar klizišta" badge={<Badge tone="brand">{ls.length}</Badge>} />
+            {ls.length === 0 ? <EmptyState icon={LayersThree01} title="Registar je prazan" /> : (
+              <ul className="divide-y divide-[#e5e5e5]">
+                {ls.map((l) => (
+                  <li key={l.id} className="flex items-center gap-3 px-4 py-4 md:px-6">
+                    <span className="min-w-0 flex-1"><span className="flex flex-wrap items-center gap-2 text-[14px] font-medium text-[#171717]">{l.name}{l.isDemo && <Badge tone="warning">Demo</Badge>}</span><span className="mt-1 flex flex-wrap items-center gap-2 text-[14px] text-[#525252]"><Badge tone={LTONE[l.status] ?? 'warning'} dot>{LS_STATUS[l.status]?.label}</Badge>{l.municipality} · rizik {l.risk}/3</span></span>
+                    <button type="button" onClick={() => removeLs(l)} className={`${iconBtn} hover:!text-[#d92d20]`} title="Ukloni"><Trash01 /></button>
+                    <button type="button" onClick={() => { setF({ id: l.id, name: l.name, municipality: l.municipality, status: l.status, risk: l.risk, description: l.description, source: l.source, lat: l.lat, lng: l.lng }); setPk((k) => k + 1); }} className={iconBtn} title="Uredi"><Edit01 /></button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </Card>
         </div>
       )}

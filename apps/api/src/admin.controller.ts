@@ -85,7 +85,13 @@ export class AdminController {
       this.db.q(`SELECT "id","title","status","type","category","updatedAt","publishedAt" FROM posts ORDER BY "updatedAt" DESC LIMIT 6`),
       this.db.q(`SELECT * FROM audit_log ORDER BY "createdAt" DESC LIMIT 8`),
     ]);
-    return { published, drafts, scheduled, views, documents, permits, facilities, locations, expiring, recentPosts, audit };
+    const [monthly, topPosts, reports] = await Promise.all([
+      this.db.q(`SELECT to_char(date_trunc('month', "publishedAt"), 'YYYY-MM') m, "type", count(*)::int n FROM posts
+                 WHERE "status"='OBJAVLJENO' AND "publishedAt" >= date_trunc('month', now()) - interval '11 months' GROUP BY 1,2`),
+      this.db.q(`SELECT "id","title","views","type","publishedAt" FROM posts WHERE "status"='OBJAVLJENO' ORDER BY "views" DESC LIMIT 5`),
+      this.db.q(`SELECT "status", count(*)::int n FROM eco_reports GROUP BY 1`).catch(() => []),
+    ]);
+    return { published, drafts, scheduled, views, documents, permits, facilities, locations, expiring, recentPosts, audit, monthly, topPosts, reports };
   }
 
   // ---------- Objave ----------

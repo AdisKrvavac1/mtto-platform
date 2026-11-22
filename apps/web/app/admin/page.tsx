@@ -1,95 +1,158 @@
 'use client';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { adminFetch } from '@/lib/adminApi';
-import { dateLong, dateShort, dateTime } from '@/lib/format';
-import StitchToggles from '@/components/stitch/StitchToggles';
-import { DashboardBody } from '@/components/stitch/cms/Dashboard';
+import { dateShort, dateTime } from '@/lib/format';
+import { AlertTriangle, Announcement01, ArrowRight, CheckCircle, LinkExternal01, Plus, XClose } from '@untitledui/icons';
+import { Avatar, Badge, BarChart, ButtonGroup, Card, CardHeader, EmptyState, MetricCard, ProgressBar, StatusChip, WelcomeHeader, btnPrimary, btnSecondary, btnTertiary, td, th, tr } from '@/components/admin/ui';
+import { getUser } from '@/lib/adminApi';
 
 type Dash = {
   published: number; drafts: number; scheduled: number; views: number; documents: number; permits: number; facilities: number; locations: number;
   expiring: { id: string; registerNumber: string; operator: string; validUntil: string; status: string }[];
   recentPosts: { id: string; title: string; status: string; type: string; category: string; updatedAt: string }[];
   audit: { id: string; userName: string; action: string; target: string; createdAt: string }[];
+  monthly?: { m: string; type: string; n: number }[];
+  topPosts?: { id: string; title: string; views: number; type: string; publishedAt: string }[];
+  reports?: { status: string; n: number }[];
 };
-const PAIRS: [string, string][] = [['exportBtn', 'exportMenu'], ['newItemBtn', 'newItemMenu']];
-const ACTION: Record<string, string> = { LOGIN: 'Prijava na CMS', CREATE: 'Kreirao zapis', UPDATE: 'Izmijenio zapis', DELETE: 'Obrisao zapis', PUBLISH: 'Objavio na portalu', UPLOAD: 'Učitao datoteku' };
-
-function card(icon: string, kicker: string, title: string, value: React.ReactNode, note: string, rows: [string, React.ReactNode, string?][], href: string) {
-  return (
-    <Link href={href} className="p-space-md rounded-xl bg-surface-container-lowest shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
-      <div>
-        <div className="flex items-center justify-between mb-space-sm">
-          <div className="w-10 h-10 rounded-lg bg-surface-container-low text-primary-container flex items-center justify-center"><span className="material-symbols-outlined text-[22px]">{icon}</span></div>
-          <span className="font-label-badge text-label-badge px-2 py-0.5 rounded bg-surface-container text-primary uppercase">{kicker}</span>
-        </div>
-        <span className="font-label-kicker text-label-kicker text-on-surface-variant uppercase tracking-wider">{title}</span>
-        <div className="flex items-baseline gap-2 mt-1"><span className="font-headline-lg text-headline-lg text-text-heading">{value}</span><span className="font-body-sm text-body-sm text-secondary font-semibold">{note}</span></div>
-      </div>
-      <div className="mt-space-md pt-space-xs bg-surface-container-low p-2 rounded-lg space-y-1">
-        {rows.map(([k, v, c]) => <div key={k} className={`flex justify-between font-body-sm text-body-sm ${c ?? 'text-on-surface-variant'}`}><span>{k}</span><strong>{v}</strong></div>)}
-      </div>
-    </Link>
-  );
-}
+const ACTION: Record<string, string> = { LOGIN: 'se prijavio/la na CMS', CREATE: 'je kreirao/la', UPDATE: 'je izmijenio/la', DELETE: 'je obrisao/la', PUBLISH: 'je objavio/la', UPLOAD: 'je učitao/la datoteku' };
+const TYPE: Record<string, string> = { VIJEST: 'Vijest', JAVNI_POZIV: 'Javni poziv', SAOPCENJE: 'Saopćenje' };
+const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
+type Range = '12' | '6' | '3';
 
 export default function Dashboard() {
   const [d, setD] = useState<Dash | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [range, setRange] = useState<Range>('12');
+  const [hideAlert, setHideAlert] = useState(false);
   useEffect(() => {
     const load = () => adminFetch<Dash>('/admin/dashboard').then(setD).catch((e) => setErr(e.message));
     load();
-    const t = setInterval(load, 15000);
+    const t = setInterval(load, 30000);
     return () => clearInterval(t);
   }, []);
-  if (err) return <p className="text-error">{err}</p>;
-  if (!d) return <div className="h-64 rounded-xl bg-surface-container-low animate-pulse" />;
-  const now = new Date();
+
+  const months = useMemo(() => {
+    const now = new Date();
+    return Array.from({ length: 12 }, (_, i) => { const x = new Date(now.getFullYear(), now.getMonth() - 11 + i, 1); return { key: `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}`, label: MON[x.getMonth()] }; });
+  }, []);
+  const per = (type?: string) => months.map((m) => (d?.monthly ?? []).filter((r) => r.m === m.key && (!type || r.type === type)).reduce((s, r) => s + r.n, 0));
+
+  if (err) return <Card className="p-6"><EmptyState icon={AlertTriangle} title="Kontrolnu ploču nije moguće učitati">{err}</EmptyState></Card>;
+  if (!d) return <div className="space-y-6"><div className="h-12 w-80 animate-pulse rounded-[8px] bg-[#f5f5f5]" /><div className="grid gap-6 md:grid-cols-3">{[0, 1, 2].map((i) => <div key={i} className="h-40 animate-pulse rounded-[12px] bg-[#f5f5f5]" />)}</div><div className="h-96 animate-pulse rounded-[12px] bg-[#f5f5f5]" /></div>;
+
+  const all = per();
+  const trend = all[10] ? Math.round(((all[11] - all[10]) / all[10]) * 100) : null;
+  const cut = 12 - Number(range);
+  const reportsTotal = (d.reports ?? []).reduce((s, r) => s + r.n, 0);
+  const reportsNew = (d.reports ?? []).find((r) => r.status === 'NOVO')?.n ?? 0;
+  const structure: [string, number, string][] = [['Objave', d.published, '/admin/objave'], ['Dokumenti i propisi', d.documents, '/admin/dokumenti'], ['Okolišne dozvole', d.permits, '/admin/registri'], ['Ugostiteljski objekti', d.facilities, '/registri/ugostiteljski-objekti'], ['Lokacije na karti', d.locations, '/admin/mapa']];
+  const maxS = Math.max(1, ...structure.map((s) => s[1]));
+  const first = (getUser()?.name ?? 'urednice').split(' ')[0];
 
   return (
     <>
-      <StitchToggles pairs={PAIRS} />
-      <DashboardBody
-        now={`Danas, ${now.toLocaleTimeString('bs-BA', { hour: '2-digit', minute: '2-digit' })}`}
-        date={dateLong(now)}
-        n={{ permits: d.permits, facilities: d.facilities }}
-        alert={
-          d.expiring.length > 0 ? (
-            <div className="flex items-center justify-between p-3.5 rounded-xl bg-amber-light text-on-tertiary-fixed shadow-sm">
-              <div className="flex items-center gap-space-sm">
-                <span className="material-symbols-outlined text-on-tertiary-container text-[22px]">warning</span>
-                <span className="font-body-regular text-body-regular font-semibold">Pažnja, Sektor za zaštitu okoliša:</span>
-                <span className="font-body-regular text-body-regular text-text-body">{d.expiring.length} {d.expiring.length === 1 ? 'dozvola ističe' : 'dozvole ističu'} u narednih 60 dana ({d.expiring.map((x) => x.operator).slice(0, 2).join(', ')}{d.expiring.length > 2 ? '…' : ''}).</span>
-              </div>
-              <Link href="/admin/registri" className="font-button text-button font-bold text-on-tertiary-container hover:underline flex items-center gap-1 shrink-0">Pregledaj isteke<span className="material-symbols-outlined text-[18px]">arrow_forward</span></Link>
-            </div>
-          ) : (
-            <div className="flex items-center gap-space-sm p-3.5 rounded-xl bg-emerald-light text-secondary shadow-sm"><span className="material-symbols-outlined">check_circle</span><span className="font-body-regular text-body-regular font-semibold">Nijedna okolišna dozvola ne ističe u narednih 60 dana.</span></div>
-          )
-        }
-        cardPermits={card('eco', 'Registar A-1', 'Okolišne dozvole', d.permits, 'u registru', [['Ističe u 60 dana', d.expiring.length, d.expiring.length ? 'text-error' : undefined], ['Lokacija na mapi', d.locations + d.permits + d.facilities]], '/admin/registri')}
-        cardFacilities={card('apartment', 'Turizam', 'Ugostiteljski objekti', d.facilities, 'kategorizirano', [['Javni registar', 'aktivan'], ['Uvoz pune evidencije', 'pri migraciji']], '/registri/ugostiteljski-objekti')}
-        cardPosts={card('article', 'Portal', 'Objave i dokumenti', d.published, 'objavljeno', [['Nacrti / zakazano', `${d.drafts} / ${d.scheduled}`], ['Dokumenata u repozitoriju', d.documents], ['Ukupno pregleda', d.views.toLocaleString('bs-BA')]], '/admin/objave')}
-        audit={
-          <div className="bg-surface-container-lowest rounded-xl shadow-sm p-space-md space-y-space-sm" id="audit">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-space-xs"><span className="w-2 h-2 rounded-full bg-secondary-fixed animate-ping" /><h2 className="font-title-md text-title-md font-bold text-[#1e2570]">Dnevnik aktivnosti (uživo)</h2></div>
-              <span className="font-label-badge text-label-badge uppercase tracking-wider text-outline">Audit log</span>
-            </div>
-            <div className="space-y-space-md relative pl-4 before:content-[''] before:absolute before:left-1.5 before:top-2 before:bottom-2 before:w-[2px] before:bg-surface-container">
-              {d.audit.length === 0 && <p className="font-body-sm text-body-sm text-outline">Još nema zabilježenih aktivnosti.</p>}
-              {d.audit.map((a, i) => (
-                <div key={a.id} className="relative pl-3">
-                  <span className={`absolute -left-[19px] top-1.5 w-2.5 h-2.5 rounded-full ring-4 ring-surface-container-lowest ${i === 0 ? 'bg-secondary' : 'bg-primary-container'}`} />
-                  <div className="flex items-baseline justify-between gap-2"><span className="font-button text-button font-bold text-text-heading truncate">{a.userName}</span><span className="font-label-badge text-label-badge text-outline shrink-0">{dateShort(a.createdAt) === dateShort(now) ? new Date(a.createdAt).toLocaleTimeString('bs-BA', { hour: '2-digit', minute: '2-digit' }) : dateTime(a.createdAt)}</span></div>
-                  <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">{ACTION[a.action] ?? a.action}{a.target && <>: <span className="font-semibold text-institutional-navy-deep">{a.target}</span></>}</p>
-                </div>
-              ))}
-            </div>
-            <Link href="/admin/korisnici#audit" className="font-button text-button text-primary-container hover:underline flex items-center gap-1 pt-1">Cijeli sigurnosni dnevnik<span className="material-symbols-outlined text-[18px]">history</span></Link>
-          </div>
-        }
+      <WelcomeHeader
+        title={`Dobro došli, ${first}`}
+        sub="Pregled sadržaja portala, registara i prijava građana."
+        actions={<><a href="/" target="_blank" rel="noopener" className={btnSecondary}><LinkExternal01 />Javni portal</a><Link href="/admin/objave/nova" className={btnPrimary}><Plus />Nova objava</Link></>}
       />
+
+      {d.expiring.length > 0 && !hideAlert && (
+        <div className="mb-6 flex items-start gap-4 rounded-[12px] bg-white p-4 ring-1 ring-inset ring-[#fedf89] shadow-[0_1px_2px_rgba(10,13,18,0.05)]">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#fef0c7] text-[#dc6803] ring-[6px] ring-[#fffaeb]"><AlertTriangle size={16} /></span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[14px] leading-5 font-semibold text-[#171717]">{d.expiring.length} {d.expiring.length === 1 ? 'okolišna dozvola ističe' : 'okolišne dozvole ističu'} u narednih 60 dana</p>
+            <p className="mt-1 text-[14px] leading-5 text-[#525252]">{d.expiring.map((x) => `${x.operator} (${dateShort(x.validUntil)})`).join(', ')}</p>
+            <Link href="/admin/registri" className="mt-3 inline-flex items-center gap-1.5 text-[14px] font-semibold text-[#6941c6] hover:text-[#53389e]">Pregledaj registar<ArrowRight size={16} /></Link>
+          </div>
+          <button type="button" onClick={() => setHideAlert(true)} className="rounded-[8px] p-2 text-[#a3a3a3] hover:bg-[#fafafa]" aria-label="Zatvori"><XClose size={20} /></button>
+        </div>
+      )}
+
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <MetricCard title="Objavljeno" value={d.published.toLocaleString('bs-BA')} trend={trend} spark={all} href="/admin/objave" />
+        <MetricCard title="Pregledi objava" value={d.views.toLocaleString('bs-BA')} footer={`${d.drafts} nacrta · ${d.scheduled} zakazano`} spark={all.map((v, i) => v + i)} href="/admin/objave" />
+        <MetricCard title="Okolišne dozvole" value={d.permits} footer={d.expiring.length ? <span className="text-[#d92d20]">{d.expiring.length} ističe u 60 dana</span> : 'Nijedna ne ističe uskoro'} href="/admin/registri" />
+        <MetricCard title="Prijave građana" value={reportsTotal} footer={reportsNew ? <Badge tone="error" dot>{reportsNew} nove</Badge> : 'Sve prijave obrađene'} href="/admin/eko-rizik" />
+      </div>
+
+      <Card className="mt-6 overflow-hidden">
+        <CardHeader title="Objave po mjesecima" description="Objavljene vijesti, javni pozivi i saopćenja na portalu." actions={<ButtonGroup<Range> value={range} onChange={setRange} items={[{ value: '12', label: '12 mjeseci' }, { value: '6', label: '6 mjeseci' }, { value: '3', label: '3 mjeseca' }]} />} />
+        <div className="grid gap-8 p-4 md:p-6 lg:grid-cols-[1fr_320px] [&>*]:min-w-0">
+          <BarChart labels={months.slice(cut).map((m) => m.label)} series={[
+            { name: 'Vijesti', data: per('VIJEST').slice(cut), color: '#6941c6' },
+            { name: 'Javni pozivi', data: per('JAVNI_POZIV').slice(cut), color: '#9e77ed' },
+            { name: 'Saopćenja', data: per('SAOPCENJE').slice(cut), color: '#d6bbfb' },
+          ]} />
+          <div className="border-t border-[#e5e5e5] pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+            <p className="text-[14px] font-medium text-[#525252]">Ukupno zapisa u sistemu</p>
+            <p className="mt-1 text-[36px] leading-[44px] font-semibold tracking-[-0.02em] text-[#171717]">{structure.reduce((s, x) => s + x[1], 0).toLocaleString('bs-BA')}</p>
+            <ul className="mt-6 flex flex-col gap-5">
+              {structure.map(([l, n, href]) => (
+                <li key={l}><Link href={href} className="group block"><span className="flex justify-between text-[14px] font-medium text-[#404040] group-hover:text-[#6941c6]"><span>{l}</span><span className="text-[#525252]">{n}</span></span><span className="mt-2 block"><ProgressBar value={(n / maxS) * 100} /></span></Link></li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </Card>
+
+      <div className="mt-6 grid gap-6 xl:grid-cols-[1fr_400px]">
+        <Card className="overflow-hidden">
+          <CardHeader title="Nedavne izmjene" badge={<Badge tone="brand">{d.recentPosts.length} objava</Badge>} actions={<Link href="/admin/objave" className={btnSecondary}>Sve objave</Link>} />
+          {d.recentPosts.length === 0 ? <EmptyState icon={Announcement01} title="Još nema objava" action={<Link href="/admin/objave/nova" className={btnPrimary}><Plus />Nova objava</Link>}>Prva objava pojavit će se ovdje.</EmptyState> : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[640px]">
+                <thead><tr><th className={th}>Naslov</th><th className={th}>Vrsta</th><th className={th}>Status</th><th className={th}>Izmijenjeno</th></tr></thead>
+                <tbody>
+                  {d.recentPosts.map((p) => (
+                    <tr key={p.id} className={tr}>
+                      <td className={td}><Link href={`/admin/objave/${p.id}`} className="line-clamp-1 font-medium text-[#171717] hover:text-[#6941c6]">{p.title}</Link><span className="text-[#525252]">{p.category}</span></td>
+                      <td className={td}><Badge tone="gray">{TYPE[p.type] ?? p.type}</Badge></td>
+                      <td className={td}><StatusChip status={p.status} /></td>
+                      <td className={`${td} whitespace-nowrap`}>{dateTime(p.updatedAt)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Card>
+
+        <Card className="flex flex-col">
+          <CardHeader title="Aktivnost" description="Dnevnik prijava i izmjena u CMS-u." menu />
+          <ul className="flex-1 divide-y divide-[#e5e5e5] px-4 md:px-6">
+            {d.audit.length === 0 && <li className="py-6 text-[14px] text-[#525252]">Još nema zabilježenih aktivnosti.</li>}
+            {d.audit.map((a, i) => (
+              <li key={a.id} className="flex gap-3 py-4">
+                <Avatar name={a.userName} online={i === 0} />
+                <div className="min-w-0 flex-1">
+                  <p className="flex items-baseline gap-2 text-[14px] leading-5"><span className="truncate font-semibold text-[#404040]">{a.userName}</span><span className="shrink-0 text-[12px] text-[#737373]">{dateTime(a.createdAt)}</span></p>
+                  <p className="text-[14px] leading-5 text-[#525252]">{ACTION[a.action] ?? a.action}{a.target && <> <span className="font-medium text-[#6941c6]">{a.target}</span></>}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <div className="border-t border-[#e5e5e5] px-4 py-3 text-right md:px-6"><Link href="/admin/korisnici#audit" className={btnTertiary}>Cijeli dnevnik</Link></div>
+        </Card>
+      </div>
+
+      {(d.topPosts?.length ?? 0) > 0 && (
+        <Card className="mt-6 overflow-hidden">
+          <CardHeader title="Najčitanije objave" description="Prema broju pregleda na portalu." menu />
+          <ul className="divide-y divide-[#e5e5e5]">
+            {d.topPosts!.map((p, i) => (
+              <li key={p.id} className="flex items-center gap-4 px-4 py-4 md:px-6">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#f9f5ff] text-[14px] font-semibold text-[#7f56d9]">{i + 1}</span>
+                <span className="min-w-0 flex-1"><Link href={`/admin/objave/${p.id}`} className="line-clamp-1 text-[14px] font-medium text-[#171717] hover:text-[#6941c6]">{p.title}</Link><span className="text-[14px] text-[#525252]">{TYPE[p.type] ?? p.type} · {dateShort(p.publishedAt)}</span></span>
+                <span className="text-[14px] font-medium text-[#404040] whitespace-nowrap">{p.views.toLocaleString('bs-BA')} pregleda</span>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
+      {d.expiring.length === 0 && <p className="mt-6 flex items-center gap-2 text-[14px] text-[#525252]"><CheckCircle size={16} className="text-[#079455]" />Nijedna okolišna dozvola ne ističe u narednih 60 dana.</p>}
     </>
   );
 }

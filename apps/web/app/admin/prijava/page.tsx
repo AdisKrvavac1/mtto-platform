@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { login } from '@/lib/adminApi';
-import { input, btnPrimary } from '@/components/admin/ui';
+import { AlertCircle, Eye, EyeOff, ShieldTick } from '@untitledui/icons';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -30,7 +30,7 @@ export default function LoginPage() {
 
   // Untitled UI PRO – "Log in / Split mockup" (1646:403218)
   return (
-    <div className="cms-theme min-h-screen flex bg-white">
+    <div className="min-h-screen flex bg-white">
       <section className="flex flex-col w-full lg:w-1/2 lg:max-w-[640px] lg:min-w-[480px] min-h-screen">
         <div className="flex-1 flex items-center justify-center px-4 md:px-8 py-12">
           <div className="w-full max-w-[360px] flex flex-col gap-12 lg:gap-20">
@@ -50,15 +50,15 @@ export default function LoginPage() {
                     <span className="text-[14px] leading-5 font-medium text-[#404040]">Lozinka</span>
                     <span className="relative">
                       <input className={`${field} pr-11`} type={show ? 'text' : 'password'} autoComplete="current-password" placeholder="••••••••••••" required value={password} onChange={(e) => setPassword(e.target.value)} />
-                      <button type="button" onClick={() => setShow((v) => !v)} aria-label={show ? 'Sakrij lozinku' : 'Prikaži lozinku'} className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 text-[#a3a3a3] hover:text-[#525252]"><span className="material-symbols-outlined text-[18px]">{show ? 'visibility_off' : 'visibility'}</span></button>
+                      <button type="button" onClick={() => setShow((v) => !v)} aria-label={show ? 'Sakrij lozinku' : 'Prikaži lozinku'} className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 text-[#a3a3a3] hover:text-[#525252]">{show ? <EyeOff size={16} /> : <Eye size={16} />}</button>
                     </span>
                   </label>
                 </div>
                 <div className="flex items-center justify-between gap-2">
-                  <span className="flex items-center gap-2 text-[14px] leading-5 font-medium text-[#404040]"><span className="material-symbols-outlined text-[16px] text-[#079455]">shield_lock</span>Sesija traje 8 sati</span>
+                  <span className="flex items-center gap-2 text-[14px] leading-5 font-medium text-[#404040]"><ShieldTick size={16} className="text-[#079455]" />Sesija traje 8 sati</span>
                   <a href="mailto:info@mtto.gov.ba?subject=CMS%20%E2%80%93%20zaboravljena%20lozinka" className="text-[14px] leading-5 font-semibold text-[#7f56d9] hover:underline">Zaboravljena lozinka</a>
                 </div>
-                {err && <p role="alert" className="flex items-start gap-2 p-3 rounded-[8px] border border-[#fecdca] bg-[#fef3f2] text-[#b42318] text-[14px] leading-5"><span className="material-symbols-outlined text-[18px]">error</span>{err}</p>}
+                {err && <p role="alert" className="flex items-start gap-2 p-3 rounded-[8px] border border-[#fecdca] bg-[#fef3f2] text-[#b42318] text-[14px] leading-5"><AlertCircle size={20} className="shrink-0" />{err}</p>}
                 <button className="relative h-11 w-full rounded-[8px] bg-[#7f56d9] hover:bg-[#6941c6] text-white text-[16px] leading-6 font-semibold shadow-[0_1px_2px_rgba(10,13,18,0.05),inset_0_-2px_0_rgba(10,13,18,0.05),inset_0_0_0_1px_rgba(10,13,18,0.18)] border-2 border-white/10 disabled:opacity-60" disabled={busy}>{busy ? 'Prijava…' : 'Prijavi se'}</button>
               </form>
               <p className="text-center text-[14px] leading-5 text-[#525252]">Nemate nalog? <a href="mailto:tajnik@mtto.gov.ba?subject=CMS%20%E2%80%93%20zahtjev%20za%20nalog" className="font-semibold text-[#7f56d9] hover:underline">Zatražite pristup</a></p>

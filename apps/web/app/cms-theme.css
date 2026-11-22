@@ -98,3 +98,6 @@
 .prose-uui img, .prose-uui figure img { border-radius: 12px; width: 100%; height: auto; }
 .prose-uui figcaption { margin-top: 12px; font-size: 14px; line-height: 20px; color: #525252; }
 .prose-uui table { width: 100%; font-size: 14px; border-collapse: collapse; } .prose-uui th, .prose-uui td { border-bottom: 1px solid #e5e5e5; padding: 12px 8px; text-align: left; }
+
+/* sr-only elementi u tabelama ne smiju širiti stranicu na mobitelu */
+.overflow-x-auto { position: relative; }
