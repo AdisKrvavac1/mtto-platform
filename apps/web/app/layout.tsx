@@ -16,7 +16,10 @@ import '@fontsource-variable/roboto-flex/index.css';
 import '@fontsource/roboto-mono/500.css';
 import 'material-symbols/outlined.css';
 import 'leaflet/dist/leaflet.css';
+import './tokens.css';
 import './globals.css';
+import './cms-theme.css';
+import '@fontsource-variable/inter';
 import './stitch.css';
 
 export const metadata: Metadata = {

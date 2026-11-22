@@ -25,37 +25,57 @@ export default function LoginPage() {
     }
   }
 
+  const [show, setShow] = useState(false);
+  const field = 'w-full h-11 px-[14px] rounded-[8px] bg-white border border-[#d4d4d4] text-[16px] leading-6 text-[#171717] placeholder:text-[#737373] shadow-[0_1px_2px_rgba(10,13,18,0.05)] focus:outline-none focus:border-[#d6bbfb] focus:ring-4 focus:ring-[#9e77ed]/25';
+
+  // Untitled UI PRO – "Log in / Split mockup" (1646:403218)
   return (
-    <div className="min-h-screen grid lg:grid-cols-2">
-      <div className="hidden lg:flex flex-col justify-between p-space-2xl text-white relative overflow-hidden" style={{ background: 'linear-gradient(160deg, #1a1e5c 0%, #234696 60%, #062343 100%)' }}>
-        <div className="absolute -bottom-40 -right-40 w-[520px] h-[520px] rounded-full bg-neretva-cyan/20 blur-3xl" />
-        <img src="/mtto-logo.svg" alt="MTTO" className="h-14 w-auto self-start bg-white rounded-lg p-2" />
-        <div className="relative space-y-space-md max-w-md">
-          <p className="font-label-kicker text-label-kicker uppercase tracking-widest text-secondary-fixed">MTTO Back-Office</p>
-          <h1 className="font-display text-display font-bold leading-tight">Jedno mjesto za sav sadržaj Ministarstva</h1>
-          <p className="font-body-lead text-body-lead text-white/80">Objave, javni pozivi, dokumenti, registri i mapa. Bez programera, bez dodataka, s evidencijom svake izmjene.</p>
-        </div>
-        <p className="relative font-body-sm text-body-sm text-white/60">Ministarstvo trgovine, turizma i zaštite okoliša HNK</p>
-      </div>
-      <div className="flex items-center justify-center p-space-lg bg-slate-surface">
-        <form onSubmit={submit} className="w-full max-w-sm bg-surface-container-lowest rounded-xl shadow-md border border-slate-border p-space-lg space-y-space-md">
-          <div>
-            <p className="font-label-kicker text-label-kicker uppercase tracking-wider text-on-surface-variant">Sigurna prijava</p>
-            <h2 className="font-headline-sm text-headline-sm font-bold text-text-heading">Prijava u CMS</h2>
+    <div className="cms-theme min-h-screen flex bg-white">
+      <section className="flex flex-col w-full lg:w-1/2 lg:max-w-[640px] lg:min-w-[480px] min-h-screen">
+        <div className="flex-1 flex items-center justify-center px-4 md:px-8 py-12">
+          <div className="w-full max-w-[360px] flex flex-col gap-12 lg:gap-20">
+            <a href="/" aria-label="Javni portal MTTO"><img src="/mtto-logo.svg" alt="Ministarstvo trgovine, turizma i zaštite okoliša HNK" className="h-12 w-auto" /></a>
+            <div className="flex flex-col gap-8">
+              <div className="flex flex-col gap-3">
+                <h1 className="text-[24px] leading-8 lg:text-[30px] lg:leading-[38px] font-semibold text-[#171717]">Prijava u CMS</h1>
+                <p className="text-[16px] leading-6 text-[#525252]">Dobro došli. Unesite podatke svog službenog naloga.</p>
+              </div>
+              <form onSubmit={submit} className="flex flex-col gap-6" noValidate>
+                <div className="flex flex-col gap-5">
+                  <label className="flex flex-col gap-1.5">
+                    <span className="text-[14px] leading-5 font-medium text-[#404040]">E-mail</span>
+                    <input className={field} type="email" autoComplete="username" placeholder="ime.prezime@mtto.gov.ba" required value={email} onChange={(e) => setEmail(e.target.value)} />
+                  </label>
+                  <label className="flex flex-col gap-1.5">
+                    <span className="text-[14px] leading-5 font-medium text-[#404040]">Lozinka</span>
+                    <span className="relative">
+                      <input className={`${field} pr-11`} type={show ? 'text' : 'password'} autoComplete="current-password" placeholder="••••••••••••" required value={password} onChange={(e) => setPassword(e.target.value)} />
+                      <button type="button" onClick={() => setShow((v) => !v)} aria-label={show ? 'Sakrij lozinku' : 'Prikaži lozinku'} className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 text-[#a3a3a3] hover:text-[#525252]"><span className="material-symbols-outlined text-[18px]">{show ? 'visibility_off' : 'visibility'}</span></button>
+                    </span>
+                  </label>
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="flex items-center gap-2 text-[14px] leading-5 font-medium text-[#404040]"><span className="material-symbols-outlined text-[16px] text-[#079455]">shield_lock</span>Sesija traje 8 sati</span>
+                  <a href="mailto:info@mtto.gov.ba?subject=CMS%20%E2%80%93%20zaboravljena%20lozinka" className="text-[14px] leading-5 font-semibold text-[#7f56d9] hover:underline">Zaboravljena lozinka</a>
+                </div>
+                {err && <p role="alert" className="flex items-start gap-2 p-3 rounded-[8px] border border-[#fecdca] bg-[#fef3f2] text-[#b42318] text-[14px] leading-5"><span className="material-symbols-outlined text-[18px]">error</span>{err}</p>}
+                <button className="relative h-11 w-full rounded-[8px] bg-[#7f56d9] hover:bg-[#6941c6] text-white text-[16px] leading-6 font-semibold shadow-[0_1px_2px_rgba(10,13,18,0.05),inset_0_-2px_0_rgba(10,13,18,0.05),inset_0_0_0_1px_rgba(10,13,18,0.18)] border-2 border-white/10 disabled:opacity-60" disabled={busy}>{busy ? 'Prijava…' : 'Prijavi se'}</button>
+              </form>
+              <p className="text-center text-[14px] leading-5 text-[#525252]">Nemate nalog? <a href="mailto:tajnik@mtto.gov.ba?subject=CMS%20%E2%80%93%20zahtjev%20za%20nalog" className="font-semibold text-[#7f56d9] hover:underline">Zatražite pristup</a></p>
+            </div>
           </div>
-          <label className="block space-y-1">
-            <span className="font-label-badge text-label-badge uppercase text-on-surface-variant">E-mail</span>
-            <input className={input} type="email" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} />
-          </label>
-          <label className="block space-y-1">
-            <span className="font-label-badge text-label-badge uppercase text-on-surface-variant">Lozinka</span>
-            <input className={input} type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
-          </label>
-          {err && <p role="alert" className="flex items-center gap-1 p-2 rounded bg-error-container text-on-error-container font-body-sm text-body-sm"><span className="material-symbols-outlined text-[18px]">error</span>{err}</p>}
-          <button className={`${btnPrimary} w-full`} disabled={busy}><span className="material-symbols-outlined text-[18px]">lock_open</span>{busy ? 'Prijava…' : 'Prijavi se'}</button>
-          <p className="font-body-sm text-body-sm text-on-surface-variant flex items-start gap-1"><span className="material-symbols-outlined text-[16px] text-eko-green">shield</span>Sesija ističe nakon 8 sati. Dvofaktorska prijava (MFA) dolazi u Fazi 1.</p>
-        </form>
-      </div>
+        </div>
+        <footer className="px-4 md:px-8 py-8 text-[14px] leading-5 text-[#525252]">© {new Date().getFullYear()} Ministarstvo trgovine, turizma i zaštite okoliša HNK</footer>
+      </section>
+      <section aria-hidden className="hidden lg:block flex-1 relative overflow-hidden bg-[#f5f5f5]">
+        <div className="absolute left-[96px] top-1/2 -translate-y-1/2 rounded-[27px] p-[3.4px] bg-white border border-black/10 shadow-[0_10px_7px_rgba(0,0,0,0.08),0_3px_2.5px_rgba(0,0,0,0.03),0_1.7px_0.8px_rgba(0,0,0,0.04)]">
+          <div className="rounded-[23.6px] p-[3.4px] bg-white shadow-[inset_0_0_5px_1.7px_rgba(0,0,0,0.08)]">
+            <div className="rounded-[20px] border-[1.7px] border-[#e5e5e5] bg-[#fafafa] overflow-hidden w-[1010px] h-[674px]">
+              <img src="/cms/preview-dashboard.png" alt="" className="w-full h-full object-cover object-left-top" />
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

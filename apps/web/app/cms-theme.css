@@ -1,0 +1,85 @@
+/* CMS tema prema Untitled UI PRO (v8) – neutralna siva skala, Inter, radijusi 6/8/12, Untitled ljubičasta (#7F56D9) kao brand boja.
+   Primjenjuje se samo unutar .cms-theme (CmsShell), javni portal ostaje na svojim tokenima. */
+.cms-theme {
+  --c-background: 255 255 255;
+  --c-surface: 255 255 255;
+  --c-surface-bright: 255 255 255;
+  --c-slate-surface: 250 250 250;
+  --c-surface-container-lowest: 255 255 255;
+  --c-surface-container-low: 250 250 250;
+  --c-surface-container: 245 245 245;
+  --c-surface-container-high: 229 229 229;
+  --c-surface-container-highest: 229 229 229;
+  --c-surface-variant: 245 245 245;
+  --c-surface-dim: 229 229 229;
+  --c-text-heading: 23 23 23;
+  --c-on-surface: 23 23 23;
+  --c-on-background: 23 23 23;
+  --c-text-body: 82 82 82;
+  --c-on-surface-variant: 82 82 82;
+  --c-outline: 115 115 115;
+  --c-outline-variant: 212 212 212;
+  --c-slate-border: 229 229 229;
+  --c-primary: 127 86 217;
+  --c-primary-container: 105 65 198;
+  --c-on-primary: 255 255 255;
+  --c-institutional-navy-deep: 255 255 255;
+  --c-primary-fixed: 249 245 255;
+  --c-primary-fixed-dim: 233 215 254;
+  --c-surface-tint: 158 119 237;
+  --c-on-primary-fixed: 66 48 125;
+  --c-on-primary-fixed-variant: 105 65 198;
+  --c-mtto-primary: 127 86 217;
+  --c-inverse-primary: 233 215 254;
+  --c-secondary: 7 148 85;
+  --c-on-secondary: 255 255 255;
+  --c-secondary-container: 220 250 230;
+  --c-on-secondary-container: 6 118 71;
+  --c-secondary-fixed: 171 239 198;
+  --c-secondary-fixed-dim: 117 224 167;
+  --c-eko-green: 7 148 85;
+  --c-eko-green-light: 236 253 243;
+  --c-eko-green-border: 171 239 198;
+  --c-emerald-light: 236 253 243;
+  --c-error: 217 45 32;
+  --c-on-error: 255 255 255;
+  --c-error-container: 254 243 242;
+  --c-on-error-container: 180 35 24;
+  --c-tertiary: 147 55 13;
+  --c-tertiary-container: 254 240 199;
+  --c-on-tertiary-container: 220 104 3;
+  --c-tertiary-fixed: 254 240 199;
+  --c-tertiary-fixed-dim: 254 200 75;
+  --c-on-tertiary-fixed-variant: 181 71 8;
+  --c-amber-light: 255 250 235;
+  --c-herzeg-gold-soft: 255 250 235;
+  --r-sm: 6px;
+  --r-lg: 8px;
+  --r-xl: 12px;
+  --r-full: 9999px;
+  --font-sans: 'Inter Variable';
+  --font-kicker: 'Inter Variable';
+  --uui-shadow-xs: 0 1px 2px rgba(10, 13, 18, 0.05);
+  --uui-shadow-sk: 0 1px 2px rgba(10, 13, 18, 0.05), inset 0 -2px 0 rgba(10, 13, 18, 0.05), inset 0 0 0 1px rgba(10, 13, 18, 0.18);
+  --uui-shadow-lg: 0 12px 16px -4px rgba(10, 13, 18, 0.08), 0 4px 6px -2px rgba(10, 13, 18, 0.03), 0 2px 2px -1px rgba(10, 13, 18, 0.04);
+  font-family: 'Inter Variable', system-ui, sans-serif;
+  font-feature-settings: 'cv11', 'ss01';
+  color: #525252;
+}
+/* Tipografija (Untitled UI skala) */
+.cms-theme .text-headline-lg { font-size: 30px; line-height: 38px; font-weight: 600; letter-spacing: 0; }
+.cms-theme .text-headline-md { font-size: 24px; line-height: 32px; font-weight: 600; letter-spacing: 0; }
+.cms-theme .text-headline-sm { font-size: 18px; line-height: 28px; font-weight: 600; }
+.cms-theme .text-title-md { font-size: 18px; line-height: 28px; font-weight: 600; }
+.cms-theme .text-button { font-size: 14px; line-height: 20px; font-weight: 600; letter-spacing: 0; }
+.cms-theme .text-body-sm { font-size: 14px; line-height: 20px; }
+.cms-theme .text-body-regular { font-size: 16px; line-height: 24px; }
+.cms-theme .text-label-kicker { font-size: 12px; line-height: 18px; letter-spacing: 0; font-weight: 600; text-transform: none; }
+.cms-theme .text-label-badge { font-size: 12px; line-height: 18px; letter-spacing: 0; font-weight: 500; text-transform: none; }
+.cms-theme .uppercase.tracking-wider, .cms-theme .uppercase.tracking-widest { letter-spacing: 0.02em; }
+/* Sjene: Stitch sjene → Untitled xs / lg */
+.cms-theme .shadow-sm, .cms-theme .shadow { box-shadow: var(--uui-shadow-xs); }
+.cms-theme .shadow-lg, .cms-theme .shadow-xl { box-shadow: var(--uui-shadow-lg); }
+/* Fokus */
+.cms-theme :focus-visible { outline: 2px solid #7f56d9; outline-offset: 2px; }
+.cms-theme input:focus, .cms-theme select:focus, .cms-theme textarea:focus { border-color: #d6bbfb !important; box-shadow: 0 0 0 4px rgba(158, 119, 237, 0.24) !important; outline: none; }
