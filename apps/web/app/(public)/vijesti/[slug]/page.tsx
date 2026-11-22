@@ -4,7 +4,8 @@ import { api, apiSafe, type Doc, type PostListItem } from '@/lib/api';
 import { renderMarkdown } from '@/lib/markdown';
 import { dateLong, dateShort, dateTime, daysUntil, fileExt, fileSize, POST_TYPE, DOC_TYPE } from '@/lib/format';
 import { Badge, Button, Container, FeaturedIcon, PostCard, Section, SectionHeader } from '@/components/uui';
-import { Bell01, Calendar, Clock, Download01, Edit05, Eye, File06, Mail01, Share07 } from '@untitledui/icons';
+import { Bell01, Calendar, Clock, Download01, Edit05, Eye, File06 } from '@untitledui/icons';
+import ShareButtons from '@/components/uui/ShareButtons';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,9 +23,16 @@ async function load(slug: string): Promise<Post | null> {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const p = await apiSafe<Post | null>(`/posts/${encodeURIComponent(slug)}`, null);
-  return p ? { title: p.title, description: p.excerpt } : { title: 'Objava nije pronađena' };
+  if (!p) return { title: 'Objava nije pronađena' };
+  const img = p.coverImage ? (p.coverImage.startsWith('http') ? p.coverImage : `${SITE}${p.coverImage}`) : `${SITE}/og/mtto-og.jpg`;
+  return {
+    title: p.title, description: p.excerpt,
+    openGraph: { type: 'article', title: p.title, description: p.excerpt ?? undefined, url: `${SITE}/vijesti/${p.slug}`, siteName: 'MTTO HNK', locale: 'bs_BA', images: [{ url: img, width: 1200, height: 630, alt: p.title }] },
+    twitter: { card: 'summary_large_image', title: p.title, description: p.excerpt ?? undefined, images: [img] },
+  };
 }
 
+const SITE = 'https://mtto-platform.onrender.com';
 const SECTOR: Record<string, string> = { Turizam: 'Sektor za turizam i ugostiteljstvo', 'Zaštita okoliša': 'Sektor za zaštitu prirode i okoliša', Trgovina: 'Sektor za trgovinu' };
 
 export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
@@ -42,7 +50,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
   const sector = SECTOR[post.category] ?? 'Ministarstvo trgovine, turizma i zaštite okoliša HNK';
   const typeLabel = POST_TYPE[post.type];
-  const url = `https://mtto-platform.onrender.com/vijesti/${post.slug}`;
+  const url = `${SITE}/vijesti/${post.slug}`;
   const readMin = Math.max(1, Math.round(words / 200));
 
   return (
@@ -66,6 +74,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
             <span className="flex items-center gap-2"><Clock size={16} className="text-[#a3a3a3]" />{readMin} min čitanja</span>
             <span className="flex items-center gap-2"><Eye size={16} className="text-[#a3a3a3]" />{post.views.toLocaleString('bs-BA')} pregleda</span>
           </div>
+          <div className="mt-6"><ShareButtons url={url} title={post.title} compact /></div>
         </Container>
         {post.coverImage && (
           <Container className="mt-12 md:mt-16">
@@ -112,10 +121,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                 <span className="flex size-12 items-center justify-center rounded-full bg-[var(--br-50)] ring-1 ring-black/10"><img src="/mtto-logo.svg" alt="" className="h-6" /></span>
                 <div><p className="text-[16px] leading-6 font-semibold text-[#171717]">{sector}</p><p className="text-[16px] leading-6 text-[#525252]">Ažurirano {dateTime(post.updatedAt)}</p></div>
               </div>
-              <div className="flex gap-3">
-                <Button href={`mailto:?subject=${encodeURIComponent(post.title)}&body=${encodeURIComponent(url)}`} variant="secondary" icon={Mail01}>E-mail</Button>
-                <Button href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`} variant="secondary" icon={Share07}>Facebook</Button>
-              </div>
+              <ShareButtons url={url} title={post.title} />
             </div>
           </div>
         </Container>

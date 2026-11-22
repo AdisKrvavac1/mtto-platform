@@ -25,6 +25,14 @@ import './stitch.css';
 export const metadata: Metadata = {
   title: { default: 'MTTO HNK – Ministarstvo trgovine, turizma i zaštite okoliša', template: '%s · MTTO HNK' },
   description: 'Službeni portal Ministarstva trgovine, turizma i zaštite okoliša Hercegovačko-neretvanskog kantona.',
+  metadataBase: new URL('https://mtto-platform.onrender.com'),
+  openGraph: {
+    type: 'website', siteName: 'MTTO HNK', locale: 'bs_BA', url: '/',
+    title: 'MTTO HNK – Trgovina, turizam i okoliš Hercegovine',
+    description: 'Vijesti, javni pozivi, registri i e-usluge Ministarstva trgovine, turizma i zaštite okoliša HNK na jednom mjestu.',
+    images: [{ url: '/og/mtto-og.jpg', width: 1200, height: 630, alt: 'MTTO HNK – Ministarstvo trgovine, turizma i zaštite okoliša' }],
+  },
+  twitter: { card: 'summary_large_image', images: ['/og/mtto-og.jpg'] },
   robots: { index: false, follow: false }, // staging / prototip
 };
 

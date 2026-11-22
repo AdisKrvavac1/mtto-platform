@@ -3,7 +3,7 @@ import Link from 'next/link';
 import MapSection from '@/components/site/MapSection';
 import HeroSlider, { type Slide } from '@/components/uui/HeroSlider';
 import { dateLong, daysUntil, POST_TYPE } from '@/lib/format';
-import { Badge, BadgeGroup, Button, Card, Container, CtaBox, Faq, Feature, FeaturedIcon, Metric, PostCard, FeaturedPost, Section, SectionHeader } from '@/components/uui';
+import { Badge, BadgeGroup, Button, Card, Container, CtaBox, Faq, Feature, FeaturedIcon, Metric, PostCard, FeaturedPost, Section, SectionHeader, CountUp } from '@/components/uui';
 import {
   AlertTriangle, ArrowRight, Building07, Calendar, FileSearch02, Globe02, MessageChatCircle, Phone01, Scales02, Sun, Ticket01, Waves,
 } from '@untitledui/icons';
@@ -61,7 +61,7 @@ export default async function HomePage() {
           <dl className="grid grid-cols-2 overflow-hidden rounded-[16px] bg-white/10 ring-1 ring-inset ring-white/20 backdrop-blur-xl md:grid-cols-4">
             {[['9', 'općina i gradova'], [fmt(stats.posts), 'objava na portalu'], [fmt(stats.permits), 'okolišnih dozvola'], [fmt(stats.documents), 'propisa i obrazaca']].map(([v, l], k) => (
               <div key={l} className={`px-5 py-4 md:px-6 md:py-5 ${k % 2 ? 'border-l border-white/15' : ''} ${k > 1 ? 'border-t border-white/15 md:border-t-0' : ''} ${k === 2 ? 'md:border-l' : ''}`}>
-                <dt className="sr-only">{l}</dt><dd className="text-[30px] leading-[38px] md:text-[36px] md:leading-[44px] font-semibold text-white">{v}</dd><dd className="mt-1 text-[14px] md:text-[16px] text-[var(--br-200)]">{l}</dd>
+                <dt className="sr-only">{l}</dt><dd className="text-[30px] leading-[38px] md:text-[36px] md:leading-[44px] font-semibold text-white"><CountUp value={v} /></dd><dd className="mt-1 text-[14px] md:text-[16px] text-[var(--br-200)]">{l}</dd>
               </div>
             ))}
           </dl>
@@ -130,10 +130,10 @@ export default async function HomePage() {
             const d = daysUntil(c.deadline);
             const isOpen = !c.deadline || (d ?? 0) >= 0;
             return (
-              <Card key={c.id} className="p-5 md:p-6 hover:ring-[var(--br-300)] transition-shadow">
+              <Card key={c.id} className="group uui-lift p-5 md:p-6 hover:ring-[var(--br-300)]">
                 <a href={`/vijesti/${c.slug}`} className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div className="flex items-start gap-4 min-w-0">
-                    <FeaturedIcon icon={Ticket01} size="md" tone="brand" />
+                    <FeaturedIcon icon={Ticket01} size="md" tone="brand" ripple={isOpen} />
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <Badge tone={isOpen ? 'success' : 'gray'} dot>{isOpen ? 'Otvoren' : 'Zatvoren'}</Badge>
@@ -146,7 +146,7 @@ export default async function HomePage() {
                   </div>
                   <div className="flex items-center gap-4 shrink-0 md:pl-6">
                     {c.deadline && <span className="flex items-center gap-1.5 text-[14px] font-medium text-[#404040]"><Calendar size={16} className="text-[#a3a3a3]" />Rok: {dateLong(c.deadline)}</span>}
-                    <ArrowRight size={20} className="text-[var(--br-600)]" />
+                    <ArrowRight size={20} className="text-[var(--br-600)] transition-transform duration-300 group-hover:translate-x-1" />
                   </div>
                 </a>
               </Card>

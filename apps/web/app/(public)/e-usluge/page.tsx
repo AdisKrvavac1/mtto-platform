@@ -61,7 +61,7 @@ export default async function EUslugePage() {
         <SectionHeader eyebrow="Javne evidencije" title="Temeljni registri kantona">Podaci se objavljuju direktno iz CMS-a Ministarstva i dostupni su svima, bez prijave.</SectionHeader>
         <div className="mt-12 grid gap-6 md:grid-cols-2">
           {registries.map((r) => (
-            <Card key={r.title} className="flex flex-col p-6 md:p-8">
+            <Card key={r.title} className="group uui-lift flex flex-col p-6 md:p-8">
               <div className="flex items-start justify-between gap-4">
                 <FeaturedIcon icon={r.icon} />
                 <Badge tone={r.count === 'Faza 2' ? 'gray' : 'brand'} size="md">{r.count}</Badge>

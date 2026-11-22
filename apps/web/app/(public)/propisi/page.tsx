@@ -35,7 +35,7 @@ export default async function PropisiPage({ searchParams }: { searchParams: Prom
         <SectionHeader eyebrow="Najčešće preuzimano" title="Obrasci zahtjeva" actions={<Button href="/propisi?docType=OBRAZAC#tablica" variant="secondary" size="lg">Svi obrasci ({count('OBRAZAC')})</Button>} />
         <div className="mt-10 grid gap-6 md:grid-cols-3">
           {forms.map((d) => (
-            <div key={d.id} className="flex flex-col rounded-[12px] bg-white p-6 ring-1 ring-inset ring-[#e5e5e5] shadow-[0_1px_2px_rgba(10,13,18,0.05)]">
+            <div key={d.id} className="uui-lift flex flex-col rounded-[12px] bg-white p-6 ring-1 ring-inset ring-[#e5e5e5] shadow-[0_1px_2px_rgba(10,13,18,0.05)]">
               <div className="flex items-start justify-between gap-3"><FeaturedIcon icon={FileCheck02} size="md" /><div className="flex gap-2">{d.isDemo && <Badge tone="warning">Demo</Badge>}<Badge tone="gray">{fileExt(d.fileName)} · {fileSize(d.size)}</Badge></div></div>
               <h3 className="mt-5 text-[18px] leading-7 font-semibold text-[#171717]">{d.title}</h3>
               <p className="mt-1 text-[14px] leading-5 text-[#525252]">{d.sector}{d.number ? ` · ${d.number}` : ''}</p>

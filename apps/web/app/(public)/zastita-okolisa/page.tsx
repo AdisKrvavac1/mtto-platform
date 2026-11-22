@@ -92,7 +92,7 @@ export default async function OkolisPage() {
           {envPosts.items.map((p) => {
             const open = p.deadline ? new Date(p.deadline) > new Date() : null;
             return (
-              <Card key={p.id} className="flex flex-col p-6">
+              <Card key={p.id} className="uui-lift flex flex-col p-6">
                 <div className="flex flex-wrap gap-2"><Badge tone="brand">{POST_TYPE[p.type]}</Badge>{p.deadline && <Badge tone={open ? 'error' : 'gray'} dot>{open ? `Rok ${dateShort(p.deadline)}` : 'Završeno'}</Badge>}</div>
                 <h3 className="mt-4 text-[18px] leading-7 font-semibold text-[#171717]"><Link href={`/vijesti/${p.slug}`} className="hover:text-[var(--br-700)]">{p.title}</Link></h3>
                 {p.excerpt && <p className="mt-2 text-[16px] leading-6 text-[#525252] line-clamp-3">{p.excerpt}</p>}

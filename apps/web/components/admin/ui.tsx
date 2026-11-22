@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { useEffect, useState, type ReactNode } from 'react';
 import { AlertCircle, ArrowDown, ArrowUp, CheckCircle, ChevronRight, Clock, DotsVertical, HomeLine } from '@untitledui/icons';
-import { Badge, FeaturedIcon } from '@/components/uui';
+import { Badge, CountUp, FeaturedIcon } from '@/components/uui';
 
 export { Badge, FeaturedIcon };
 type Icon = React.FC<React.SVGProps<SVGSVGElement> & { size?: number }>;
@@ -84,7 +84,7 @@ export function MetricCard({ title, value, trend, trendLabel = 'prošli mjesec',
       {icon && <h3 className="mt-4 text-[14px] leading-5 font-medium text-[#525252]">{title}</h3>}
       <div className={`${icon ? 'mt-2' : 'mt-5'} flex items-end justify-between gap-4`}>
         <div className="min-w-0">
-          <p className="text-[30px] leading-[38px] lg:text-[36px] lg:leading-[44px] font-semibold tracking-[-0.02em] text-[#171717]">{value}</p>
+          <p className="text-[30px] leading-[38px] lg:text-[36px] lg:leading-[44px] font-semibold tracking-[-0.02em] text-[#171717]">{typeof value === 'string' || typeof value === 'number' ? <CountUp value={value} /> : value}</p>
           {trend != null && (
             <p className="mt-2 flex items-center gap-2 text-[14px] leading-5 font-medium text-[#525252]">
               <span className={`flex items-center gap-0.5 ${up ? 'text-[#079455]' : 'text-[#d92d20]'}`}>{up ? <ArrowUp size={16} /> : <ArrowDown size={16} />}{Math.abs(trend)}%</span>vs {trendLabel}
@@ -97,7 +97,7 @@ export function MetricCard({ title, value, trend, trendLabel = 'prošli mjesec',
     </>
   );
   const cls = 'flex flex-col rounded-[12px] bg-white p-5 ring-1 ring-inset ring-[#e5e5e5] shadow-[0_1px_2px_rgba(10,13,18,0.05)] md:p-6';
-  return href ? <Link href={href} className={`${cls} hover:ring-[#d4d4d4]`}>{body}</Link> : <div className={cls}>{body}</div>;
+  return href ? <Link href={href} className={`${cls} uui-lift hover:ring-[#d4d4d4]`}>{body}</Link> : <div className={cls}>{body}</div>;
 }
 
 export function Sparkline({ data, up = true, w = 112, h = 56 }: { data: number[]; up?: boolean; w?: number; h?: number }) {

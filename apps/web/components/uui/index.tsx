@@ -1,8 +1,10 @@
 /* Untitled UI PRO (v8) – biblioteka marketinških sekcija za javni portal MTTO.
    Tokeni: Inter, neutralna siva skala, brand var(--br-600), radijusi 8/10/12/16, kontejner 1280 px + 32 px. */
 import Link from 'next/link';
-import type { ComponentType, ReactNode, SVGProps } from 'react';
+import type { ComponentType, CSSProperties, ReactNode, SVGProps } from 'react';
 import { ArrowRight, ArrowUpRight } from '@untitledui/icons';
+import CountUp from './CountUp';
+export { CountUp };
 
 export type Icon = ComponentType<SVGProps<SVGSVGElement> & { size?: number; color?: string }>;
 const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(' ');
@@ -60,12 +62,19 @@ export function BadgeGroup({ label, children, href, tone = 'brand' }: { label: s
 
 /* ── Ikone ────────────────────────────────────────────── */
 /** Featured icon – "modern" stil (bijela pločica, obrub, skeuomorfna sjena). */
-export function FeaturedIcon({ icon: I, size = 'lg', tone = 'modern' }: { icon: Icon; size?: 'md' | 'lg' | 'xl'; tone?: 'modern' | 'brand' | 'error' | 'warning' | 'success' }) {
+export function FeaturedIcon({ icon: I, size = 'lg', tone = 'modern', ripple = true }: { icon: Icon; size?: 'md' | 'lg' | 'xl'; tone?: 'modern' | 'brand' | 'error' | 'warning' | 'success'; ripple?: boolean }) {
   const box = { md: 'size-10 rounded-[8px]', lg: 'size-12 rounded-[10px]', xl: 'size-14 rounded-[12px]' }[size];
   const ic = { md: 20, lg: 24, xl: 28 }[size];
-  if (tone === 'modern') return <span className={cx('inline-flex items-center justify-center bg-white text-[#404040] shrink-0', box, SKEU)}><I size={ic} /></span>;
+  if (tone === 'modern') return <span className={cx('inline-flex items-center justify-center bg-white text-[#404040] shrink-0 transition-transform duration-300 group-hover:-translate-y-0.5', box, SKEU)}><I size={ic} /></span>;
   const t = { brand: 'bg-[var(--br-100)] text-[var(--br-600)] ring-[var(--br-50)]', error: 'bg-[#fee4e2] text-[#d92d20] ring-[#fef3f2]', warning: 'bg-[#fef0c7] text-[#dc6803] ring-[#fffaeb]', success: 'bg-[#dcfae6] text-[#079455] ring-[#ecfdf3]' }[tone];
-  return <span className={cx('inline-flex items-center justify-center rounded-full ring-8 shrink-0', size === 'md' ? 'size-10' : size === 'lg' ? 'size-12' : 'size-14', t)}><I size={ic} /></span>;
+  // Valovi: unutrašnji krug i ikona miruju, svijetli prstenovi se šire kao valovi na vodi
+  const rip = { brand: 'var(--br-200)', error: '#fecdca', warning: '#fedf89', success: '#abefc6' }[tone];
+  const dim = size === 'md' ? 'size-10' : size === 'lg' ? 'size-12' : 'size-14';
+  return (
+    <span className={cx('inline-flex shrink-0 rounded-full', ripple && 'uui-ripple', dim)} style={ripple ? ({ '--rip': rip } as CSSProperties) : undefined}>
+      <span className={cx('relative z-[1] inline-flex items-center justify-center rounded-full ring-[6px]', dim, t)}><I size={ic} /></span>
+    </span>
+  );
 }
 
 /* ── Naslovi sekcija ─────────────────────────────────── */
@@ -117,18 +126,18 @@ export function Card({ children, className = '' }: { children: ReactNode; classN
 }
 export function Feature({ icon, title, children, href, cta = 'Saznaj više', align = 'left', tone }: { icon: Icon; title: ReactNode; children?: ReactNode; href?: string; cta?: string; align?: 'left' | 'center'; tone?: 'modern' | 'brand' }) {
   return (
-    <div className={cx('flex flex-col', align === 'center' && 'items-center text-center')}>
+    <div className={cx('group flex flex-col', align === 'center' && 'items-center text-center')}>
       <FeaturedIcon icon={icon} tone={tone ?? 'modern'} />
       <h3 className="mt-4 md:mt-5 text-[18px] leading-7 md:text-[20px] md:leading-[30px] font-semibold text-[#171717]">{title}</h3>
       {children && <div className="mt-1 md:mt-2 text-[16px] leading-6 text-[#525252]">{children}</div>}
-      {href && <Link href={href} className="mt-4 md:mt-5 inline-flex items-center gap-1.5 text-[16px] leading-6 font-semibold text-[var(--br-700)] hover:text-[var(--br-800)]">{cta}<ArrowRight size={20} /></Link>}
+      {href && <Link href={href} className="mt-4 md:mt-5 inline-flex items-center gap-1.5 text-[16px] leading-6 font-semibold text-[var(--br-700)] hover:text-[var(--br-800)] [&>svg]:transition-transform hover:[&>svg]:translate-x-1">{cta}<ArrowRight size={20} /></Link>}
     </div>
   );
 }
 export function Metric({ value, label, children }: { value: ReactNode; label: ReactNode; children?: ReactNode }) {
   return (
     <div className="flex flex-col gap-3 text-center md:text-left">
-      <p className="text-[48px] leading-[60px] md:text-[60px] md:leading-[72px] font-semibold tracking-[-0.02em] text-[var(--br-600)]">{value}</p>
+      <p className="text-[48px] leading-[60px] md:text-[60px] md:leading-[72px] font-semibold tracking-[-0.02em] text-[var(--br-600)]">{typeof value === 'string' || typeof value === 'number' ? <CountUp value={value} /> : value}</p>
       <div><p className="text-[18px] leading-7 font-semibold text-[#171717]">{label}</p>{children && <p className="mt-1 text-[16px] leading-6 text-[#525252]">{children}</p>}</div>
     </div>
   );
@@ -253,18 +262,21 @@ export function FilterField({ label, children, className = '' }: { label: string
 /** Istaknuta objava: fotografija preko cijele širine sa staklenom (blur) karticom. */
 export function FeaturedPost({ href, image, title, excerpt, category, date, badge }: { href: string; image?: string | null; title: string; excerpt?: string | null; category?: string; date?: string; badge?: ReactNode }) {
   return (
-    <Link href={href} className="group relative flex min-h-[420px] items-end overflow-hidden rounded-[24px] bg-[var(--br-950)] md:min-h-[520px]">
-      <img src={image || '/hero/neretva-m.jpg'} alt="" className="absolute inset-0 size-full object-cover transition-transform duration-700 group-hover:scale-[1.02]" />
-      <span className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-      <span className="relative m-3 flex w-full max-w-[760px] flex-col gap-3 rounded-[16px] bg-white/15 p-5 text-white ring-1 ring-inset ring-white/30 backdrop-blur-md md:m-6 md:p-8">
-        <span className="flex flex-wrap items-center gap-2 text-[14px] leading-5">
-          <span className="rounded-full bg-[var(--gr-50)] px-2.5 py-0.5 font-medium text-[var(--gr-700)]">Istaknuto</span>
-          {category && <span className="rounded-full bg-white/15 px-2.5 py-0.5 font-medium ring-1 ring-inset ring-white/30">{category}</span>}
-          {badge}
-          {date && <span className="text-white/80">{date}</span>}
+    <Link href={href} className="group relative flex min-h-[420px] items-end overflow-hidden rounded-[24px] bg-[var(--br-950)] md:min-h-[560px]">
+      <img src={image || '/hero/neretva-m.jpg'} alt="" className="absolute inset-0 size-full object-cover transition-transform duration-700 group-hover:scale-[1.03]" />
+      <span className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/50 to-transparent" />
+      <span className="relative m-3 flex w-full items-center justify-between gap-4 rounded-[16px] bg-white/15 px-4 py-3 text-white ring-1 ring-inset ring-white/30 backdrop-blur-md md:m-5 md:px-6 md:py-4">
+        <span className="flex min-w-0 flex-col gap-1.5">
+          <span className="flex flex-wrap items-center gap-2 text-[12px] leading-[18px]">
+            <span className="rounded-full bg-[var(--gr-50)] px-2 py-0.5 font-medium text-[var(--gr-700)]">Istaknuto</span>
+            {category && <span className="rounded-full bg-white/15 px-2 py-0.5 font-medium ring-1 ring-inset ring-white/30">{category}</span>}
+            {badge}
+            {date && <span className="text-white/80">{date}</span>}
+          </span>
+          <span className="line-clamp-2 text-[16px] leading-6 md:text-[20px] md:leading-[30px] font-semibold">{title}</span>
+          {excerpt && <span className="hidden text-[14px] leading-5 text-white/85 lg:line-clamp-1">{excerpt}</span>}
         </span>
-        <span className="flex items-start justify-between gap-4 text-[24px] leading-8 md:text-[30px] md:leading-[38px] font-semibold"><span className="line-clamp-3">{title}</span><ArrowUpRight size={28} className="mt-1 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" /></span>
-        {excerpt && <span className="line-clamp-2 text-[16px] leading-6 text-white/90">{excerpt}</span>}
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white/15 ring-1 ring-inset ring-white/30 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"><ArrowUpRight size={20} /></span>
       </span>
     </Link>
   );
