@@ -1,226 +1,219 @@
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 import { apiSafe } from '@/lib/api';
 import { EMPTY, LEVEL, LS_STATUS, REPORT_STATUS, WARN_COLOR, fireConfidence, fireTime, fmtTime, peakForecast, type RiskSummary } from '@/lib/risk';
 import RiverChart from '@/components/risk/RiverChart';
 import RiskMap from '@/components/risk/RiskMapLazy';
-
+import { Badge, BadgeGroup, Button, Card, Container, FeaturedIcon, Section, SectionHeader } from '@/components/uui';
+import { Activity, AlertTriangle, CheckCircle, CloudOff, CloudRaining01, ThermometerWarm, MarkerPin04, LayersThree01, Phone01, RefreshCw01, Waves } from '@untitledui/icons';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Eko-rizik HNK – požari, poplave i klizišta', description: 'Pregled rizika od požara, poplava i klizišta na području Hercegovačko-neretvanskog kantona: satelitska žarišta, meteo upozorenja, protok Neretve i prijave građana.' };
 
-const Icon = ({ n, s = 20, c = '' }: { n: string; s?: number; c?: string }) => <span aria-hidden className={`material-symbols-outlined shrink-0 leading-none ${c}`} style={{ fontSize: s }}>{n}</span>;
-const Eyebrow = ({ children, light = false }: { children: React.ReactNode; light?: boolean }) => <p className={`font-space font-bold text-[12px] tracking-[1.2px] uppercase leading-[16px] ${light ? 'text-[#85f8c4]' : 'text-[#006c4a]'}`}>{children}</p>;
+const LV_TONE = { 1: 'success', 2: 'warning', 3: 'error' } as const;
+
 const SourceNote = ({ err, at, src }: { err: string | null; at: string; src: string }) => (
-  <p className="flex items-center gap-[6px] font-rob text-[12px] leading-[18px] text-[#737780]">
-    <Icon n={err ? 'cloud_off' : 'sync'} s={14} c={err ? 'text-[#ba1a1a]' : 'text-[#006c4a]'} />
+  <p className="flex items-center gap-1.5 text-[14px] leading-5 text-[#737373]">
+    {err ? <CloudOff size={16} className="text-[#d92d20]" /> : <RefreshCw01 size={16} className="text-[#079455]" />}
     {err ? `${src}: izvor trenutno nedostupan` : `${src} · osvježeno ${fmtTime(at)}`}
   </p>
 );
 
+function Warn({ w }: { w: RiskSummary['warnings']['items'][number] }) {
+  return (
+    <article className="relative overflow-hidden rounded-[12px] bg-white p-4 pl-5 ring-1 ring-inset ring-[#e5e5e5] shadow-[0_1px_2px_rgba(10,13,18,0.05)]">
+      <span aria-hidden className="absolute inset-y-0 left-0 w-1" style={{ background: WARN_COLOR[w.color] ?? '#fadc12' }} />
+      <p className="text-[16px] leading-6 font-semibold text-[#171717]">{w.event}</p>
+      <p className="mt-0.5 text-[14px] leading-5 text-[#737373]">Regija {w.region} · {fmtTime(w.onset)} – {fmtTime(w.expires)}</p>
+      {w.description && <p className="mt-2 text-[14px] leading-5 text-[#525252]">{w.description}</p>}
+      {w.instruction && <p className="mt-1 text-[14px] leading-5 text-[#6941c6]">{w.instruction}</p>}
+    </article>
+  );
+}
+
+function Kpi({ icon: I, label, value, sub, tone }: { icon: any; label: string; value: string; sub: string; tone: 'gray' | 'warning' | 'error' }) {
+  const c = tone === 'error' ? 'text-[#d92d20]' : tone === 'warning' ? 'text-[#dc6803]' : 'text-[#171717]';
+  return (
+    <Card className="flex min-w-0 flex-col gap-2 p-5 md:p-6">
+      <div className="flex items-center justify-between gap-2"><p className="text-[14px] leading-5 font-medium text-[#525252]">{label}</p><I size={20} className="text-[#a3a3a3]" /></div>
+      <p className={`text-[30px] leading-[38px] md:text-[36px] md:leading-[44px] font-semibold tracking-[-0.02em] ${c}`}>{value}</p>
+      <p className="truncate text-[14px] leading-5 text-[#525252]" title={sub}>{sub}</p>
+    </Card>
+  );
+}
+
 export default async function EkoRizikPage() {
   const d = await apiSafe<RiskSummary>('/risk/summary', EMPTY);
-  const lv = LEVEL[d.level] ?? LEVEL[1];
+  const lvKey = (d.level in LEVEL ? d.level : 1) as 1 | 2 | 3;
+  const lv = LEVEL[lvKey];
   const mostar = d.rivers.items.find((r) => r.key === 'mostar') ?? d.rivers.items[0];
   const activeLs = d.landslides.filter((l) => l.status !== 'SANIRANO').length;
   const warn = d.warnings.items;
   const fires = d.fires.items;
 
-  const kpis = [
-    { icon: 'local_fire_department', label: 'Satelitska žarišta (72 h)', value: d.fires.error ? '—' : String(fires.length), sub: d.fires.error ? 'NASA FIRMS nedostupan' : `${d.fires.last24h} u zadnja 24 sata`, tone: fires.length ? 'text-[#ba1a1a]' : 'text-[#002042]' },
-    { icon: 'thunderstorm', label: 'Meteo upozorenja', value: d.warnings.error ? '—' : String(warn.length), sub: warn[0] ? `${warn[0].event} · ${warn[0].region}` : 'Nema aktivnih upozorenja', tone: warn.some((w) => w.level >= 3) ? 'text-[#ba1a1a]' : warn.length ? 'text-[#8a4a00]' : 'text-[#002042]' },
-    { icon: 'water', label: 'Neretva kod Mostara', value: mostar ? `${Math.round(mostar.discharge[mostar.todayIndex] ?? 0)} m³/s` : '—', sub: mostar ? `Vrh prognoze ${peakForecast(mostar)} m³/s (10 dana)` : 'Model GloFAS', tone: mostar?.status === 'VISOKO' ? 'text-[#ba1a1a]' : mostar?.status === 'POVISENO' ? 'text-[#8a4a00]' : 'text-[#002042]' },
-    { icon: 'landslide', label: 'Klizišta u registru', value: String(d.landslides.length), sub: `${activeLs} aktivno ili u praćenju`, tone: activeLs ? 'text-[#8a4a00]' : 'text-[#002042]' },
-  ];
-
   return (
-    <div className="bg-[#f8f9ff] w-full">
-      {/* HERO */}
-      <section className="relative overflow-hidden bg-[#062343] px-[16px] md:px-[32px] pt-[40px] pb-[72px]">
-        <div aria-hidden className="absolute -right-[80px] -top-[120px] size-[420px] rounded-full bg-[#ba1a1a] opacity-[0.12] blur-[80px]" />
-        <div aria-hidden className="absolute left-1/3 bottom-0 h-[140px] w-1/3 bg-[#00abeb] opacity-[0.12] blur-[60px]" />
-        <div className="relative flex flex-col lg:flex-row lg:items-end lg:justify-between gap-[24px]">
-          <div className="flex flex-col gap-[16px] max-w-[760px]">
-            <Eyebrow light>Sistem ranog informisanja · Hercegovačko-neretvanski kanton</Eyebrow>
-            <h1 className="font-pub font-bold text-white text-[34px] md:text-[44px] lg:text-[52px] tracking-[-0.9px] leading-[1.1]">Eko-rizik HNK</h1>
-            <p className="font-pub text-[#d3e4fe] text-[16px] md:text-[18px] leading-[28px]">Požari, poplave i klizišta na jednom mjestu: satelitska žarišta, upozorenja Federalnog hidrometeorološkog zavoda, prognoza protoka Neretve i prijave građana.</p>
-            <div className="flex flex-wrap gap-[8px] pt-[4px]">
-              <Link href="/eko-rizik/prijava" className="bg-[#ba1a1a] hover:bg-[#93000a] text-white flex gap-[8px] items-center px-[20px] py-[12px] rounded-[4px] font-pub font-semibold text-[15px]"><Icon n="campaign" s={18} />Prijavi incident</Link>
-              <Link href="/eko-rizik/krizni" className="bg-white/10 hover:bg-white/20 text-white flex gap-[8px] items-center px-[20px] py-[12px] rounded-[4px] font-pub font-semibold text-[15px]"><Icon n="monitor_heart" s={18} />Krizni prikaz</Link>
+    <>
+      {/* Hero */}
+      <section className="relative overflow-hidden bg-white pt-12 pb-16 md:pt-16 md:pb-20">
+        <div aria-hidden className="absolute inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_at_top,black_30%,transparent_70%)]" />
+        <Container className="relative">
+          <nav aria-label="Putanja" className="mb-8 flex items-center gap-2 text-[14px] font-medium text-[#525252]"><Link href="/" className="hover:text-[#262626]">Naslovna</Link><span className="text-[#d4d4d4]">/</span><span className="font-semibold text-[#6941c6]" aria-current="page">Eko-rizik HNK</span></nav>
+          <div className="flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-[768px]">
+              <BadgeGroup label={lv.short} tone={LV_TONE[lvKey]}>Ažurirano {fmtTime(d.generatedAt)}</BadgeGroup>
+              <h1 className="mt-4 text-[36px] leading-[44px] md:text-[60px] md:leading-[72px] font-semibold tracking-[-0.02em] text-[#171717]">Eko-rizik HNK</h1>
+              <p className="mt-4 md:mt-6 text-[18px] leading-7 md:text-[20px] md:leading-[30px] text-[#525252]">Požari, poplave i klizišta na jednom mjestu: satelitska žarišta, upozorenja Federalnog hidrometeorološkog zavoda, prognoza protoka Neretve i prijave građana.</p>
+              <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row">
+                <Button href="/eko-rizik/krizni" variant="secondary" size="xl" icon={Activity}>Krizni prikaz</Button>
+                <Button href="/eko-rizik/prijava" size="xl" icon={MarkerPin04}>Prijavi incident</Button>
+              </div>
+            </div>
+            <div role="status" aria-live="polite" className="flex items-center gap-4 self-start rounded-[16px] bg-white p-5 pr-8 ring-1 ring-inset ring-[#e5e5e5] shadow-[0_12px_16px_-4px_rgba(10,13,18,0.08),0_4px_6px_-2px_rgba(10,13,18,0.03)] lg:self-auto">
+              <FeaturedIcon icon={lvKey === 1 ? CheckCircle : AlertTriangle} tone={LV_TONE[lvKey]} size="xl" />
+              <div><p className="text-[14px] font-medium text-[#525252]">Procjena stanja</p><p className={`text-[24px] leading-8 font-semibold ${lvKey === 1 ? 'text-[#079455]' : lvKey === 2 ? 'text-[#dc6803]' : 'text-[#d92d20]'}`}>{lv.label}</p></div>
             </div>
           </div>
-          <div className={`self-start lg:self-auto flex items-center gap-[16px] rounded-[8px] bg-white p-[16px] pr-[24px] ring-4 ${lv.ring}`} role="status" aria-live="polite">
-            <span className={`flex items-center justify-center rounded-[8px] size-[56px] text-white ${lv.bg}`}><Icon n={lv.icon} s={30} /></span>
-            <span className="flex flex-col">
-              <span className="font-pub font-bold text-[#737780] text-[11px] tracking-[0.44px] uppercase leading-[14px]">Procjena stanja</span>
-              <span className={`font-pub font-bold text-[22px] leading-[28px] ${lv.text}`}>{lv.label}</span>
-              <span className="font-rob text-[12px] text-[#737780]">Ažurirano {fmtTime(d.generatedAt)}</span>
-            </span>
-          </div>
-        </div>
+        </Container>
       </section>
 
       {/* KPI */}
-      <section className="relative px-[16px] md:px-[32px] -mt-[40px]">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[16px]">
-          {kpis.map((k) => (
-            <div key={k.label} className="bg-white rounded-[8px] p-[16px] shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)] flex flex-col gap-[6px] min-w-0">
-              <div className="flex items-center justify-between gap-2"><p className="font-rob font-bold text-[#43474f] text-[12px] tracking-[0.96px] uppercase leading-[16px]">{k.label}</p><Icon n={k.icon} c="text-[#002042]" /></div>
-              <p className={`font-rob font-extrabold text-[32px] tracking-[-0.9px] leading-[40px] ${k.tone}`}>{k.value}</p>
-              <p className="font-pub text-[#43474f] text-[13px] leading-[20px] truncate" title={k.sub}>{k.sub}</p>
+      <Section tone="gray" className="!py-12 md:!py-16">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <Kpi icon={ThermometerWarm} label="Satelitska žarišta (72 h)" value={d.fires.error ? '—' : String(fires.length)} sub={d.fires.error ? 'NASA FIRMS nedostupan' : `${d.fires.last24h} u zadnja 24 sata`} tone={fires.length ? 'error' : 'gray'} />
+          <Kpi icon={CloudRaining01} label="Meteo upozorenja" value={d.warnings.error ? '—' : String(warn.length)} sub={warn[0] ? `${warn[0].event} · ${warn[0].region}` : 'Nema aktivnih upozorenja'} tone={warn.some((w) => w.level >= 3) ? 'error' : warn.length ? 'warning' : 'gray'} />
+          <Kpi icon={Waves} label="Neretva kod Mostara" value={mostar ? `${Math.round(mostar.discharge[mostar.todayIndex] ?? 0)} m³/s` : '—'} sub={mostar ? `Vrh prognoze ${peakForecast(mostar)} m³/s (10 dana)` : 'Model GloFAS'} tone={mostar?.status === 'VISOKO' ? 'error' : mostar?.status === 'POVISENO' ? 'warning' : 'gray'} />
+          <Kpi icon={LayersThree01} label="Klizišta u registru" value={String(d.landslides.length)} sub={`${activeLs} aktivno ili u praćenju`} tone={activeLs ? 'warning' : 'gray'} />
+        </div>
+      </Section>
+
+      {/* Karta */}
+      <Section>
+        <SectionHeader eyebrow="Karta rizika" title="Šta se trenutno dešava na terenu">Uključite ili isključite slojeve iznad karte. Satelitska žarišta su toplotne anomalije i ne moraju biti potvrđeni požari.</SectionHeader>
+        <div className="mt-10"><RiskMap data={d} /></div>
+      </Section>
+
+      {/* Upozorenja + rijeke */}
+      <Section tone="gray">
+        <div className="grid gap-12 lg:grid-cols-12 lg:gap-8">
+          <div className="lg:col-span-5">
+            <SectionHeader eyebrow="Meteoalarm · FHMZ BiH" title="Meteorološka upozorenja" />
+            <div className="mt-8 flex flex-col gap-3">
+              {warn.length === 0 && (
+                <Card className="flex items-center gap-3 p-4">
+                  {d.warnings.error ? <CloudOff size={20} className="text-[#a3a3a3]" /> : <CheckCircle size={20} className="text-[#079455]" />}
+                  <p className="text-[14px] text-[#525252]">{d.warnings.error ? 'Upozorenja trenutno nije moguće preuzeti. Provjerite meteoalarm.org.' : 'Za regije Mostar, Livno i Trebinje trenutno nema aktivnih upozorenja.'}</p>
+                </Card>
+              )}
+              {warn.slice(0, 5).map((w, i) => <Warn key={i} w={w} />)}
+              {warn.length > 5 && (
+                <details>
+                  <summary className="cursor-pointer py-1.5 text-[14px] font-semibold text-[#6941c6]">Prikaži još {warn.length - 5} upozorenja</summary>
+                  <div className="flex flex-col gap-3 pt-2">{warn.slice(5).map((w, i) => <Warn key={i} w={w} />)}</div>
+                </details>
+              )}
+              <SourceNote err={d.warnings.error} at={d.warnings.updatedAt} src="Meteoalarm" />
             </div>
-          ))}
+          </div>
+          <div className="lg:col-span-7">
+            <SectionHeader eyebrow="Copernicus GloFAS · Open-Meteo" title="Protok Neretve i Bune" />
+            <div className="mt-8 grid gap-4 md:grid-cols-2">
+              {d.rivers.items.map((r) => <RiverChart key={r.key} r={r} />)}
+              {d.rivers.items.length === 0 && <p className="text-[14px] text-[#525252]">Model protoka trenutno nije dostupan.</p>}
+            </div>
+            <p className="mt-4 text-[14px] leading-5 text-[#737373]">Vrijednosti su procjena hidrološkog modela GloFAS (rezolucija ~5 km), a ne mjerenja vodomjernih stanica. Status se računa u odnosu na protok iz zadnjih 60 dana. Službene informacije o vodostajima daju FHMZ i Agencija za vodno područje Jadranskog mora.</p>
+            <div className="mt-2"><SourceNote err={d.rivers.error} at={d.rivers.updatedAt} src="GloFAS" /></div>
+          </div>
         </div>
-      </section>
+      </Section>
 
-      {/* KARTA */}
-      <section className="px-[16px] md:px-[32px] pt-[40px]">
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-[8px] mb-[16px]">
-          <div className="flex flex-col gap-[4px]"><Eyebrow>Karta rizika</Eyebrow><h2 className="font-pub font-bold text-[#002042] text-[24px] tracking-[-0.24px] leading-[32px]">Šta se trenutno dešava na terenu</h2></div>
-          <p className="font-pub text-[#43474f] text-[13px] leading-[20px] max-w-[520px]">Uključite ili isključite slojeve iznad karte. Klik na oznaku otvara detalje. Satelitska žarišta su toplotne anomalije i ne moraju biti potvrđeni požari.</p>
-        </div>
-        <RiskMap data={d} />
-      </section>
-
-      {/* UPOZORENJA + RIJEKE */}
-      <section className="px-[16px] md:px-[32px] pt-[40px] grid grid-cols-1 lg:grid-cols-12 gap-[24px]">
-        <div className="lg:col-span-5 flex flex-col gap-[16px]">
-          <div className="flex flex-col gap-[4px]"><Eyebrow>Meteoalarm · FHMZ BiH</Eyebrow><h2 className="font-pub font-bold text-[#002042] text-[24px] leading-[32px]">Meteorološka upozorenja</h2></div>
-          <div className="flex flex-col gap-[8px]">
-            {warn.length === 0 && (
-              <div className="bg-white rounded-[8px] p-[16px] flex gap-[12px] items-center shadow-[0px_1px_2px_rgba(0,0,0,0.05)]">
-                <Icon n={d.warnings.error ? 'cloud_off' : 'check_circle'} c={d.warnings.error ? 'text-[#737780]' : 'text-[#006c4a]'} />
-                <p className="font-pub text-[14px] text-[#43474f]">{d.warnings.error ? 'Upozorenja trenutno nije moguće preuzeti. Provjerite meteoalarm.org.' : 'Za regije Mostar, Livno i Trebinje trenutno nema aktivnih upozorenja.'}</p>
-              </div>
-            )}
-            {warn.slice(0, 5).map((w, i) => (
-              <article key={i} className="bg-white rounded-[8px] p-[16px] flex gap-[12px] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] border-l-[6px]" style={{ borderLeftColor: WARN_COLOR[w.color] ?? '#fadc12' }}>
-                <div className="flex flex-col gap-[4px] min-w-0">
-                  <p className="font-pub font-bold text-[#002042] text-[15px] leading-[22px]">{w.event}</p>
-                  <p className="font-rob text-[12px] text-[#737780]">Regija {w.region} · {fmtTime(w.onset)} – {fmtTime(w.expires)}</p>
-                  {w.description && <p className="font-pub text-[13px] leading-[20px] text-[#334155]">{w.description}</p>}
-                  {w.instruction && <p className="font-pub text-[13px] leading-[20px] text-[#006c4a]">{w.instruction}</p>}
-                </div>
-              </article>
-            ))}
-            {warn.length > 5 && (
-              <details className="group">
-                <summary className="cursor-pointer font-pub font-semibold text-[14px] text-[#002042] py-[6px]">Prikaži još {warn.length - 5} upozorenja</summary>
-                <div className="flex flex-col gap-[8px] pt-[8px]">
-                {warn.slice(5).map((w, i) => (
-              <article key={i} className="bg-white rounded-[8px] p-[16px] flex gap-[12px] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] border-l-[6px]" style={{ borderLeftColor: WARN_COLOR[w.color] ?? '#fadc12' }}>
-                <div className="flex flex-col gap-[4px] min-w-0">
-                  <p className="font-pub font-bold text-[#002042] text-[15px] leading-[22px]">{w.event}</p>
-                  <p className="font-rob text-[12px] text-[#737780]">Regija {w.region} · {fmtTime(w.onset)} – {fmtTime(w.expires)}</p>
-                  {w.description && <p className="font-pub text-[13px] leading-[20px] text-[#334155]">{w.description}</p>}
-                  {w.instruction && <p className="font-pub text-[13px] leading-[20px] text-[#006c4a]">{w.instruction}</p>}
-                </div>
-              </article>
+      {/* Žarišta + klizišta */}
+      <Section>
+        <div className="grid gap-6 lg:grid-cols-2">
+          <ListCard icon={ThermometerWarm} title="Satelitska žarišta" meta="VIIRS 375 m" footer={<SourceNote err={d.fires.error} at={d.fires.updatedAt} src="NASA FIRMS" />}>
+            {fires.length === 0 ? (
+              <p className="px-6 py-5 text-[14px] text-[#525252]">{d.fires.error ? 'Podaci NASA FIRMS trenutno nisu dostupni.' : 'U posljednja 72 sata sateliti nisu zabilježili toplotne anomalije na području kantona.'}</p>
+            ) : (
+              <ul className="divide-y divide-[#e5e5e5]">
+                {fires.slice(0, 8).map((f, i) => (
+                  <li key={i} className="flex items-center justify-between gap-3 px-6 py-3 text-[14px]">
+                    <span><b className="block font-medium text-[#171717]">{fireTime(f)}</b><span className="text-[#737373]">{f.lat.toFixed(3)}° N, {f.lng.toFixed(3)}° E</span></span>
+                    <span className="text-right text-[#525252]">pouzdanost {fireConfidence(f.confidence)}{f.frp != null && <><br />{f.frp} MW</>}</span>
+                  </li>
                 ))}
-                </div>
-              </details>
+              </ul>
             )}
-            <SourceNote err={d.warnings.error} at={d.warnings.updatedAt} src="Meteoalarm" />
-          </div>
-        </div>
-        <div className="lg:col-span-7 flex flex-col gap-[16px]">
-          <div className="flex flex-col gap-[4px]"><Eyebrow>Copernicus GloFAS · Open-Meteo</Eyebrow><h2 className="font-pub font-bold text-[#002042] text-[24px] leading-[32px]">Protok Neretve i Bune</h2></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-[12px]">
-            {d.rivers.items.map((r) => <RiverChart key={r.key} r={r} />)}
-            {d.rivers.items.length === 0 && <p className="font-pub text-[14px] text-[#43474f]">Model protoka trenutno nije dostupan.</p>}
-          </div>
-          <p className="font-pub text-[12px] leading-[18px] text-[#737780]">Vrijednosti su procjena hidrološkog modela GloFAS (rezolucija ~5 km), a ne mjerenja vodomjernih stanica. Status se računa u odnosu na protok iz zadnjih 60 dana. Službene informacije o vodostajima daju FHMZ i Agencija za vodno područje Jadranskog mora.</p>
-          <SourceNote err={d.rivers.error} at={d.rivers.updatedAt} src="GloFAS" />
-        </div>
-      </section>
-
-      {/* ŽARIŠTA + KLIZIŠTA */}
-      <section className="px-[16px] md:px-[32px] pt-[40px] grid grid-cols-1 lg:grid-cols-2 gap-[24px]">
-        <div className="bg-white rounded-[8px] p-[24px] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] flex flex-col gap-[12px]">
-          <div className="flex items-center justify-between gap-2"><h2 className="flex gap-[8px] items-center font-pub font-semibold text-[#002042] text-[20px] leading-[28px]"><Icon n="local_fire_department" c="text-[#ba1a1a]" />Satelitska žarišta</h2><span className="font-rmono text-[12px] text-[#737780]">VIIRS 375 m</span></div>
-          {fires.length === 0 ? (
-            <p className="font-pub text-[14px] text-[#43474f]">{d.fires.error ? 'Podaci NASA FIRMS trenutno nisu dostupni.' : 'U posljednja 72 sata sateliti nisu zabilježili toplotne anomalije na području kantona.'}</p>
-          ) : (
-            <ul className="divide-y divide-[#eff4ff]">
-              {fires.slice(0, 8).map((f, i) => (
-                <li key={i} className="flex items-center justify-between gap-[12px] py-[8px] font-rob text-[13px]">
-                  <span className="flex flex-col"><span className="font-semibold text-[#002042]">{fireTime(f)}</span><span className="text-[#737780]">{f.lat.toFixed(3)}° N, {f.lng.toFixed(3)}° E</span></span>
-                  <span className="text-right text-[#43474f]">pouzdanost {fireConfidence(f.confidence)}<br />{f.frp != null ? `${f.frp} MW` : ''}</span>
-                </li>
-              ))}
+          </ListCard>
+          <ListCard icon={LayersThree01} title="Registar klizišta" meta="CMS · MTTO">
+            {d.landslides.length === 0 && <p className="px-6 py-5 text-[14px] text-[#525252]">Registar je prazan.</p>}
+            <ul className="divide-y divide-[#e5e5e5]">
+              {d.landslides.map((l) => {
+                const st = LS_STATUS[l.status] ?? LS_STATUS.PRACENJE;
+                const tone = l.status === 'AKTIVNO' ? 'error' : l.status === 'SANIRANO' ? 'success' : 'warning';
+                return (
+                  <li key={l.id} className="flex items-start justify-between gap-3 px-6 py-3">
+                    <span className="min-w-0"><b className="block text-[14px] font-medium text-[#171717]">{l.name}{l.isDemo && <Badge tone="warning" className="ml-2">Demo</Badge>}</b><span className="text-[14px] text-[#737373]">{l.municipality} · rizik {l.risk}/3</span></span>
+                    <Badge tone={tone} dot>{st.label}</Badge>
+                  </li>
+                );
+              })}
             </ul>
-          )}
-          <SourceNote err={d.fires.error} at={d.fires.updatedAt} src="NASA FIRMS" />
+          </ListCard>
         </div>
-        <div className="bg-white rounded-[8px] p-[24px] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] flex flex-col gap-[12px]">
-          <div className="flex items-center justify-between gap-2"><h2 className="flex gap-[8px] items-center font-pub font-semibold text-[#002042] text-[20px] leading-[28px]"><Icon n="landslide" c="text-[#7a4a1f]" />Registar klizišta</h2><span className="font-rmono text-[12px] text-[#737780]">CMS · MTTO</span></div>
-          {d.landslides.length === 0 && <p className="font-pub text-[14px] text-[#43474f]">Registar je prazan.</p>}
-          <ul className="divide-y divide-[#eff4ff]">
-            {d.landslides.map((l) => {
-              const st = LS_STATUS[l.status] ?? LS_STATUS.PRACENJE;
-              return (
-                <li key={l.id} className="flex items-start justify-between gap-[12px] py-[10px]">
-                  <span className="flex flex-col min-w-0">
-                    <span className="font-pub font-semibold text-[#002042] text-[14px] leading-[20px]">{l.name}{l.isDemo && <span className="ml-[6px] align-middle px-[6px] py-[1px] rounded-[2px] bg-[#fffde6] border border-[#fadc12] text-[#786000] text-[10px] font-bold uppercase">Demo</span>}</span>
-                    <span className="font-rob text-[12px] text-[#737780]">{l.municipality} · rizik {l.risk}/3</span>
-                  </span>
-                  <span className={`shrink-0 px-[8px] py-[2px] rounded-[2px] font-pub font-bold text-[11px] tracking-[0.44px] uppercase leading-[14px] ${st.cls}`}>{st.label}</span>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      </section>
+      </Section>
 
-      {/* PRIJAVE GRAĐANA */}
-      <section className="px-[16px] md:px-[32px] pt-[40px]">
-        <div className="bg-white rounded-[8px] p-[24px] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] flex flex-col gap-[16px]">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-[12px]">
-            <div className="flex flex-col gap-[4px]"><Eyebrow>Građani kao senzori</Eyebrow><h2 className="font-pub font-bold text-[#002042] text-[24px] leading-[32px]">Potvrđene prijave građana</h2></div>
-            <Link href="/eko-rizik/prijava" className="self-start bg-[#002042] hover:bg-[#062343] text-white flex gap-[8px] items-center px-[16px] py-[10px] rounded-[4px] font-pub font-semibold text-[14px]"><Icon n="add_location_alt" s={18} />Nova prijava</Link>
+      {/* Prijave građana */}
+      <Section tone="gray">
+        <SectionHeader eyebrow="Građani kao senzori" title="Potvrđene prijave građana" actions={<Button href="/eko-rizik/prijava" size="lg" icon={MarkerPin04}>Nova prijava</Button>}>Prijave se prikazuju nakon što ih službenik Ministarstva provjeri, bez ličnih podataka prijavitelja.</SectionHeader>
+        {d.reports.length > 0 && (
+          <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {d.reports.slice(0, 9).map((r) => (
+              <Card key={r.id} className="flex flex-col p-5">
+                <div className="flex items-center justify-between gap-2"><span className="text-[12px] font-medium text-[#737373]">{r.code}</span><Badge tone="brand">{REPORT_STATUS[r.status] ?? r.status}</Badge></div>
+                <p className="mt-3 text-[16px] leading-6 font-semibold text-[#171717]">{r.kindLabel}</p>
+                <p className="text-[14px] text-[#737373]">{r.municipality}{r.location ? ` · ${r.location}` : ''} · {fmtTime(r.createdAt)}</p>
+                <p className="mt-2 text-[14px] leading-5 text-[#525252] line-clamp-3">{r.description}</p>
+              </Card>
+            ))}
           </div>
-          {d.reports.length === 0 ? (
-            <p className="font-pub text-[14px] text-[#43474f]">Prijave se ovdje prikazuju nakon što ih službenik Ministarstva provjeri, bez ličnih podataka prijavitelja.</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[12px]">
-              {d.reports.slice(0, 9).map((r) => (
-                <article key={r.id} className="rounded-[8px] bg-[#f8f9ff] p-[16px] flex flex-col gap-[6px]">
-                  <div className="flex items-center justify-between gap-2"><span className="font-rmono text-[12px] text-[#737780]">{r.code}</span><span className="px-[8px] py-[2px] rounded-[2px] bg-[#eff4ff] text-[#002042] font-pub font-bold text-[11px] uppercase">{REPORT_STATUS[r.status] ?? r.status}</span></div>
-                  <p className="font-pub font-semibold text-[#002042] text-[15px] leading-[22px]">{r.kindLabel}</p>
-                  <p className="font-rob text-[12px] text-[#737780]">{r.municipality}{r.location ? ` · ${r.location}` : ''} · {fmtTime(r.createdAt)}</p>
-                  <p className="font-pub text-[13px] leading-[20px] text-[#334155] line-clamp-3">{r.description}</p>
-                </article>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
+        )}
+      </Section>
 
-      {/* ŠTA RADITI */}
-      <section className="px-[16px] md:px-[32px] py-[40px]">
-        <div className="flex flex-col gap-[4px] mb-[16px]"><Eyebrow>Priprema i postupanje</Eyebrow><h2 className="font-pub font-bold text-[#002042] text-[24px] leading-[32px]">Šta učiniti u slučaju opasnosti</h2></div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-[16px]">
+      {/* Šta raditi */}
+      <Section>
+        <SectionHeader eyebrow="Priprema i postupanje" title="Šta učiniti u slučaju opasnosti" align="center" />
+        <div className="mt-12 grid gap-6 md:grid-cols-3">
           {[
-            { icon: 'local_fire_department', t: 'Požar', c: 'bg-[#ffdad6] text-[#ba1a1a]', items: ['Odmah pozovite vatrogasce na 123.', 'Ne palite vatru na otvorenom tokom sušnog perioda.', 'Udaljite se niz vjetar i ne vraćajte se po stvari.'] },
-            { icon: 'flood', t: 'Poplava i bujica', c: 'bg-[#dce9ff] text-[#002042]', items: ['Pratite upozorenja i ne prelazite preko poplavljenih puteva.', 'Isključite struju i plin ako voda ulazi u objekat.', 'Za pomoć pozovite Civilnu zaštitu na 121.'] },
-            { icon: 'landslide', t: 'Klizište i odron', c: 'bg-[#fffbeb] text-[#8a4a00]', items: ['Uočene pukotine u tlu ili na zidovima prijavite općinskoj službi civilne zaštite.', 'Izbjegavajte kosine i puteve ispod njih nakon jakih kiša.', 'Prijavite lokaciju Ministarstvu putem Eko-prijave.'] },
+            { icon: ThermometerWarm, tone: 'error' as const, t: 'Požar', items: ['Odmah pozovite vatrogasce na 123.', 'Ne palite vatru na otvorenom tokom sušnog perioda.', 'Udaljite se niz vjetar i ne vraćajte se po stvari.'] },
+            { icon: Waves, tone: 'brand' as const, t: 'Poplava i bujica', items: ['Pratite upozorenja i ne prelazite preko poplavljenih puteva.', 'Isključite struju i plin ako voda ulazi u objekat.', 'Za pomoć pozovite Civilnu zaštitu na 121.'] },
+            { icon: LayersThree01, tone: 'warning' as const, t: 'Klizište i odron', items: ['Uočene pukotine u tlu ili na zidovima prijavite općinskoj službi civilne zaštite.', 'Izbjegavajte kosine i puteve ispod njih nakon jakih kiša.', 'Prijavite lokaciju Ministarstvu putem Eko-prijave.'] },
           ].map((b) => (
-            <div key={b.t} className="bg-white rounded-[8px] p-[24px] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] flex flex-col gap-[12px]">
-              <span className={`flex items-center justify-center rounded-[4px] size-[44px] ${b.c}`}><Icon n={b.icon} s={24} /></span>
-              <h3 className="font-pub font-semibold text-[#0f172a] text-[20px] leading-[28px]">{b.t}</h3>
-              <ul className="flex flex-col gap-[6px]">{b.items.map((it) => <li key={it} className="flex gap-[8px] font-pub text-[14px] leading-[22px] text-[#334155]"><span className="mt-[9px] size-[6px] rounded-full bg-[#006c4a] shrink-0" />{it}</li>)}</ul>
-            </div>
+            <Card key={b.t} className="p-6 md:p-8">
+              <FeaturedIcon icon={b.icon} tone={b.tone} />
+              <h3 className="mt-5 text-[20px] leading-[30px] font-semibold text-[#171717]">{b.t}</h3>
+              <ul className="mt-4 flex flex-col gap-3">{b.items.map((it) => <li key={it} className="flex gap-3 text-[16px] leading-6 text-[#525252]"><CheckCircle size={20} className="mt-0.5 shrink-0 text-[#7f56d9]" />{it}</li>)}</ul>
+            </Card>
           ))}
         </div>
-        <div className="mt-[16px] bg-[#062343] rounded-[8px] p-[20px] md:p-[24px] flex flex-col md:flex-row md:items-center md:justify-between gap-[16px]">
-          <p className="font-pub font-semibold text-white text-[16px] leading-[24px]">Hitni brojevi</p>
-          <div className="flex flex-wrap gap-[8px]">
+        <div className="mt-8 flex flex-col gap-4 rounded-[16px] bg-[#fafafa] p-6 ring-1 ring-inset ring-[#e5e5e5] md:flex-row md:items-center md:justify-between md:p-8">
+          <p className="flex items-center gap-3 text-[18px] font-semibold text-[#171717]"><Phone01 size={24} className="text-[#7f56d9]" />Hitni brojevi</p>
+          <div className="flex flex-wrap gap-3">
             {[['121', 'Civilna zaštita'], ['123', 'Vatrogasci'], ['124', 'Hitna pomoć'], ['122', 'Policija']].map(([n, l]) => (
-              <a key={n} href={`tel:${n}`} className="bg-white/10 hover:bg-white/20 rounded-[4px] px-[14px] py-[8px] flex items-baseline gap-[8px] text-white"><span className="font-rob font-extrabold text-[20px]">{n}</span><span className="font-pub text-[13px] text-[#d3e4fe]">{l}</span></a>
+              <a key={n} href={`tel:${n}`} className="flex items-baseline gap-2 rounded-[8px] bg-white px-4 py-2.5 ring-1 ring-inset ring-[#d4d4d4] shadow-[0_1px_2px_rgba(10,13,18,0.05)] hover:bg-[#fafafa]"><span className="text-[20px] font-semibold text-[#171717]">{n}</span><span className="text-[14px] text-[#525252]">{l}</span></a>
             ))}
           </div>
         </div>
-        <p className="mt-[16px] font-pub text-[12px] leading-[18px] text-[#737780] max-w-[900px]">Izvori: NASA FIRMS (VIIRS), EFFIS – Copernicus Emergency Management Service, Meteoalarm / Federalni hidrometeorološki zavod, Copernicus GloFAS putem Open-Meteo, registar klizišta i prijave građana MTTO. Stranica služi za informisanje i ne zamjenjuje službena upozorenja nadležnih službi.</p>
-      </section>
-    </div>
+        <p className="mt-8 max-w-[900px] text-[14px] leading-5 text-[#737373]">Izvori: NASA FIRMS (VIIRS), EFFIS – Copernicus Emergency Management Service, Meteoalarm / Federalni hidrometeorološki zavod, Copernicus GloFAS putem Open-Meteo, registar klizišta i prijave građana MTTO. Stranica služi za informisanje i ne zamjenjuje službena upozorenja nadležnih službi.</p>
+      </Section>
+    </>
+  );
+}
+
+function ListCard({ icon: I, title, meta, children, footer }: { icon: any; title: string; meta: string; children: ReactNode; footer?: ReactNode }) {
+  return (
+    <Card className="flex flex-col overflow-hidden">
+      <div className="flex items-center justify-between gap-2 border-b border-[#e5e5e5] px-6 py-5"><h2 className="flex items-center gap-2 text-[18px] leading-7 font-semibold text-[#171717]"><I size={20} className="text-[#7f56d9]" />{title}</h2><Badge tone="gray">{meta}</Badge></div>
+      <div className="flex-1">{children}</div>
+      {footer && <div className="border-t border-[#e5e5e5] px-6 py-3">{footer}</div>}
+    </Card>
   );
 }

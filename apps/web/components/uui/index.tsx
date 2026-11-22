@@ -198,3 +198,54 @@ export function TableCard({ title, badge, description, actions, children, footer
 }
 export const th = 'px-6 py-3 text-left text-[12px] leading-[18px] font-medium text-[#525252] bg-[#fafafa] border-b border-[#e5e5e5] whitespace-nowrap';
 export const td = 'px-6 py-4 text-[14px] leading-5 text-[#525252] border-b border-[#e5e5e5] align-middle';
+
+/** Hero "split image" (Untitled "Hero header section" – tekst lijevo, slika desno s plutajućom karticom). */
+export function SplitHero({ eyebrow, title, children, actions, image, imageAlt = '', card, crumbs }: { eyebrow?: ReactNode; title: ReactNode; children?: ReactNode; actions?: ReactNode; image: string; imageAlt?: string; card?: ReactNode; crumbs?: { label: string; href?: string }[] }) {
+  return (
+    <section className="bg-white pt-12 pb-16 md:pt-16 md:pb-24 overflow-hidden">
+      <Container>
+        {crumbs && (
+          <nav aria-label="Putanja" className="mb-8 flex flex-wrap items-center gap-2 text-[14px] leading-5 font-medium text-[#525252]">
+            {crumbs.map((c, i) => <span key={i} className="flex items-center gap-2">{i > 0 && <span className="text-[#d4d4d4]">/</span>}{c.href ? <Link href={c.href} className="hover:text-[#262626]">{c.label}</Link> : <span className="text-[#6941c6] font-semibold" aria-current="page">{c.label}</span>}</span>)}
+          </nav>
+        )}
+        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+          <div>
+            {eyebrow && <p className="text-[14px] leading-5 md:text-[16px] md:leading-6 font-semibold text-[#6941c6]">{eyebrow}</p>}
+            <h1 className="mt-3 text-[36px] leading-[44px] md:text-[60px] md:leading-[72px] font-semibold tracking-[-0.02em] text-[#171717] text-balance">{title}</h1>
+            {children && <div className="mt-4 md:mt-6 text-[18px] leading-7 md:text-[20px] md:leading-[30px] text-[#525252] max-w-[560px]">{children}</div>}
+            {actions && <div className="mt-8 md:mt-12 flex flex-col-reverse gap-3 sm:flex-row">{actions}</div>}
+          </div>
+          <div className="relative">
+            <div className="overflow-hidden rounded-[24px] aspect-[4/3] lg:aspect-[5/6] bg-[#f5f5f5]"><img src={image} alt={imageAlt} className="size-full object-cover" /></div>
+            {card && <div className="absolute -bottom-6 left-4 right-4 md:left-auto md:right-6 md:w-[320px] rounded-[16px] bg-white/90 p-5 ring-1 ring-black/10 backdrop-blur-md shadow-[0_20px_24px_-4px_rgba(10,13,18,0.08),0_8px_8px_-4px_rgba(10,13,18,0.03)]">{card}</div>}
+          </div>
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+/** Slikovna kartica (Untitled "Image card" s gradijentom i staklenim natpisom). */
+export function ImageCard({ href, image, title, text, badge }: { href: string; image: string; title: string; text?: string; badge?: ReactNode }) {
+  return (
+    <Link href={href} className="group relative flex min-h-[360px] items-end overflow-hidden rounded-[16px]">
+      <img src={image} alt="" className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+      <span className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+      <span className="relative m-4 flex w-full flex-col gap-2 rounded-[12px] bg-white/15 p-5 text-white ring-1 ring-white/30 backdrop-blur-md">
+        {badge}
+        <span className="flex items-center justify-between gap-2 text-[20px] leading-[30px] font-semibold">{title}<ArrowUpRight size={24} /></span>
+        {text && <span className="text-[16px] leading-6 text-white/90">{text}</span>}
+      </span>
+    </Link>
+  );
+}
+
+/** Untitled input/select klase (forme filtera na javnim stranicama). */
+export const inputCls = 'h-10 w-full rounded-[8px] bg-white px-3 text-[16px] leading-6 text-[#171717] placeholder:text-[#737373] border border-[#d4d4d4] shadow-[0_1px_2px_rgba(10,13,18,0.05)] focus:outline-none focus:border-[#d6bbfb] focus:ring-4 focus:ring-[#9e77ed]/25';
+export const labelCls = 'text-[14px] leading-5 font-medium text-[#404040]';
+
+/** Bijeli "filter bar" s pretragom i padajućim izbornicima. */
+export function FilterField({ label, children, className = '' }: { label: string; children: ReactNode; className?: string }) {
+  return <label className={cx('flex flex-col gap-1.5', className)}><span className={labelCls}>{label}</span>{children}</label>;
+}
