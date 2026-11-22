@@ -25,7 +25,7 @@ export class PublicController {
     if (q.type) w.add(`"type"=?`, q.type);
     if (q.category) w.add(`"category"=?`, q.category);
     if (q.q) w.add(`("title" ILIKE ? OR "excerpt" ILIKE ?)`, `%${q.q}%`, `%${q.q}%`);
-    const items = await this.db.q(`SELECT ${POST_LIST_COLS} FROM posts ${w.sql} ORDER BY "publishedAt" DESC LIMIT ${take} OFFSET ${(page - 1) * take}`, w.params);
+    const items = await this.db.q(`SELECT ${POST_LIST_COLS}, (SELECT count(*)::int FROM documents d WHERE d."postId"=posts."id") AS "attachmentCount" FROM posts ${w.sql} ORDER BY "publishedAt" DESC LIMIT ${take} OFFSET ${(page - 1) * take}`, w.params);
     const total = await this.db.count(`SELECT count(*) n FROM posts ${w.sql}`, w.params);
     return { items, total, page, pages: Math.max(1, Math.ceil(total / take)) };
   }

@@ -18,7 +18,7 @@ export async function apiSafe<T>(path: string, fallback: T): Promise<T> {
 
 export type PostListItem = {
   id: string; slug: string; type: string; category: string; title: string; excerpt: string; coverImage: string | null;
-  publishedAt: string; deadline: string | null; views: number; authorName: string; isDemo: boolean;
+  publishedAt: string; deadline: string | null; views: number; authorName: string; isDemo: boolean; attachmentCount?: number;
 };
 export type Doc = {
   id: string; title: string; docType: string; sector: string; number: string | null; issuedAt: string | null; status: string;

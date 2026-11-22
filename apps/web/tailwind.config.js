@@ -89,6 +89,12 @@ module.exports = {
       "space-2xl": "4rem"
   },
   "fontFamily": {
+    "pub": ["Public Sans", "system-ui", "sans-serif"],
+    "space": ["Space Grotesk", "system-ui", "sans-serif"],
+    "rob": ["Roboto", "system-ui", "sans-serif"],
+    "robflex": ["Roboto Flex Variable", "Roboto Flex", "Roboto", "system-ui", "sans-serif"],
+    "cond": ["Roboto Condensed", "Roboto", "sans-serif"],
+    "rmono": ["Roboto Mono", "monospace"],
     "body-regular": [
       "var(--font-sans)",
       "system-ui",

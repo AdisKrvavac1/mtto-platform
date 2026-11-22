@@ -7,6 +7,7 @@ import { Db, Where, id } from './db';
 import { AuthGuard } from './auth';
 import { DOC_COLS } from './public.controller';
 import { slugify, toDate, toFloat, toInt } from './util';
+import { MttoImporter } from './importer';
 
 const MAX_DOC = 10 * 1024 * 1024;
 const MAX_IMG = 5 * 1024 * 1024;
@@ -53,10 +54,18 @@ function utf8Name(name: string) {
 @Controller('admin')
 @UseGuards(AuthGuard)
 export class AdminController {
-  constructor(private db: Db) {}
+  constructor(private db: Db, private importer: MttoImporter) {}
 
   private log(req: any, action: string, target: string) {
     return this.db.insert('audit_log', { id: id(), userName: req.user?.name ?? 'Nepoznat', action, target: String(target).slice(0, 200) });
+  }
+
+  // ---------- Uvoz s mtto.gov.ba ----------
+  @Post('import/mtto')
+  async importMtto(@Req() req: any) {
+    const r = await this.importer.run();
+    await this.log(req, 'Uvezao/la vijesti s mtto.gov.ba', `novih ${r.imported}, povezanih ${r.updated}`);
+    return r;
   }
 
   // ---------- Kontrolna ploča ----------

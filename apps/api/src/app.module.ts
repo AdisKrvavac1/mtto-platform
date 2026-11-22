@@ -4,6 +4,7 @@ import { Db } from './db';
 import { AuthController, AuthGuard } from './auth';
 import { PublicController } from './public.controller';
 import { AdminController } from './admin.controller';
+import { MttoImporter } from './importer';
 
 const secret = process.env.JWT_SECRET;
 if (!secret || secret.length < 32) {
@@ -13,6 +14,6 @@ if (!secret || secret.length < 32) {
 @Module({
   imports: [JwtModule.register({ global: true, secret: secret || 'dev-only-secret-dev-only-secret-0000', signOptions: { expiresIn: '8h' } })],
   controllers: [AuthController, PublicController, AdminController],
-  providers: [Db, AuthGuard],
+  providers: [Db, AuthGuard, MttoImporter],
 })
 export class AppModule {}

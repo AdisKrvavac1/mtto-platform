@@ -17,6 +17,9 @@ CREATE TABLE IF NOT EXISTS posts (
   "authorName" text NOT NULL DEFAULT 'Uredništvo MTTO', "views" int NOT NULL DEFAULT 0, "isDemo" boolean NOT NULL DEFAULT false,
   "createdAt" timestamptz NOT NULL DEFAULT now(), "updatedAt" timestamptz NOT NULL DEFAULT now()
 );
+ALTER TABLE posts ADD COLUMN IF NOT EXISTS "externalId" text;
+ALTER TABLE posts ADD COLUMN IF NOT EXISTS "sourceUrl" text;
+CREATE UNIQUE INDEX IF NOT EXISTS posts_external_id ON posts("externalId") WHERE "externalId" IS NOT NULL;
 CREATE TABLE IF NOT EXISTS permits (
   "id" text PRIMARY KEY, "registerNumber" text UNIQUE NOT NULL, "operator" text NOT NULL, "facility" text NOT NULL,
   "activity" text NOT NULL, "municipality" text NOT NULL, "address" text NOT NULL DEFAULT '', "issuedAt" date NOT NULL,

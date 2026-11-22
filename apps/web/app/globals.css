@@ -5,7 +5,7 @@
 :root {
   --font-sans: 'Public Sans';
   --font-kicker: 'Space Grotesk';
-  --font-display: 'Roboto Flex', 'Roboto', sans-serif;
+  --font-display: 'Roboto Flex Variable', 'Roboto Flex', 'Roboto', sans-serif;
   --font-condensed: 'Roboto Condensed', sans-serif;
   --font-mono-cond: 'Roboto Condensed', 'Roboto Mono', monospace;
 }
@@ -48,3 +48,20 @@
 .prose-mtto blockquote { border-left: 3px solid #234696; padding-left: 1rem; color: #444b5d; }
 
 .leaflet-container { font-family: var(--font-sans), system-ui, sans-serif; }
+
+/* Figma tipografija članka (9:15067) */
+.prose-figma { font-family: 'Public Sans', system-ui, sans-serif; color: #43474f; font-size: 15px; line-height: 24px; }
+.prose-figma > * + * { margin-top: 12px; }
+.prose-figma h2 { font-size: 24px; line-height: 32px; letter-spacing: -0.24px; font-weight: 700; color: #062343; margin-top: 32px; }
+.prose-figma h2::before { width: 10px; height: 10px; border-radius: 12px; }
+.prose-figma h3 { font-size: 18px; line-height: 26px; font-weight: 600; color: #062343; margin-top: 24px; }
+.prose-figma a { color: #006c4a; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+.prose-figma strong, .prose-figma b { color: #062343; }
+.prose-figma ul { list-style: disc; padding-left: 1.25rem; }
+.prose-figma ol { list-style: decimal; padding-left: 1.25rem; }
+.prose-figma li + li { margin-top: 4px; }
+.prose-figma img { border-radius: 8px; max-width: 100%; height: auto; }
+.prose-figma blockquote { border-left: 4px solid #006c4a; background: #eff4ff; padding: 12px 16px; border-radius: 4px; }
+.prose-figma table { width: 100%; font-size: 14px; border-collapse: collapse; display: block; overflow-x: auto; }
+.prose-figma th, .prose-figma td { border-bottom: 1px solid #e5eeff; padding: 8px; text-align: left; }
+@media (max-width: 767px) { .prose-figma h2 { font-size: 20px; line-height: 26px; } }
