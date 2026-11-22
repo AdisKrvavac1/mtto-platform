@@ -1,12 +1,10 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { createHash } from 'crypto';
 import { api, apiSafe, type Doc, type PostListItem } from '@/lib/api';
 import { renderMarkdown } from '@/lib/markdown';
 import { dateLong, dateShort, dateTime, daysUntil, fileExt, fileSize, POST_TYPE, DOC_TYPE } from '@/lib/format';
-import { ArticleBody } from '@/components/figma/Article';
-import { ArticleShare, ArticleFigure, ArticleDocs, RelatedList, H2 } from '@/components/figma/ArticleParts';
-import { DemoTag } from '@/components/figma/cards';
+import { Badge, Button, Container, FeaturedIcon, PostCard, Section, SectionHeader } from '@/components/uui';
+import { Bell01, Calendar, Clock, Download01, Edit05, Eye, File06, Mail01, Share07 } from '@untitledui/icons';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,54 +36,99 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   const isCall = post.type === 'JAVNI_POZIV';
   const left = daysUntil(post.deadline);
   const open = isCall && (left === null || left >= 0);
-  const hash = createHash('sha256').update(post.title + post.body + post.documents.map((d) => d.id).join()).digest('hex');
   const downloads = post.documents.reduce((s, d) => s + d.downloads, 0);
   const related = (await apiSafe<{ items: PostListItem[] }>('/posts?type=JAVNI_POZIV&limit=4', { items: [] })).items.filter((p) => p.id !== post.id).slice(0, 3);
   const relatedNews = related.length ? related : (await apiSafe<{ items: PostListItem[] }>('/posts?limit=4', { items: [] })).items.filter((p) => p.id !== post.id).slice(0, 3);
 
-  const deadlineBox = isCall && post.deadline ? (
-    <div id="prijava" className="bg-[#fffbeb] border-l-4 border-[#f59e0b] flex gap-[16px] items-start p-[20px] md:p-[24px] rounded-[8px] w-full scroll-mt-24">
-      <div className="bg-[#062343] flex items-center justify-center rounded-[8px] shrink-0 size-[40px]"><span aria-hidden className="material-symbols-outlined text-white text-[22px]">notifications_active</span></div>
-      <div className="flex flex-col gap-[6px] min-w-0">
-        <p className="font-space font-bold text-[#062343] text-[12px] tracking-[0.6px] uppercase leading-[16px]">Ključni rokovi i način dostave prijava</p>
-        <p className="font-pub font-semibold text-[#062343] text-[15px] leading-[24px]">Rok za podnošenje prijava je <span className="font-extrabold">{dateTime(post.deadline)} sati</span>.{open && left !== null ? ` Preostalo je ${left} dana.` : ' Rok je istekao.'}</p>
-        <p className="font-pub text-[#334155] text-[13px] leading-[20px]">Nepotpune i nepravovremene prijave neće se razmatrati. Detaljni uslovi su u tekstu poziva i priloženim dokumentima.</p>
-        {open && post.formUrl && (
-          <a href={post.formUrl} target="_blank" rel="noopener" className="mt-[8px] self-start bg-[#006c4a] hover:bg-[#005339] flex gap-[8px] items-center px-[16px] py-[10px] rounded-[4px] font-pub font-semibold text-[14px] text-white tracking-[0.14px] leading-[20px]"><span aria-hidden className="material-symbols-outlined text-[18px]">edit_document</span>Podnesi prijavu online</a>
-        )}
-      </div>
-    </div>
-  ) : null;
   const sector = SECTOR[post.category] ?? 'Ministarstvo trgovine, turizma i zaštite okoliša HNK';
   const typeLabel = POST_TYPE[post.type];
+  const url = `https://mtto-platform.onrender.com/vijesti/${post.slug}`;
+  const readMin = Math.max(1, Math.round(words / 200));
 
   return (
-    <ArticleBody
-      crumbType={isCall ? 'Javni pozivi' : typeLabel}
-      crumbTitle={<span className="inline-block max-w-[16rem] md:max-w-md truncate align-bottom">{post.title}</span>}
-      statusText={isCall ? (open ? 'POZIV JE OTVOREN' : 'POZIV JE ZATVOREN') : typeLabel.toUpperCase()}
-      tag1={(isCall ? 'Javni pozivi · ' : '') + post.category.toUpperCase()}
-      tag3={`GODINA: ${new Date(post.publishedAt).getFullYear()}.`}
-      title={<>{post.title} {post.isDemo && <DemoTag show />}</>}
-      published={dateLong(post.publishedAt)}
-      readMin={Math.max(1, Math.round(words / 200))}
-      updated={dateTime(post.updatedAt)}
-      number={post.documents[0]?.number || `MTTO-${post.id.slice(0, 8).toUpperCase()}`}
-      statusShort={isCall ? (open ? 'STATUS: OTVOREN' : 'STATUS: ZATVOREN') : typeLabel.toUpperCase()}
-      author={sector}
-      share={<ArticleShare title={post.title} />}
-      figure={<ArticleFigure src={post.coverImage} chip={isCall ? 'JAVNI POZIV MTTO' : post.category.toUpperCase()} caption={post.excerpt.slice(0, 120)} />}
-      lead={post.excerpt || null}
-      body={<div className="prose-mtto prose-figma w-full" dangerouslySetInnerHTML={{ __html: html }} />}
-      deadline={deadlineBox}
-      docs={<ArticleDocs docs={post.documents} />}
-      relatedTitle={related.length ? 'Povezani natječaji' : 'Najnovije objave'}
-      related={<RelatedList items={relatedNews} />}
-      views={`${post.views.toLocaleString('bs-BA')} pregleda`}
-      downloads={`${downloads} puta`}
-      callStatus={isCall ? (open ? (left !== null ? `Aktivan (još ${left} dana)` : 'Aktivan') : 'Zatvoren') : 'Objavljeno'}
-      hash1={hash.slice(0, 46)}
-      hash2={hash.slice(46)}
-    />
+    <>
+      {/* Untitled UI "Blog post" – zaglavlje */}
+      <section className="bg-white pt-12 md:pt-16">
+        <Container className="flex flex-col items-center text-center">
+          <nav aria-label="Putanja" className="flex flex-wrap items-center justify-center gap-2 text-[14px] leading-5 font-medium text-[#525252]">
+            <Link href="/" className="hover:text-[#262626]">Naslovna</Link><span className="text-[#d4d4d4]">/</span>
+            <Link href={isCall ? '/vijesti?type=JAVNI_POZIV' : '/vijesti'} className="hover:text-[#262626]">{isCall ? 'Javni pozivi' : 'Vijesti'}</Link>
+          </nav>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
+            <Badge tone="brand" size="md">{post.category || typeLabel}</Badge>
+            {isCall && <Badge tone={open ? 'success' : 'gray'} size="md" dot>{open ? (left !== null ? `Otvoren · još ${left} dana` : 'Otvoren') : 'Zatvoren'}</Badge>}
+            {post.isDemo && <Badge tone="warning" size="md">Demo</Badge>}
+          </div>
+          <h1 className="mt-4 max-w-[960px] text-[30px] leading-[38px] md:text-[48px] md:leading-[60px] font-semibold tracking-[-0.02em] text-[#171717] text-balance">{post.title}</h1>
+          {post.excerpt && <p className="mt-4 md:mt-6 max-w-[768px] text-[18px] leading-7 md:text-[20px] md:leading-[30px] text-[#525252]">{post.excerpt}</p>}
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[14px] leading-5 text-[#525252]">
+            <span className="flex items-center gap-2"><Calendar size={16} className="text-[#a3a3a3]" />{dateLong(post.publishedAt)}</span>
+            <span className="flex items-center gap-2"><Clock size={16} className="text-[#a3a3a3]" />{readMin} min čitanja</span>
+            <span className="flex items-center gap-2"><Eye size={16} className="text-[#a3a3a3]" />{post.views.toLocaleString('bs-BA')} pregleda</span>
+          </div>
+        </Container>
+        {post.coverImage && (
+          <Container className="mt-12 md:mt-16">
+            <div className="overflow-hidden rounded-[16px] md:rounded-[24px] bg-[#f5f5f5] aspect-[16/8]"><img src={post.coverImage} alt="" className="size-full object-cover" /></div>
+          </Container>
+        )}
+      </section>
+
+      <section className="bg-white py-12 md:py-16">
+        <Container>
+          <div className="mx-auto max-w-[720px]">
+            {isCall && post.deadline && (
+              <div id="prijava" className="mb-10 flex gap-4 rounded-[12px] bg-white p-4 md:p-5 ring-1 ring-inset ring-[#d6bbfb] shadow-[0_1px_2px_rgba(10,13,18,0.05)] scroll-mt-28">
+                <FeaturedIcon icon={Bell01} size="md" tone={open ? 'brand' : 'warning'} />
+                <div className="flex flex-col gap-1 min-w-0">
+                  <p className="text-[14px] leading-5 font-semibold text-[#171717]">Rok za prijavu: {dateTime(post.deadline)} h</p>
+                  <p className="text-[14px] leading-5 text-[#525252]">{open ? (left !== null ? `Preostalo je ${left} dana. ` : '') : 'Rok je istekao. '}Nepotpune i nepravovremene prijave se ne razmatraju; uslovi su u tekstu poziva i prilozima.</p>
+                  {open && post.formUrl && <div className="mt-3"><Button href={post.formUrl} icon={Edit05}>Podnesi prijavu online</Button></div>}
+                </div>
+              </div>
+            )}
+            <div className="prose-uui" dangerouslySetInnerHTML={{ __html: html }} />
+
+            {post.documents.length > 0 && (
+              <div id="dokumenti" className="mt-12 scroll-mt-28">
+                <h2 className="text-[24px] leading-8 font-semibold text-[#171717]">Dokumenti za preuzimanje</h2>
+                <ul className="mt-6 flex flex-col gap-3">
+                  {post.documents.map((d) => (
+                    <li key={d.id} className="flex items-center gap-3 rounded-[12px] bg-white p-4 ring-1 ring-inset ring-[#e5e5e5]">
+                      <span className="relative flex h-10 w-8 shrink-0 items-end justify-center rounded-[4px] ring-1 ring-inset ring-[#d4d4d4] bg-white"><span className="absolute -left-1.5 bottom-1.5 rounded-[2px] bg-[#d92d20] px-1 text-[10px] leading-[14px] font-bold text-white">{fileExt(d.fileName).slice(0, 4)}</span></span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-[14px] leading-5 font-medium text-[#404040]">{d.title}{d.isDemo && <Badge tone="warning" className="ml-2">Demo</Badge>}</p>
+                        <p className="text-[14px] leading-5 text-[#525252]">{fileSize(d.size)} · {DOC_TYPE[d.docType] ?? d.docType}{d.number ? ` · ${d.number}` : ''}</p>
+                      </div>
+                      <Button href={`/api/documents/${d.id}/file`} variant="tertiary" size="sm" icon={Download01} external>Preuzmi</Button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <div className="mt-12 flex flex-col gap-6 border-t border-[#e5e5e5] pt-6 md:flex-row md:items-center md:justify-between">
+              <div className="flex items-center gap-3">
+                <span className="flex size-12 items-center justify-center rounded-full bg-[#f9f5ff] ring-1 ring-black/10"><img src="/mtto-logo.svg" alt="" className="h-6" /></span>
+                <div><p className="text-[16px] leading-6 font-semibold text-[#171717]">{sector}</p><p className="text-[16px] leading-6 text-[#525252]">Ažurirano {dateTime(post.updatedAt)}</p></div>
+              </div>
+              <div className="flex gap-3">
+                <Button href={`mailto:?subject=${encodeURIComponent(post.title)}&body=${encodeURIComponent(url)}`} variant="secondary" icon={Mail01}>E-mail</Button>
+                <Button href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`} variant="secondary" icon={Share07}>Facebook</Button>
+              </div>
+            </div>
+          </div>
+        </Container>
+      </section>
+
+      {relatedNews.length > 0 && (
+        <Section tone="gray">
+          <SectionHeader eyebrow={related.length ? 'Javni pozivi' : 'Vijesti'} title={related.length ? 'Povezani pozivi' : 'Najnovije objave'} actions={<Button href="/vijesti" size="lg">Sve objave</Button>} />
+          <div className="mt-12 grid gap-x-8 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
+            {relatedNews.map((p) => <PostCard key={p.id} href={`/vijesti/${p.slug}`} image={p.coverImage} category={p.category || POST_TYPE[p.type]} title={p.title} excerpt={p.excerpt} meta={dateLong(p.publishedAt)} />)}
+          </div>
+        </Section>
+      )}
+    </>
   );
 }

@@ -1,6 +1,6 @@
 /* CMS tema prema Untitled UI PRO (v8) – neutralna siva skala, Inter, radijusi 6/8/12, Untitled ljubičasta (#7F56D9) kao brand boja.
    Primjenjuje se samo unutar .cms-theme (CmsShell), javni portal ostaje na svojim tokenima. */
-.cms-theme {
+.cms-theme, .uui-theme {
   --c-background: 255 255 255;
   --c-surface: 255 255 255;
   --c-surface-bright: 255 255 255;
@@ -67,19 +67,34 @@
   color: #525252;
 }
 /* Tipografija (Untitled UI skala) */
-.cms-theme .text-headline-lg { font-size: 30px; line-height: 38px; font-weight: 600; letter-spacing: 0; }
-.cms-theme .text-headline-md { font-size: 24px; line-height: 32px; font-weight: 600; letter-spacing: 0; }
-.cms-theme .text-headline-sm { font-size: 18px; line-height: 28px; font-weight: 600; }
-.cms-theme .text-title-md { font-size: 18px; line-height: 28px; font-weight: 600; }
-.cms-theme .text-button { font-size: 14px; line-height: 20px; font-weight: 600; letter-spacing: 0; }
-.cms-theme .text-body-sm { font-size: 14px; line-height: 20px; }
-.cms-theme .text-body-regular { font-size: 16px; line-height: 24px; }
-.cms-theme .text-label-kicker { font-size: 12px; line-height: 18px; letter-spacing: 0; font-weight: 600; text-transform: none; }
-.cms-theme .text-label-badge { font-size: 12px; line-height: 18px; letter-spacing: 0; font-weight: 500; text-transform: none; }
-.cms-theme .uppercase.tracking-wider, .cms-theme .uppercase.tracking-widest { letter-spacing: 0.02em; }
+.cms-theme .text-headline-lg, .uui-theme .text-headline-lg { font-size: 30px; line-height: 38px; font-weight: 600; letter-spacing: 0; }
+.cms-theme .text-headline-md, .uui-theme .text-headline-md { font-size: 24px; line-height: 32px; font-weight: 600; letter-spacing: 0; }
+.cms-theme .text-headline-sm, .uui-theme .text-headline-sm { font-size: 18px; line-height: 28px; font-weight: 600; }
+.cms-theme .text-title-md, .uui-theme .text-title-md { font-size: 18px; line-height: 28px; font-weight: 600; }
+.cms-theme .text-button, .uui-theme .text-button { font-size: 14px; line-height: 20px; font-weight: 600; letter-spacing: 0; }
+.cms-theme .text-body-sm, .uui-theme .text-body-sm { font-size: 14px; line-height: 20px; }
+.cms-theme .text-body-regular, .uui-theme .text-body-regular { font-size: 16px; line-height: 24px; }
+.cms-theme .text-label-kicker, .uui-theme .text-label-kicker { font-size: 12px; line-height: 18px; letter-spacing: 0; font-weight: 600; text-transform: none; }
+.cms-theme .text-label-badge, .uui-theme .text-label-badge { font-size: 12px; line-height: 18px; letter-spacing: 0; font-weight: 500; text-transform: none; }
+.cms-theme .uppercase.tracking-wider, .cms-theme .uppercase.tracking-widest, .uui-theme .uppercase.tracking-wider, .cms-theme .uppercase.tracking-widest { letter-spacing: 0.02em; }
 /* Sjene: Stitch sjene → Untitled xs / lg */
-.cms-theme .shadow-sm, .cms-theme .shadow { box-shadow: var(--uui-shadow-xs); }
-.cms-theme .shadow-lg, .cms-theme .shadow-xl { box-shadow: var(--uui-shadow-lg); }
+.cms-theme .shadow-sm, .cms-theme .shadow, .uui-theme .shadow-sm, .cms-theme .shadow { box-shadow: var(--uui-shadow-xs); }
+.cms-theme .shadow-lg, .cms-theme .shadow-xl, .uui-theme .shadow-lg, .cms-theme .shadow-xl { box-shadow: var(--uui-shadow-lg); }
 /* Fokus */
-.cms-theme :focus-visible { outline: 2px solid #7f56d9; outline-offset: 2px; }
-.cms-theme input:focus, .cms-theme select:focus, .cms-theme textarea:focus { border-color: #d6bbfb !important; box-shadow: 0 0 0 4px rgba(158, 119, 237, 0.24) !important; outline: none; }
+.cms-theme :focus-visible, .uui-theme :focus-visible { outline: 2px solid #7f56d9; outline-offset: 2px; }
+.cms-theme input:focus, .cms-theme select:focus, .cms-theme textarea:focus, .uui-theme input:focus, .cms-theme select:focus, .cms-theme textarea:focus { border-color: #d6bbfb !important; box-shadow: 0 0 0 4px rgba(158, 119, 237, 0.24) !important; outline: none; }
+/* Javni portal: stari fontovi (Public Sans, Space Grotesk, Roboto) → Inter, da sve stranice dijele istu tipografiju */
+.uui-theme .font-pub, .uui-theme .font-space, .uui-theme .font-rob, .uui-theme .font-robflex, .uui-theme .font-cond { font-family: 'Inter Variable', system-ui, sans-serif; }
+/* Untitled UI "Blog post" tipografija sadržaja */
+.prose-uui { color: #525252; font-size: 18px; line-height: 28px; }
+.prose-uui > * + * { margin-top: 20px; }
+.prose-uui h2 { margin-top: 40px; color: #171717; font-size: 24px; line-height: 32px; font-weight: 600; }
+.prose-uui h3 { margin-top: 32px; color: #171717; font-size: 20px; line-height: 30px; font-weight: 600; }
+.prose-uui a { color: #6941c6; text-decoration: underline; text-underline-offset: 3px; }
+.prose-uui strong, .prose-uui b { color: #404040; font-weight: 600; }
+.prose-uui ul, .prose-uui ol { padding-left: 24px; } .prose-uui ul { list-style: disc; } .prose-uui ol { list-style: decimal; }
+.prose-uui li + li { margin-top: 8px; } .prose-uui li::marker { color: #a3a3a3; }
+.prose-uui blockquote { border-left: 2px solid #7f56d9; padding-left: 20px; font-style: italic; font-size: 20px; line-height: 30px; color: #171717; }
+.prose-uui img, .prose-uui figure img { border-radius: 12px; width: 100%; height: auto; }
+.prose-uui figcaption { margin-top: 12px; font-size: 14px; line-height: 20px; color: #525252; }
+.prose-uui table { width: 100%; font-size: 14px; border-collapse: collapse; } .prose-uui th, .prose-uui td { border-bottom: 1px solid #e5e5e5; padding: 12px 8px; text-align: left; }
