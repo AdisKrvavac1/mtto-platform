@@ -75,7 +75,7 @@ export default async function PermitDossier({ params }: { params: Promise<{ id: 
                 <ul className="divide-y divide-[#e5e5e5]">
                   {docs.map((d) => (
                     <li key={d.id} className="flex items-center gap-3 px-6 py-4">
-                      <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#f9f5ff] text-[#7f56d9]"><File06 size={20} /></span>
+                      <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--br-50)] text-[var(--br-600)]"><File06 size={20} /></span>
                       <span className="min-w-0 flex-1"><b className="block truncate text-[14px] font-medium text-[#171717]">{d.title}</b><span className="text-[14px] text-[#525252]">{fileExt(d.fileName)} · {fileSize(d.size)}</span></span>
                       <Button href={`/api/documents/${d.id}/file`} variant="tertiary" size="sm" icon={Download01} external>Preuzmi</Button>
                     </li>
@@ -85,7 +85,7 @@ export default async function PermitDossier({ params }: { params: Promise<{ id: 
             </TableCard>
           </div>
           <Card className="flex flex-col gap-4 p-5 lg:col-span-5">
-            <div className="flex items-center justify-between"><h2 className="flex items-center gap-2 text-[18px] font-semibold text-[#171717]"><Map01 size={20} className="text-[#7f56d9]" />Lokacija postrojenja</h2><Badge tone="gray">GIS</Badge></div>
+            <div className="flex items-center justify-between"><h2 className="flex items-center gap-2 text-[18px] font-semibold text-[#171717]"><Map01 size={20} className="text-[var(--br-600)]" />Lokacija postrojenja</h2><Badge tone="gray">GIS</Badge></div>
             {p.lat != null && p.lng != null ? (
               <>
                 <div className="overflow-hidden rounded-[8px]"><MapSection compact title={false} height={280} points={[{ id: p.id, layer: 'DOZVOLA', name: p.operator, description: p.facility, lat: p.lat, lng: p.lng, link: null }]} /></div>
@@ -117,7 +117,7 @@ export default async function PermitDossier({ params }: { params: Promise<{ id: 
             </table>
           </TableCard>
         </div>
-        <p className="mt-8 flex items-center gap-2 text-[14px] text-[#737373]"><Calendar size={16} />Javnost ima pravo uvida u podatke o okolišu prema Aarhuškoj konvenciji. Zahtjev za uvid u spis šalje se putem <Link href="/o-nama#upit" className="font-semibold text-[#6941c6]">obrasca za upit</Link>.</p>
+        <p className="mt-8 flex items-center gap-2 text-[14px] text-[#737373]"><Calendar size={16} />Javnost ima pravo uvida u podatke o okolišu prema Aarhuškoj konvenciji. Zahtjev za uvid u spis šalje se putem <Link href="/o-nama#upit" className="font-semibold text-[var(--br-700)]">obrasca za upit</Link>.</p>
       </Section>
     </>
   );

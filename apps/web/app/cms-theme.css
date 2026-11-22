@@ -1,4 +1,4 @@
-/* CMS tema prema Untitled UI PRO (v8) – neutralna siva skala, Inter, radijusi 6/8/12, Untitled ljubičasta (#7F56D9) kao brand boja.
+/* CMS tema prema Untitled UI PRO (v8) – neutralna siva skala, Inter, radijusi 6/8/12, Untitled ljubičasta (var(--br-600)) kao brand boja.
    Primjenjuje se samo unutar .cms-theme (CmsShell), javni portal ostaje na svojim tokenima. */
 .cms-theme, .uui-theme {
   --c-background: 255 255 255;
@@ -81,8 +81,8 @@
 .cms-theme .shadow-sm, .cms-theme .shadow, .uui-theme .shadow-sm, .cms-theme .shadow { box-shadow: var(--uui-shadow-xs); }
 .cms-theme .shadow-lg, .cms-theme .shadow-xl, .uui-theme .shadow-lg, .cms-theme .shadow-xl { box-shadow: var(--uui-shadow-lg); }
 /* Fokus */
-.cms-theme :focus-visible, .uui-theme :focus-visible { outline: 2px solid #7f56d9; outline-offset: 2px; }
-.cms-theme input:focus, .cms-theme select:focus, .cms-theme textarea:focus, .uui-theme input:focus, .cms-theme select:focus, .cms-theme textarea:focus { border-color: #d6bbfb !important; box-shadow: 0 0 0 4px rgba(158, 119, 237, 0.24) !important; outline: none; }
+.cms-theme :focus-visible, .uui-theme :focus-visible { outline: 2px solid var(--br-600); outline-offset: 2px; }
+.cms-theme input:focus, .cms-theme select:focus, .cms-theme textarea:focus, .uui-theme input:focus, .cms-theme select:focus, .cms-theme textarea:focus { border-color: var(--br-300) !important; box-shadow: 0 0 0 4px rgba(158, 119, 237, 0.24) !important; outline: none; }
 /* Javni portal: stari fontovi (Public Sans, Space Grotesk, Roboto) → Inter, da sve stranice dijele istu tipografiju */
 .uui-theme .font-pub, .uui-theme .font-space, .uui-theme .font-rob, .uui-theme .font-robflex, .uui-theme .font-cond { font-family: 'Inter Variable', system-ui, sans-serif; }
 /* Untitled UI "Blog post" tipografija sadržaja */
@@ -90,14 +90,21 @@
 .prose-uui > * + * { margin-top: 20px; }
 .prose-uui h2 { margin-top: 40px; color: #171717; font-size: 24px; line-height: 32px; font-weight: 600; }
 .prose-uui h3 { margin-top: 32px; color: #171717; font-size: 20px; line-height: 30px; font-weight: 600; }
-.prose-uui a { color: #6941c6; text-decoration: underline; text-underline-offset: 3px; }
+.prose-uui a { color: var(--br-700); text-decoration: underline; text-underline-offset: 3px; }
 .prose-uui strong, .prose-uui b { color: #404040; font-weight: 600; }
 .prose-uui ul, .prose-uui ol { padding-left: 24px; } .prose-uui ul { list-style: disc; } .prose-uui ol { list-style: decimal; }
 .prose-uui li + li { margin-top: 8px; } .prose-uui li::marker { color: #a3a3a3; }
-.prose-uui blockquote { border-left: 2px solid #7f56d9; padding-left: 20px; font-style: italic; font-size: 20px; line-height: 30px; color: #171717; }
+.prose-uui blockquote { border-left: 2px solid var(--br-600); padding-left: 20px; font-style: italic; font-size: 20px; line-height: 30px; color: #171717; }
 .prose-uui img, .prose-uui figure img { border-radius: 12px; width: 100%; height: auto; }
 .prose-uui figcaption { margin-top: 12px; font-size: 14px; line-height: 20px; color: #525252; }
 .prose-uui table { width: 100%; font-size: 14px; border-collapse: collapse; } .prose-uui th, .prose-uui td { border-bottom: 1px solid #e5e5e5; padding: 12px 8px; text-align: left; }
 
 /* sr-only elementi u tabelama ne smiju širiti stranicu na mobitelu */
 .overflow-x-auto { position: relative; }
+
+/* ───── Brand skale: CMS = Untitled Purple, javni portal = Untitled Blue (+ Green za akcije i status) ───── */
+.cms-theme { --br-25:#fcfaff; --br-50:#f9f5ff; --br-100:#f4ebff; --br-200:#e9d7fe; --br-300:#d6bbfb; --br-400:#b692f6; --br-500:#9e77ed; --br-600:#7f56d9; --br-700:#6941c6; --br-800:#53389e; --br-900:#42307d; --br-950:#2c1c5f; --br-ring:rgba(158,119,237,.25); --br-ring2:rgba(158,119,237,.4); }
+.uui-theme { --br-25:#f5faff; --br-50:#eff8ff; --br-100:#d1e9ff; --br-200:#b2ddff; --br-300:#84caff; --br-400:#53b1fd; --br-500:#2e90fa; --br-600:#1570ef; --br-700:#175cd3; --br-800:#1849a9; --br-900:#194185; --br-950:#102a56; --br-ring:rgba(46,144,250,.25); --br-ring2:rgba(46,144,250,.4);
+  --c-primary: 21 112 239; --c-primary-container: 23 92 211; --c-surface-tint: 83 177 253; --c-primary-fixed: 239 248 255; --c-primary-fixed-dim: 178 221 255;
+  --c-on-primary-fixed: 25 65 133; --c-on-primary-fixed-variant: 23 92 211; --c-mtto-primary: 21 112 239; --c-inverse-primary: 178 221 255; }
+.cms-theme, .uui-theme { --gr-25:#f6fef9; --gr-50:#edfcf2; --gr-100:#d3f8df; --gr-200:#aaf0c4; --gr-300:#73e2a3; --gr-400:#3ccb7f; --gr-500:#16b364; --gr-600:#099250; --gr-700:#087443; --gr-800:#095c37; --gr-900:#084c2e; --gr-950:#052e1c; }

@@ -46,7 +46,7 @@ export default function PrijavaIncidentaPage() {
               <Link href="/eko-rizik" className="group flex items-center gap-3 rounded-[12px] bg-white p-4 ring-1 ring-inset ring-[#e5e5e5] shadow-[0_1px_2px_rgba(10,13,18,0.05)] hover:bg-[#fafafa]">
                 <FeaturedIcon icon={AlertTriangle} tone="brand" size="md" />
                 <span className="flex flex-col"><span className="text-[16px] font-semibold text-[#171717]">Karta rizika HNK</span><span className="text-[14px] text-[#525252]">Požari, upozorenja, protok Neretve, klizišta</span></span>
-                <ArrowRight size={20} className="ml-auto text-[#a3a3a3] group-hover:text-[#6941c6]" />
+                <ArrowRight size={20} className="ml-auto text-[#a3a3a3] group-hover:text-[var(--br-700)]" />
               </Link>
             </aside>
           </div>

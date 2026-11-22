@@ -1,7 +1,9 @@
 import { apiSafe, type MapPoint, type PostListItem } from '@/lib/api';
+import Link from 'next/link';
 import MapSection from '@/components/site/MapSection';
+import HeroSlider, { type Slide } from '@/components/uui/HeroSlider';
 import { dateLong, daysUntil, POST_TYPE } from '@/lib/format';
-import { Badge, BadgeGroup, Button, Card, Container, CtaBox, Faq, Feature, FeaturedIcon, Metric, PostCard, Section, SectionHeader } from '@/components/uui';
+import { Badge, BadgeGroup, Button, Card, Container, CtaBox, Faq, Feature, FeaturedIcon, Metric, PostCard, FeaturedPost, Section, SectionHeader } from '@/components/uui';
 import {
   AlertTriangle, ArrowRight, Building07, Calendar, FileSearch02, Globe02, MessageChatCircle, Phone01, Scales02, Sun, Ticket01, Waves,
 } from '@untitledui/icons';
@@ -11,6 +13,13 @@ export const dynamic = 'force-dynamic';
 type Stats = { posts: number; calls: number; documents: number; permits: number; permitsRenewal: number; facilities: number; locations: number };
 type Risk = { level: 1 | 2 | 3; warnings: { items: unknown[] }; fires: { last24h: number } };
 const fmt = (n: number) => n.toLocaleString('bs-BA');
+const SLIDES: Slide[] = [
+  { src: '/hero/neretva.jpg', alt: 'Kanjon Neretve', place: 'Kanjon Neretve' },
+  { src: '/hero/neum.jpg', alt: 'Neum', place: 'Neum' },
+  { src: '/hero/hutovo.jpg', alt: 'Park prirode Hutovo blato', place: 'Hutovo blato' },
+  { src: '/hero/prenj.jpg', alt: 'Planina Prenj', place: 'Prenj' },
+  { src: '/hero/blidinje.jpg', alt: 'Park prirode Blidinje', place: 'Blidinje' },
+];
 
 export default async function HomePage() {
   const [news, calls, stats, points, risk] = await Promise.all([
@@ -20,34 +29,42 @@ export default async function HomePage() {
     apiSafe<MapPoint[]>('/map', []),
     apiSafe<Risk | null>('/risk/summary', null),
   ]);
-  const posts = news.items.filter((p) => p.type !== 'JAVNI_POZIV').slice(0, 3);
+  const posts = news.items.filter((p) => p.type !== 'JAVNI_POZIV');
+  const featured = posts.find((p) => p.coverImage) ?? posts[0];
+  const rest = posts.filter((p) => p !== featured).slice(0, 3);
   const open = calls.items.filter((c) => !c.deadline || new Date(c.deadline) > new Date());
   const lvl = risk?.level ?? 1;
   const riskLabel = lvl === 3 ? 'Visok rizik' : lvl === 2 ? 'Pojačan oprez' : 'Uobičajeno stanje';
 
   return (
     <>
-      {/* HERO – Untitled "Hero header section" (centrirano, badge group, dvije akcije, vizual u okviru) */}
-      <section className="relative overflow-hidden bg-white pt-16 md:pt-24">
-        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[640px] [background-image:linear-gradient(#f5f5f5_1px,transparent_1px),linear-gradient(90deg,#f5f5f5_1px,transparent_1px)] [background-size:64px_64px] [mask-image:radial-gradient(ellipse_at_top,black_30%,transparent_70%)]" />
-        <Container className="relative flex flex-col items-center text-center">
-          <BadgeGroup label={riskLabel} tone={lvl === 3 ? 'error' : lvl === 2 ? 'warning' : 'success'} href="/eko-rizik">Eko-rizik HNK uživo</BadgeGroup>
-          <h1 className="mt-4 max-w-[1024px] text-[36px] leading-[44px] md:text-[60px] md:leading-[72px] font-semibold tracking-[-0.02em] text-[#171717] text-balance">Trgovina, turizam i okoliš Hercegovačko-neretvanskog kantona</h1>
-          <p className="mt-4 md:mt-6 max-w-[768px] text-[18px] leading-7 md:text-[20px] md:leading-[30px] text-[#525252]">Vijesti, javni pozivi, registri i e-usluge Ministarstva na jednom mjestu. Podnesite zahtjev, preuzmite obrazac ili prijavite ekološki incident bez odlaska u ured.</p>
-          <div className="mt-8 md:mt-12 flex w-full flex-col-reverse gap-3 sm:w-auto sm:flex-row">
-            <Button href="/eko-rizik/prijava" variant="secondary" size="xl" icon={AlertTriangle}>Prijavi incident</Button>
-            <Button href="/e-usluge" size="xl">Otvori e-usluge</Button>
+      {/* HERO – Untitled "Hero header" s punom pozadinom: slider fotografija, plavi prelaz, staklena traka s brojkama */}
+      <section className="relative isolate flex min-h-[760px] flex-col overflow-hidden bg-[var(--br-950)] md:min-h-[860px]">
+        <HeroSlider slides={SLIDES} />
+        <div aria-hidden className="absolute inset-0 bg-[linear-gradient(90deg,rgba(16,42,86,0.95)_0%,rgba(16,42,86,0.8)_40%,rgba(16,42,86,0.2)_100%)]" />
+        <div aria-hidden className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-[rgba(16,42,86,0.85)] to-transparent" />
+        <Container className="relative flex flex-1 flex-col justify-center pb-12 pt-36 md:pt-40">
+          <Link href="/eko-rizik" className="inline-flex w-max max-w-full items-center gap-2 rounded-full bg-white/10 py-1 pl-1 pr-3 text-[14px] leading-5 font-medium text-white ring-1 ring-inset ring-white/20 backdrop-blur-md hover:bg-white/15">
+            <span className={`flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[12px] leading-[18px] ${lvl === 3 ? 'bg-[#fef3f2] text-[#b42318]' : lvl === 2 ? 'bg-[#fffaeb] text-[#b54708]' : 'bg-[var(--gr-50)] text-[var(--gr-700)]'}`}><span className={`size-1.5 rounded-full ${lvl === 3 ? 'bg-[#f04438]' : lvl === 2 ? 'bg-[#f79009]' : 'bg-[var(--gr-500)]'}`} />{riskLabel}</span>
+            <span className="truncate">Eko-rizik HNK uživo</span><ArrowRight size={16} className="shrink-0" />
+          </Link>
+          <h1 className="mt-6 max-w-[960px] text-[40px] leading-[48px] md:text-[60px] md:leading-[72px] font-medium tracking-[-0.02em] text-white">
+            Trgovina, turizam i okoliš <span className="underline decoration-[3px] decoration-[var(--gr-400)] underline-offset-[10px]">Hercegovine</span> na jednom mjestu
+          </h1>
+          <p className="mt-6 max-w-[560px] text-[18px] leading-7 md:text-[20px] md:leading-[30px] text-white/80">— Vijesti, javni pozivi, registri i e-usluge Ministarstva. Podnesite zahtjev ili prijavite ekološki incident bez odlaska u ured.</p>
+          <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row md:mt-12">
+            <Link href="/eko-rizik/prijava" className="inline-flex h-12 items-center justify-center gap-2 rounded-[8px] bg-white px-5 text-[16px] font-semibold text-[#404040] ring-1 ring-inset ring-[#d4d4d4] shadow-[0_1px_2px_rgba(10,13,18,0.05)] hover:bg-[#fafafa]"><AlertTriangle size={20} className="text-[#a3a3a3]" />Prijavi incident</Link>
+            <Link href="/e-usluge" className="inline-flex h-12 items-center justify-center gap-2 rounded-[8px] border-2 border-white/10 bg-[var(--gr-600)] px-5 text-[16px] font-semibold text-white shadow-[0_1px_2px_rgba(10,13,18,0.05),inset_0_-2px_0_rgba(10,13,18,0.05),inset_0_0_0_1px_rgba(10,13,18,0.18)] hover:bg-[var(--gr-700)]">Otvori e-usluge<ArrowRight size={20} /></Link>
           </div>
         </Container>
-        <Container className="relative mt-16 md:mt-20">
-          <div className="relative rounded-[24px] bg-white p-1 ring-1 ring-black/10 shadow-[0_24px_48px_-12px_rgba(10,13,18,0.18)]">
-            <div className="relative overflow-hidden rounded-[20px] aspect-[16/7] bg-[#f5f5f5]">
-              <img src="/fig/tile-neretva.jpg" alt="Rijeka Neretva" className="size-full object-cover" />
-              <div className="absolute inset-x-0 bottom-0 flex flex-wrap gap-2 p-4 md:p-6 bg-gradient-to-t from-black/50 to-transparent">
-                {['Mostar', 'Konjic', 'Jablanica', 'Prozor-Rama', 'Čitluk', 'Čapljina', 'Stolac', 'Neum', 'Ravno'].map((m) => <span key={m} className="rounded-full bg-white/90 px-2.5 py-0.5 text-[12px] leading-[18px] font-medium text-[#404040] backdrop-blur">{m}</span>)}
+        <Container className="relative pb-14 md:pb-16">
+          <dl className="grid grid-cols-2 overflow-hidden rounded-[16px] bg-white/10 ring-1 ring-inset ring-white/20 backdrop-blur-xl md:grid-cols-4">
+            {[['9', 'općina i gradova'], [fmt(stats.posts), 'objava na portalu'], [fmt(stats.permits), 'okolišnih dozvola'], [fmt(stats.documents), 'propisa i obrazaca']].map(([v, l], k) => (
+              <div key={l} className={`px-5 py-4 md:px-6 md:py-5 ${k % 2 ? 'border-l border-white/15' : ''} ${k > 1 ? 'border-t border-white/15 md:border-t-0' : ''} ${k === 2 ? 'md:border-l' : ''}`}>
+                <dt className="sr-only">{l}</dt><dd className="text-[30px] leading-[38px] md:text-[36px] md:leading-[44px] font-semibold text-white">{v}</dd><dd className="mt-1 text-[14px] md:text-[16px] text-[var(--br-200)]">{l}</dd>
               </div>
-            </div>
-          </div>
+            ))}
+          </dl>
         </Container>
       </section>
 
@@ -88,10 +105,15 @@ export default async function HomePage() {
       </Section>
 
       {/* BLOG – najnovije vijesti */}
-      <Section tone="gray">
+      <Section>
         <SectionHeader eyebrow="Vijesti" title="Najnovije iz Ministarstva" actions={<Button href="/vijesti" size="lg">Sve vijesti</Button>}>Saopćenja, odluke i aktivnosti sektora za trgovinu, turizam i zaštitu okoliša.</SectionHeader>
-        <div className="mt-12 md:mt-16 grid gap-x-8 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
-          {posts.map((p) => (
+        {featured && (
+          <div className="mt-12 md:mt-16">
+            <FeaturedPost href={`/vijesti/${featured.slug}`} image={featured.coverImage} category={featured.category || POST_TYPE[featured.type]} title={featured.title} excerpt={featured.excerpt} date={dateLong(featured.publishedAt)} badge={featured.isDemo ? <Badge tone="warning">Demo</Badge> : undefined} />
+          </div>
+        )}
+        <div className="mt-12 grid gap-x-8 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
+          {rest.map((p) => (
             <PostCard key={p.id} href={`/vijesti/${p.slug}`} image={p.coverImage} category={p.category || POST_TYPE[p.type]} title={p.title} excerpt={p.excerpt}
               badge={p.isDemo ? <Badge tone="warning">Demo</Badge> : undefined}
               meta={<span className="flex items-center gap-2"><Calendar size={16} className="text-[#a3a3a3]" />{dateLong(p.publishedAt)}</span>} />
@@ -108,7 +130,7 @@ export default async function HomePage() {
             const d = daysUntil(c.deadline);
             const isOpen = !c.deadline || (d ?? 0) >= 0;
             return (
-              <Card key={c.id} className="p-5 md:p-6 hover:ring-[#d6bbfb] transition-shadow">
+              <Card key={c.id} className="p-5 md:p-6 hover:ring-[var(--br-300)] transition-shadow">
                 <a href={`/vijesti/${c.slug}`} className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div className="flex items-start gap-4 min-w-0">
                     <FeaturedIcon icon={Ticket01} size="md" tone="brand" />
@@ -124,7 +146,7 @@ export default async function HomePage() {
                   </div>
                   <div className="flex items-center gap-4 shrink-0 md:pl-6">
                     {c.deadline && <span className="flex items-center gap-1.5 text-[14px] font-medium text-[#404040]"><Calendar size={16} className="text-[#a3a3a3]" />Rok: {dateLong(c.deadline)}</span>}
-                    <ArrowRight size={20} className="text-[#7f56d9]" />
+                    <ArrowRight size={20} className="text-[var(--br-600)]" />
                   </div>
                 </a>
               </Card>
@@ -145,11 +167,11 @@ export default async function HomePage() {
         <SectionHeader title="Česta pitanja" align="center">Odgovori na pitanja koja građani i privreda najčešće postavljaju Ministarstvu.</SectionHeader>
         <div className="mt-12 md:mt-16">
           <Faq items={[
-            { q: 'Kako mogu provjeriti da li firma ima važeću okolišnu dozvolu?', a: <>Otvorite <a className="font-semibold text-[#6941c6]" href="/registri/okolisne-dozvole">registar okolišnih dozvola</a> i pretražite po nazivu operatera, broju rješenja ili općini. Za svaku dozvolu prikazan je rok važenja i dokumenti.</> },
-            { q: 'Gdje mogu preuzeti obrasce zahtjeva?', a: <>Svi obrasci nalaze se u rubrici <a className="font-semibold text-[#6941c6]" href="/propisi">Propisi i obrasci</a>. Popunjen zahtjev predaje se u pisarnici Ministarstva ili poštom na adresu Braće Fejića bb, Mostar.</> },
-            { q: 'Kako prijaviti divlju deponiju, požar ili zagađenje?', a: <>Koristite <a className="font-semibold text-[#6941c6]" href="/eko-rizik/prijava">Eko-prijavu</a>. Prijava može biti anonimna. Ako je u toku požar, prvo pozovite vatrogasce na 123.</> },
-            { q: 'Kako saznati za nove javne pozive?', a: <>Otvoreni pozivi objavljuju se u rubrici <a className="font-semibold text-[#6941c6]" href="/vijesti?type=JAVNI_POZIV">Javni pozivi</a>, s rokom prijave, tekstom poziva i obrascima.</> },
-            { q: 'Kako zatražiti informaciju po Zakonu o slobodi pristupa informacijama?', a: <>Zahtjev možete poslati putem obrasca na stranici <a className="font-semibold text-[#6941c6]" href="/o-nama#upit">O nama</a> ili na info@mtto.gov.ba.</> },
+            { q: 'Kako mogu provjeriti da li firma ima važeću okolišnu dozvolu?', a: <>Otvorite <a className="font-semibold text-[var(--br-700)]" href="/registri/okolisne-dozvole">registar okolišnih dozvola</a> i pretražite po nazivu operatera, broju rješenja ili općini. Za svaku dozvolu prikazan je rok važenja i dokumenti.</> },
+            { q: 'Gdje mogu preuzeti obrasce zahtjeva?', a: <>Svi obrasci nalaze se u rubrici <a className="font-semibold text-[var(--br-700)]" href="/propisi">Propisi i obrasci</a>. Popunjen zahtjev predaje se u pisarnici Ministarstva ili poštom na adresu Braće Fejića bb, Mostar.</> },
+            { q: 'Kako prijaviti divlju deponiju, požar ili zagađenje?', a: <>Koristite <a className="font-semibold text-[var(--br-700)]" href="/eko-rizik/prijava">Eko-prijavu</a>. Prijava može biti anonimna. Ako je u toku požar, prvo pozovite vatrogasce na 123.</> },
+            { q: 'Kako saznati za nove javne pozive?', a: <>Otvoreni pozivi objavljuju se u rubrici <a className="font-semibold text-[var(--br-700)]" href="/vijesti?type=JAVNI_POZIV">Javni pozivi</a>, s rokom prijave, tekstom poziva i obrascima.</> },
+            { q: 'Kako zatražiti informaciju po Zakonu o slobodi pristupa informacijama?', a: <>Zahtjev možete poslati putem obrasca na stranici <a className="font-semibold text-[var(--br-700)]" href="/o-nama#upit">O nama</a> ili na info@mtto.gov.ba.</> },
           ]} />
         </div>
         <div className="mt-12 md:mt-16">

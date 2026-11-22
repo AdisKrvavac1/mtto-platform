@@ -78,7 +78,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         <Container>
           <div className="mx-auto max-w-[720px]">
             {isCall && post.deadline && (
-              <div id="prijava" className="mb-10 flex gap-4 rounded-[12px] bg-white p-4 md:p-5 ring-1 ring-inset ring-[#d6bbfb] shadow-[0_1px_2px_rgba(10,13,18,0.05)] scroll-mt-28">
+              <div id="prijava" className="mb-10 flex gap-4 rounded-[12px] bg-white p-4 md:p-5 ring-1 ring-inset ring-[var(--br-300)] shadow-[0_1px_2px_rgba(10,13,18,0.05)] scroll-mt-28">
                 <FeaturedIcon icon={Bell01} size="md" tone={open ? 'brand' : 'warning'} />
                 <div className="flex flex-col gap-1 min-w-0">
                   <p className="text-[14px] leading-5 font-semibold text-[#171717]">Rok za prijavu: {dateTime(post.deadline)} h</p>
@@ -109,7 +109,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
             <div className="mt-12 flex flex-col gap-6 border-t border-[#e5e5e5] pt-6 md:flex-row md:items-center md:justify-between">
               <div className="flex items-center gap-3">
-                <span className="flex size-12 items-center justify-center rounded-full bg-[#f9f5ff] ring-1 ring-black/10"><img src="/mtto-logo.svg" alt="" className="h-6" /></span>
+                <span className="flex size-12 items-center justify-center rounded-full bg-[var(--br-50)] ring-1 ring-black/10"><img src="/mtto-logo.svg" alt="" className="h-6" /></span>
                 <div><p className="text-[16px] leading-6 font-semibold text-[#171717]">{sector}</p><p className="text-[16px] leading-6 text-[#525252]">Ažurirano {dateTime(post.updatedAt)}</p></div>
               </div>
               <div className="flex gap-3">

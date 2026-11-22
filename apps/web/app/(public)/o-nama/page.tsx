@@ -41,7 +41,7 @@ export default function ONamaPage() {
             </div>
             <dl className="grid grid-cols-2 gap-8">
               {[['4.401 km²', 'površina kantona'], ['9', 'općina i gradova'], ['2', 'parka prirode'], ['3', 'resora: trgovina, turizam, okoliš']].map(([v, l]) => (
-                <div key={l} className="border-l-2 border-[#7f56d9] pl-5"><dt className="text-[36px] leading-[44px] md:text-[48px] md:leading-[60px] font-semibold tracking-[-0.02em] text-[#171717]">{v}</dt><dd className="mt-1 text-[16px] leading-6 text-[#525252]">{l}</dd></div>
+                <div key={l} className="border-l-2 border-[var(--br-600)] pl-5"><dt className="text-[36px] leading-[44px] md:text-[48px] md:leading-[60px] font-semibold tracking-[-0.02em] text-[#171717]">{v}</dt><dd className="mt-1 text-[16px] leading-6 text-[#525252]">{l}</dd></div>
               ))}
             </dl>
           </div>
@@ -57,10 +57,10 @@ export default function ONamaPage() {
             { init: 'VK', name: 'Vesna Krešić', role: 'Tajništvo ministarstva', text: 'Koordinacija rada sektora i najava sastanaka. Prijem stranaka uz prethodnu najavu.', mail: 'tajnik@mtto.gov.ba', phone: '+387 36 552 807' },
           ].map((p) => (
             <Card key={p.name} className="flex flex-col gap-5 p-6 md:p-8 sm:flex-row">
-              <span className="flex size-20 shrink-0 items-center justify-center rounded-full bg-[#f9f5ff] text-[24px] font-semibold text-[#7f56d9] ring-1 ring-black/5">{p.init}</span>
+              <span className="flex size-20 shrink-0 items-center justify-center rounded-full bg-[var(--br-50)] text-[24px] font-semibold text-[var(--br-600)] ring-1 ring-black/5">{p.init}</span>
               <div className="flex flex-col">
                 <h3 className="text-[18px] leading-7 font-semibold text-[#171717]">{p.name}</h3>
-                <p className="text-[16px] leading-6 text-[#6941c6]">{p.role}</p>
+                <p className="text-[16px] leading-6 text-[var(--br-700)]">{p.role}</p>
                 <p className="mt-3 text-[16px] leading-6 text-[#525252]">{p.text}</p>
                 <div className="mt-5 flex flex-wrap gap-3"><Button href={`mailto:${p.mail}`} variant="secondary" size="sm" icon={Mail01}>{p.mail}</Button><Button href={tel(p.phone)} variant="tertiary" size="sm" icon={Phone01}>{p.phone}</Button></div>
               </div>
@@ -76,7 +76,7 @@ export default function ONamaPage() {
           {SECTORS.map((s) => (
             <Feature key={s.title} icon={s.icon} title={s.title}>
               <p>{s.text}</p>
-              <p className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[14px]"><Badge tone="brand">Kontakt</Badge><span className="font-semibold text-[#404040]">{s.person}</span><a href={tel(s.phone)} className="text-[#6941c6] font-semibold">{s.phone}</a>{s.email && <a href={`mailto:${s.email}`} className="text-[#6941c6] font-semibold">{s.email}</a>}</p>
+              <p className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[14px]"><Badge tone="brand">Kontakt</Badge><span className="font-semibold text-[#404040]">{s.person}</span><a href={tel(s.phone)} className="text-[var(--br-700)] font-semibold">{s.phone}</a>{s.email && <a href={`mailto:${s.email}`} className="text-[var(--br-700)] font-semibold">{s.email}</a>}</p>
             </Feature>
           ))}
         </div>
@@ -95,14 +95,14 @@ export default function ONamaPage() {
               ].map(([I, t, d, href, cta]) => (
                 <div key={t as string} className="flex gap-4">
                   <FeaturedIcon icon={I as any} size="md" />
-                  <div><p className="text-[18px] leading-7 font-semibold text-[#171717]">{t as string}</p><p className="mt-1 text-[16px] leading-6 text-[#525252]">{d as string}</p><a href={href as string} className="mt-3 inline-block text-[16px] leading-6 font-semibold text-[#6941c6] hover:text-[#53389e]">{cta as string}</a></div>
+                  <div><p className="text-[18px] leading-7 font-semibold text-[#171717]">{t as string}</p><p className="mt-1 text-[16px] leading-6 text-[#525252]">{d as string}</p><a href={href as string} className="mt-3 inline-block text-[16px] leading-6 font-semibold text-[var(--br-700)] hover:text-[var(--br-800)]">{cta as string}</a></div>
                 </div>
               ))}
             </div>
             <Card className="overflow-hidden">
               <div className="px-5 py-4 border-b border-[#e5e5e5] flex items-center gap-2"><Clock size={20} className="text-[#a3a3a3]" /><h3 className="text-[16px] font-semibold text-[#171717]">Telefonski imenik</h3></div>
               <ul className="divide-y divide-[#e5e5e5]">
-                {DIRECTORY.map(([l, s, p]) => <li key={l} className="flex items-center justify-between gap-4 px-5 py-3"><span><b className="block text-[14px] font-medium text-[#171717]">{l}</b><span className="text-[14px] text-[#525252]">{s}</span></span><a href={tel(p)} className="text-[14px] font-semibold text-[#6941c6] whitespace-nowrap">{p}</a></li>)}
+                {DIRECTORY.map(([l, s, p]) => <li key={l} className="flex items-center justify-between gap-4 px-5 py-3"><span><b className="block text-[14px] font-medium text-[#171717]">{l}</b><span className="text-[14px] text-[#525252]">{s}</span></span><a href={tel(p)} className="text-[14px] font-semibold text-[var(--br-700)] whitespace-nowrap">{p}</a></li>)}
               </ul>
             </Card>
           </div>

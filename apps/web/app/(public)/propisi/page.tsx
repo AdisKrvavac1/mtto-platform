@@ -54,11 +54,11 @@ export default async function PropisiPage({ searchParams }: { searchParams: Prom
             <nav aria-label="Vrsta akta" className="flex gap-1 overflow-x-auto rounded-[10px] bg-[#fafafa] p-1 ring-1 ring-inset ring-[#e5e5e5] [scrollbar-width:none] max-w-full">
               {TABS.map((t) => (
                 <Link key={t.key} href={`/propisi?docType=${t.key}#tablica`} scroll={false} className={`h-9 px-3 inline-flex items-center gap-2 rounded-[6px] text-[14px] font-semibold whitespace-nowrap ${tab === t.key ? 'bg-white text-[#404040] shadow-[0_1px_2px_rgba(10,13,18,0.05)] ring-1 ring-inset ring-[#d4d4d4]' : 'text-[#737373] hover:text-[#404040]'}`}>
-                  {t.label}<span className={`rounded-full px-2 text-[12px] leading-[18px] font-medium ${tab === t.key ? 'bg-[#f9f5ff] text-[#6941c6]' : 'bg-[#f5f5f5] text-[#525252]'}`}>{count(t.key)}</span>
+                  {t.label}<span className={`rounded-full px-2 text-[12px] leading-[18px] font-medium ${tab === t.key ? 'bg-[var(--br-50)] text-[var(--br-700)]' : 'bg-[#f5f5f5] text-[#525252]'}`}>{count(t.key)}</span>
                 </Link>
               ))}
             </nav>
-            <form action="/propisi#tablica" className="flex h-10 w-full items-center gap-2 rounded-[8px] px-3 ring-1 ring-inset ring-[#d4d4d4] shadow-[0_1px_2px_rgba(10,13,18,0.05)] focus-within:ring-2 focus-within:ring-[#9e77ed] lg:w-[320px]">
+            <form action="/propisi#tablica" className="flex h-10 w-full items-center gap-2 rounded-[8px] px-3 ring-1 ring-inset ring-[#d4d4d4] shadow-[0_1px_2px_rgba(10,13,18,0.05)] focus-within:ring-2 focus-within:ring-[var(--br-500)] lg:w-[320px]">
               <input type="hidden" name="docType" value={tab} />
               <SearchLg size={20} className="text-[#a3a3a3]" />
               <input name="q" defaultValue={sp.q} aria-label="Pretraga propisa" placeholder="Pretraži po nazivu ili broju" className="min-w-0 flex-1 border-0 bg-transparent p-0 text-[16px] text-[#171717] placeholder:text-[#737373] shadow-none focus:outline-none focus:ring-0" />
@@ -72,7 +72,7 @@ export default async function PropisiPage({ searchParams }: { searchParams: Prom
                   <tr key={d.id} className="hover:bg-[#fafafa]">
                     <td className={td}>
                       <div className="flex items-center gap-3">
-                        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#f9f5ff] text-[#7f56d9]"><File06 size={20} /></span>
+                        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--br-50)] text-[var(--br-600)]"><File06 size={20} /></span>
                         <div className="min-w-0"><p className="font-medium text-[#171717]">{d.title}</p><p className="text-[#525252]">{d.description || d.sector}</p></div>
                       </div>
                     </td>

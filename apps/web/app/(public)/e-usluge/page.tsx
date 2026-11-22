@@ -45,7 +45,7 @@ export default async function EUslugePage() {
         title="Registri, obrasci i javni uvidi"
         after={
           <form action="/registri/okolisne-dozvole" role="search" className="flex w-full max-w-[640px] flex-col gap-3 sm:flex-row">
-            <label className="flex h-12 flex-1 items-center gap-2 rounded-[8px] bg-white px-3.5 ring-1 ring-inset ring-[#d4d4d4] shadow-[0_1px_2px_rgba(10,13,18,0.05)] focus-within:ring-2 focus-within:ring-[#9e77ed]">
+            <label className="flex h-12 flex-1 items-center gap-2 rounded-[8px] bg-white px-3.5 ring-1 ring-inset ring-[#d4d4d4] shadow-[0_1px_2px_rgba(10,13,18,0.05)] focus-within:ring-2 focus-within:ring-[var(--br-500)]">
               <SearchLg size={20} className="text-[#a3a3a3]" />
               <input name="q" aria-label="Pretraga dozvola" placeholder="Operater, broj rješenja ili lokacija" className="min-w-0 flex-1 border-0 bg-transparent p-0 text-[16px] leading-6 text-[#171717] placeholder:text-[#737373] shadow-none focus:outline-none focus:ring-0" />
             </label>
@@ -85,9 +85,9 @@ export default async function EUslugePage() {
             <ul className="mt-8 flex flex-col gap-4">
               {env.items.map((p) => (
                 <li key={p.id}>
-                  <Link href={`/vijesti/${p.slug}`} className="group flex flex-col gap-2 rounded-[12px] p-5 ring-1 ring-inset ring-[#e5e5e5] hover:ring-[#d6bbfb] hover:bg-[#fcfaff]">
+                  <Link href={`/vijesti/${p.slug}`} className="group flex flex-col gap-2 rounded-[12px] p-5 ring-1 ring-inset ring-[#e5e5e5] hover:ring-[var(--br-300)] hover:bg-[var(--br-25)]">
                     <div className="flex flex-wrap items-center gap-2"><Badge tone="success" dot>Objavljeno</Badge><span className="flex items-center gap-1.5 text-[14px] text-[#525252]"><Calendar size={14} className="text-[#a3a3a3]" />{dateLong(p.publishedAt)}</span>{p.isDemo && <Badge tone="warning">Demo</Badge>}</div>
-                    <p className="text-[16px] leading-6 font-semibold text-[#171717] group-hover:text-[#6941c6]">{p.title}</p>
+                    <p className="text-[16px] leading-6 font-semibold text-[#171717] group-hover:text-[var(--br-700)]">{p.title}</p>
                     {p.excerpt && <p className="text-[14px] leading-5 text-[#525252] line-clamp-2">{p.excerpt}</p>}
                   </Link>
                 </li>
@@ -126,7 +126,7 @@ export default async function EUslugePage() {
           ].map(([I, t, d], i) => (
             <li key={t as string} className="flex flex-col items-center text-center">
               <FeaturedIcon icon={I as any} tone="brand" />
-              <p className="mt-5 text-[14px] font-semibold text-[#6941c6]">Korak {i + 1}</p>
+              <p className="mt-5 text-[14px] font-semibold text-[var(--br-700)]">Korak {i + 1}</p>
               <h3 className="mt-1 text-[20px] leading-[30px] font-semibold text-[#171717]">{t as string}</h3>
               <p className="mt-2 text-[16px] leading-6 text-[#525252]">{d as string}</p>
             </li>
@@ -143,9 +143,9 @@ export default async function EUslugePage() {
           <Card className="p-6 md:p-8">
             <h3 className="text-[20px] leading-[30px] font-semibold text-[#171717]">Pisarnica i prijem podnesaka</h3>
             <ul className="mt-6 flex flex-col gap-5 text-[16px] leading-6 text-[#525252]">
-              <li className="flex gap-3"><MarkerPin02 size={24} className="text-[#7f56d9] shrink-0" /><span><b className="block font-semibold text-[#171717]">Sjedište Ministarstva</b>Braće Fejića bb, 88000 Mostar</span></li>
-              <li className="flex gap-3"><Clock size={24} className="text-[#7f56d9] shrink-0" /><span><b className="block font-semibold text-[#171717]">Rad sa strankama</b>Radnim danom, prema dogovoru</span></li>
-              <li className="flex gap-3"><Phone01 size={24} className="text-[#7f56d9] shrink-0" /><span><b className="block font-semibold text-[#171717]">Kontakt</b><a href="tel:+38736551823" className="hover:text-[#6941c6]">+387 36 551 823</a> · <a href="mailto:info@mtto.gov.ba" className="hover:text-[#6941c6]">info@mtto.gov.ba</a></span></li>
+              <li className="flex gap-3"><MarkerPin02 size={24} className="text-[var(--br-600)] shrink-0" /><span><b className="block font-semibold text-[#171717]">Sjedište Ministarstva</b>Braće Fejića bb, 88000 Mostar</span></li>
+              <li className="flex gap-3"><Clock size={24} className="text-[var(--br-600)] shrink-0" /><span><b className="block font-semibold text-[#171717]">Rad sa strankama</b>Radnim danom, prema dogovoru</span></li>
+              <li className="flex gap-3"><Phone01 size={24} className="text-[var(--br-600)] shrink-0" /><span><b className="block font-semibold text-[#171717]">Kontakt</b><a href="tel:+38736551823" className="hover:text-[var(--br-700)]">+387 36 551 823</a> · <a href="mailto:info@mtto.gov.ba" className="hover:text-[var(--br-700)]">info@mtto.gov.ba</a></span></li>
             </ul>
             <div className="mt-8"><Button href="https://www.google.com/maps/search/?api=1&query=Bra%C4%87e+Fej%C4%87a+bb%2C+Mostar" variant="secondary" icon={MarkerPin02}>Upute za dolazak</Button></div>
           </Card>

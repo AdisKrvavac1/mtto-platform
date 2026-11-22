@@ -42,7 +42,7 @@ export default async function NewsPage({ searchParams }: { searchParams: Promise
           <form action="/vijesti" role="search" className="mx-auto flex w-full max-w-[480px] flex-col gap-3 sm:flex-row">
             {sp.type && <input type="hidden" name="type" value={sp.type} />}
             {sp.category && <input type="hidden" name="category" value={sp.category} />}
-            <label className="flex h-11 flex-1 items-center gap-2 rounded-[8px] bg-white px-3.5 ring-1 ring-inset ring-[#d4d4d4] shadow-[0_1px_2px_rgba(10,13,18,0.05)] focus-within:ring-2 focus-within:ring-[#9e77ed]">
+            <label className="flex h-11 flex-1 items-center gap-2 rounded-[8px] bg-white px-3.5 ring-1 ring-inset ring-[#d4d4d4] shadow-[0_1px_2px_rgba(10,13,18,0.05)] focus-within:ring-2 focus-within:ring-[var(--br-500)]">
               <SearchLg size={20} className="text-[#a3a3a3]" />
               <input name="q" defaultValue={sp.q} aria-label="Pretraga vijesti" placeholder="Pretraži vijesti" className="min-w-0 flex-1 border-0 bg-transparent p-0 text-[16px] leading-6 text-[#171717] placeholder:text-[#737373] shadow-none focus:outline-none focus:ring-0" />
             </label>
@@ -68,22 +68,22 @@ export default async function NewsPage({ searchParams }: { searchParams: Promise
               ))}
             </nav>
           </div>
-          {sp.q && <p className="mt-6 text-[16px] text-[#525252]">Rezultati za „<b className="text-[#171717]">{sp.q}</b>”: {data.total}. <Link href={link({ q: undefined, page: undefined })} className="font-semibold text-[#6941c6]">Poništi pretragu</Link></p>}
+          {sp.q && <p className="mt-6 text-[16px] text-[#525252]">Rezultati za „<b className="text-[#171717]">{sp.q}</b>”: {data.total}. <Link href={link({ q: undefined, page: undefined })} className="font-semibold text-[var(--br-700)]">Poništi pretragu</Link></p>}
 
           {featured && (
             <article className="group mt-12 grid gap-8 lg:grid-cols-2 lg:items-center">
               <Link href={`/vijesti/${featured.slug}`} className="block overflow-hidden rounded-[16px] bg-[#f5f5f5] ring-1 ring-inset ring-black/5 aspect-[16/10]" aria-hidden tabIndex={-1}>
-                {featured.coverImage ? <img src={featured.coverImage} alt="" className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" /> : <span className="flex size-full items-center justify-center bg-gradient-to-br from-[#f9f5ff] to-[#f4ebff]"><img src="/mtto-logo.svg" alt="" className="h-20 opacity-60" /></span>}
+                {featured.coverImage ? <img src={featured.coverImage} alt="" className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" /> : <span className="flex size-full items-center justify-center bg-gradient-to-br from-[var(--br-50)] to-[var(--br-100)]"><img src="/mtto-logo.svg" alt="" className="h-20 opacity-60" /></span>}
               </Link>
               <div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-[14px] leading-5 font-semibold text-[#6941c6]">{featured.category || POST_TYPE[featured.type]}</p>
+                  <p className="text-[14px] leading-5 font-semibold text-[var(--br-700)]">{featured.category || POST_TYPE[featured.type]}</p>
                   {featured.type === 'JAVNI_POZIV' && <CallBadge p={featured} />}
                   {featured.isDemo && <Badge tone="warning">Demo</Badge>}
                 </div>
                 <Link href={`/vijesti/${featured.slug}`} className="mt-3 flex items-start justify-between gap-4">
-                  <h2 className="text-[24px] leading-8 md:text-[30px] md:leading-[38px] font-semibold text-[#171717] group-hover:text-[#6941c6]">{featured.title}</h2>
-                  <ArrowUpRight size={24} className="mt-1.5 shrink-0 text-[#a3a3a3] group-hover:text-[#6941c6]" />
+                  <h2 className="text-[24px] leading-8 md:text-[30px] md:leading-[38px] font-semibold text-[#171717] group-hover:text-[var(--br-700)]">{featured.title}</h2>
+                  <ArrowUpRight size={24} className="mt-1.5 shrink-0 text-[#a3a3a3] group-hover:text-[var(--br-700)]" />
                 </Link>
                 {featured.excerpt && <p className="mt-3 text-[18px] leading-7 text-[#525252] line-clamp-4">{featured.excerpt}</p>}
                 <p className="mt-6 flex items-center gap-2 text-[14px] leading-5 text-[#525252]"><Calendar size={16} className="text-[#a3a3a3]" />{dateLong(featured.publishedAt)} · {featured.authorName}</p>

@@ -1,5 +1,5 @@
 /* Untitled UI PRO (v8) – biblioteka marketinških sekcija za javni portal MTTO.
-   Tokeni: Inter, neutralna siva skala, brand #7F56D9, radijusi 8/10/12/16, kontejner 1280 px + 32 px. */
+   Tokeni: Inter, neutralna siva skala, brand var(--br-600), radijusi 8/10/12/16, kontejner 1280 px + 32 px. */
 import Link from 'next/link';
 import type { ComponentType, ReactNode, SVGProps } from 'react';
 import { ArrowRight, ArrowUpRight } from '@untitledui/icons';
@@ -12,7 +12,7 @@ export function Container({ children, className = '' }: { children: ReactNode; c
   return <div className={cx('mx-auto w-full max-w-[1280px] px-4 md:px-8', className)}>{children}</div>;
 }
 export function Section({ children, className = '', id, tone = 'white' }: { children: ReactNode; className?: string; id?: string; tone?: 'white' | 'gray' | 'brand' | 'dark' }) {
-  const bg = { white: 'bg-white', gray: 'bg-[#fafafa]', brand: 'bg-[#53389e] text-white', dark: 'bg-[#0a0a0a] text-white' }[tone];
+  const bg = { white: 'bg-white', gray: 'bg-[#fafafa]', brand: 'bg-[var(--br-800)] text-white', dark: 'bg-[#0a0a0a] text-white' }[tone];
   return <section id={id} className={cx('py-16 md:py-24 scroll-mt-24', bg, className)}><Container>{children}</Container></section>;
 }
 export const Divider = () => <Container><hr className="border-[#e5e5e5]" /></Container>;
@@ -23,13 +23,13 @@ const SKEU = 'shadow-[0_1px_2px_rgba(10,13,18,0.05),inset_0_-2px_0_rgba(10,13,18
 export function Button({ href, children, variant = 'primary', size = 'md', icon: I, iconRight: IR, className = '', external, type = 'button', disabled, title }: BtnProps) {
   const sz = { sm: 'h-9 px-3 text-[14px] gap-1', md: 'h-10 px-[14px] text-[14px] gap-1', lg: 'h-11 px-4 text-[16px] gap-1.5', xl: 'h-12 px-[18px] text-[16px] gap-1.5' }[size];
   const v = {
-    primary: `bg-[#7f56d9] text-white hover:bg-[#6941c6] border-2 border-white/10 ${SKEU}`,
+    primary: `bg-[var(--br-600)] text-white hover:bg-[var(--br-700)] border-2 border-white/10 ${SKEU}`,
     secondary: `bg-white text-[#404040] hover:bg-[#fafafa] hover:text-[#262626] ${SKEU}`,
-    'secondary-color': 'bg-[#f9f5ff] text-[#6941c6] hover:bg-[#f4ebff] ring-1 ring-inset ring-[#e9d7fe]',
+    'secondary-color': 'bg-[var(--br-50)] text-[var(--br-700)] hover:bg-[var(--br-100)] ring-1 ring-inset ring-[var(--br-200)]',
     tertiary: 'text-[#525252] hover:bg-[#fafafa] hover:text-[#404040]',
-    link: '!h-auto !px-0 text-[#6941c6] hover:text-[#53389e]',
+    link: '!h-auto !px-0 text-[var(--br-700)] hover:text-[var(--br-800)]',
   }[variant];
-  const cls = cx('inline-flex items-center justify-center rounded-[8px] font-semibold leading-6 whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#9e77ed]/40 disabled:opacity-50 disabled:pointer-events-none', sz, v, className);
+  const cls = cx('inline-flex items-center justify-center rounded-[8px] font-semibold leading-6 whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--br-ring2)] disabled:opacity-50 disabled:pointer-events-none', sz, v, className);
   const inner = (<>{I && <I size={20} className={variant === 'secondary' ? 'text-[#a3a3a3]' : ''} />}<span className="px-0.5">{children}</span>{IR && <IR size={20} />}</>);
   if (href) return external || /^(https?:|mailto:|tel:)/.test(href)
     ? <a href={href} className={cls} title={title} {...(/^https?:/.test(href) ? { target: '_blank', rel: 'noopener' } : {})}>{inner}</a>
@@ -39,10 +39,10 @@ export function Button({ href, children, variant = 'primary', size = 'md', icon:
 
 /* ── Značke ───────────────────────────────────────────── */
 const BADGE = {
-  gray: 'bg-[#fafafa] text-[#404040] ring-[#e5e5e5]', brand: 'bg-[#f9f5ff] text-[#6941c6] ring-[#e9d7fe]', success: 'bg-[#ecfdf3] text-[#067647] ring-[#abefc6]',
+  gray: 'bg-[#fafafa] text-[#404040] ring-[#e5e5e5]', brand: 'bg-[var(--br-50)] text-[var(--br-700)] ring-[var(--br-200)]', success: 'bg-[#ecfdf3] text-[#067647] ring-[#abefc6]',
   warning: 'bg-[#fffaeb] text-[#b54708] ring-[#fedf89]', error: 'bg-[#fef3f2] text-[#b42318] ring-[#fecdca]', blue: 'bg-[#eff8ff] text-[#175cd3] ring-[#b2ddff]',
 } as const;
-const DOT = { gray: 'bg-[#a3a3a3]', brand: 'bg-[#9e77ed]', success: 'bg-[#17b26a]', warning: 'bg-[#f79009]', error: 'bg-[#f04438]', blue: 'bg-[#2e90fa]' } as const;
+const DOT = { gray: 'bg-[#a3a3a3]', brand: 'bg-[var(--br-500)]', success: 'bg-[#17b26a]', warning: 'bg-[#f79009]', error: 'bg-[#f04438]', blue: 'bg-[#2e90fa]' } as const;
 export type Tone = keyof typeof BADGE;
 export function Badge({ children, tone = 'gray', dot, size = 'sm', className = '' }: { children: ReactNode; tone?: Tone; dot?: boolean; size?: 'sm' | 'md'; className?: string }) {
   return <span className={cx('inline-flex items-center gap-1.5 rounded-full ring-1 ring-inset font-medium whitespace-nowrap', size === 'sm' ? 'px-2 py-0.5 text-[12px] leading-[18px]' : 'px-2.5 py-0.5 text-[14px] leading-5', dot && 'pl-1.5', BADGE[tone], className)}>{dot && <span className={cx('size-1.5 rounded-full', DOT[tone])} />}{children}</span>;
@@ -64,7 +64,7 @@ export function FeaturedIcon({ icon: I, size = 'lg', tone = 'modern' }: { icon: 
   const box = { md: 'size-10 rounded-[8px]', lg: 'size-12 rounded-[10px]', xl: 'size-14 rounded-[12px]' }[size];
   const ic = { md: 20, lg: 24, xl: 28 }[size];
   if (tone === 'modern') return <span className={cx('inline-flex items-center justify-center bg-white text-[#404040] shrink-0', box, SKEU)}><I size={ic} /></span>;
-  const t = { brand: 'bg-[#f4ebff] text-[#7f56d9] ring-[#f9f5ff]', error: 'bg-[#fee4e2] text-[#d92d20] ring-[#fef3f2]', warning: 'bg-[#fef0c7] text-[#dc6803] ring-[#fffaeb]', success: 'bg-[#dcfae6] text-[#079455] ring-[#ecfdf3]' }[tone];
+  const t = { brand: 'bg-[var(--br-100)] text-[var(--br-600)] ring-[var(--br-50)]', error: 'bg-[#fee4e2] text-[#d92d20] ring-[#fef3f2]', warning: 'bg-[#fef0c7] text-[#dc6803] ring-[#fffaeb]', success: 'bg-[#dcfae6] text-[#079455] ring-[#ecfdf3]' }[tone];
   return <span className={cx('inline-flex items-center justify-center rounded-full ring-8 shrink-0', size === 'md' ? 'size-10' : size === 'lg' ? 'size-12' : 'size-14', t)}><I size={ic} /></span>;
 }
 
@@ -73,7 +73,7 @@ export function SectionHeader({ eyebrow, title, children, align = 'left', action
   return (
     <div className={cx('flex flex-col gap-8 md:flex-row md:items-end md:justify-between', align === 'center' && 'md:!flex-col md:!items-center text-center', className)}>
       <div className={cx('flex flex-col max-w-[768px]', align === 'center' && 'items-center')}>
-        {eyebrow && <p className="text-[14px] leading-5 md:text-[16px] md:leading-6 font-semibold text-[#6941c6]">{eyebrow}</p>}
+        {eyebrow && <p className="text-[14px] leading-5 md:text-[16px] md:leading-6 font-semibold text-[var(--br-700)]">{eyebrow}</p>}
         <h2 className={cx('text-[30px] leading-[38px] md:text-[36px] md:leading-[44px] font-semibold tracking-[-0.02em] text-[#171717] text-balance', eyebrow ? 'mt-3' : '')}>{title}</h2>
         {children && <div className="mt-4 md:mt-5 text-[18px] leading-7 md:text-[20px] md:leading-[30px] text-[#525252]">{children}</div>}
       </div>
@@ -92,14 +92,14 @@ export function PageHeader({ eyebrow, title, children, actions, crumbs, align = 
             {crumbs.map((c, i) => (
               <span key={i} className="flex items-center gap-2">
                 {i > 0 && <span className="text-[#d4d4d4]">/</span>}
-                {c.href ? <Link href={c.href} className="hover:text-[#262626]">{c.label}</Link> : <span className="text-[#6941c6] font-semibold" aria-current="page">{c.label}</span>}
+                {c.href ? <Link href={c.href} className="hover:text-[#262626]">{c.label}</Link> : <span className="text-[var(--br-700)] font-semibold" aria-current="page">{c.label}</span>}
               </span>
             ))}
           </nav>
         )}
         <div className={cx('flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between', align === 'center' && 'lg:!flex-col lg:!items-center text-center')}>
           <div className={cx('flex flex-col max-w-[768px]', align === 'center' && 'items-center')}>
-            {eyebrow && <p className="text-[14px] leading-5 md:text-[16px] md:leading-6 font-semibold text-[#6941c6]">{eyebrow}</p>}
+            {eyebrow && <p className="text-[14px] leading-5 md:text-[16px] md:leading-6 font-semibold text-[var(--br-700)]">{eyebrow}</p>}
             <h1 className={cx('text-[36px] leading-[44px] md:text-[48px] md:leading-[60px] font-semibold tracking-[-0.02em] text-[#171717] text-balance', !!eyebrow && 'mt-3')}>{title}</h1>
             {children && <div className="mt-4 md:mt-6 text-[18px] leading-7 md:text-[20px] md:leading-[30px] text-[#525252]">{children}</div>}
           </div>
@@ -121,14 +121,14 @@ export function Feature({ icon, title, children, href, cta = 'Saznaj više', ali
       <FeaturedIcon icon={icon} tone={tone ?? 'modern'} />
       <h3 className="mt-4 md:mt-5 text-[18px] leading-7 md:text-[20px] md:leading-[30px] font-semibold text-[#171717]">{title}</h3>
       {children && <div className="mt-1 md:mt-2 text-[16px] leading-6 text-[#525252]">{children}</div>}
-      {href && <Link href={href} className="mt-4 md:mt-5 inline-flex items-center gap-1.5 text-[16px] leading-6 font-semibold text-[#6941c6] hover:text-[#53389e]">{cta}<ArrowRight size={20} /></Link>}
+      {href && <Link href={href} className="mt-4 md:mt-5 inline-flex items-center gap-1.5 text-[16px] leading-6 font-semibold text-[var(--br-700)] hover:text-[var(--br-800)]">{cta}<ArrowRight size={20} /></Link>}
     </div>
   );
 }
 export function Metric({ value, label, children }: { value: ReactNode; label: ReactNode; children?: ReactNode }) {
   return (
     <div className="flex flex-col gap-3 text-center md:text-left">
-      <p className="text-[48px] leading-[60px] md:text-[60px] md:leading-[72px] font-semibold tracking-[-0.02em] text-[#7f56d9]">{value}</p>
+      <p className="text-[48px] leading-[60px] md:text-[60px] md:leading-[72px] font-semibold tracking-[-0.02em] text-[var(--br-600)]">{value}</p>
       <div><p className="text-[18px] leading-7 font-semibold text-[#171717]">{label}</p>{children && <p className="mt-1 text-[16px] leading-6 text-[#525252]">{children}</p>}</div>
     </div>
   );
@@ -139,12 +139,12 @@ export function PostCard({ href, image, category, title, excerpt, meta, badge }:
   return (
     <article className="group flex flex-col">
       <Link href={href} className="block overflow-hidden rounded-[16px] bg-[#f5f5f5] ring-1 ring-inset ring-black/5 aspect-[16/10]" tabIndex={-1} aria-hidden>
-        {image ? <img src={image} alt="" loading="lazy" className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" /> : <span className="flex size-full items-center justify-center bg-gradient-to-br from-[#f9f5ff] to-[#f4ebff]"><img src="/mtto-logo.svg" alt="" className="h-16 opacity-60" /></span>}
+        {image ? <img src={image} alt="" loading="lazy" className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" /> : <span className="flex size-full items-center justify-center bg-gradient-to-br from-[var(--br-50)] to-[var(--br-100)]"><img src="/mtto-logo.svg" alt="" className="h-16 opacity-60" /></span>}
       </Link>
-      <div className="mt-5 flex items-center gap-2">{category && <p className="text-[14px] leading-5 font-semibold text-[#6941c6]">{category}</p>}{badge}</div>
+      <div className="mt-5 flex items-center gap-2">{category && <p className="text-[14px] leading-5 font-semibold text-[var(--br-700)]">{category}</p>}{badge}</div>
       <Link href={href} className="mt-2 flex items-start justify-between gap-4">
-        <h3 className="text-[18px] leading-7 font-semibold text-[#171717] group-hover:text-[#6941c6] line-clamp-3">{title}</h3>
-        <ArrowUpRight size={24} className="mt-0.5 shrink-0 text-[#a3a3a3] group-hover:text-[#6941c6]" />
+        <h3 className="text-[18px] leading-7 font-semibold text-[#171717] group-hover:text-[var(--br-700)] line-clamp-3">{title}</h3>
+        <ArrowUpRight size={24} className="mt-0.5 shrink-0 text-[#a3a3a3] group-hover:text-[var(--br-700)]" />
       </Link>
       {excerpt && <p className="mt-2 text-[16px] leading-6 text-[#525252] line-clamp-3">{excerpt}</p>}
       {meta && <div className="mt-5 text-[14px] leading-5 text-[#525252]">{meta}</div>}
@@ -206,12 +206,12 @@ export function SplitHero({ eyebrow, title, children, actions, image, imageAlt =
       <Container>
         {crumbs && (
           <nav aria-label="Putanja" className="mb-8 flex flex-wrap items-center gap-2 text-[14px] leading-5 font-medium text-[#525252]">
-            {crumbs.map((c, i) => <span key={i} className="flex items-center gap-2">{i > 0 && <span className="text-[#d4d4d4]">/</span>}{c.href ? <Link href={c.href} className="hover:text-[#262626]">{c.label}</Link> : <span className="text-[#6941c6] font-semibold" aria-current="page">{c.label}</span>}</span>)}
+            {crumbs.map((c, i) => <span key={i} className="flex items-center gap-2">{i > 0 && <span className="text-[#d4d4d4]">/</span>}{c.href ? <Link href={c.href} className="hover:text-[#262626]">{c.label}</Link> : <span className="text-[var(--br-700)] font-semibold" aria-current="page">{c.label}</span>}</span>)}
           </nav>
         )}
         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
           <div>
-            {eyebrow && <p className="text-[14px] leading-5 md:text-[16px] md:leading-6 font-semibold text-[#6941c6]">{eyebrow}</p>}
+            {eyebrow && <p className="text-[14px] leading-5 md:text-[16px] md:leading-6 font-semibold text-[var(--br-700)]">{eyebrow}</p>}
             <h1 className="mt-3 text-[36px] leading-[44px] md:text-[60px] md:leading-[72px] font-semibold tracking-[-0.02em] text-[#171717] text-balance">{title}</h1>
             {children && <div className="mt-4 md:mt-6 text-[18px] leading-7 md:text-[20px] md:leading-[30px] text-[#525252] max-w-[560px]">{children}</div>}
             {actions && <div className="mt-8 md:mt-12 flex flex-col-reverse gap-3 sm:flex-row">{actions}</div>}
@@ -242,10 +242,30 @@ export function ImageCard({ href, image, title, text, badge }: { href: string; i
 }
 
 /** Untitled input/select klase (forme filtera na javnim stranicama). */
-export const inputCls = 'h-10 w-full rounded-[8px] bg-white px-3 text-[16px] leading-6 text-[#171717] placeholder:text-[#737373] border border-[#d4d4d4] shadow-[0_1px_2px_rgba(10,13,18,0.05)] focus:outline-none focus:border-[#d6bbfb] focus:ring-4 focus:ring-[#9e77ed]/25';
+export const inputCls = 'h-10 w-full rounded-[8px] bg-white px-3 text-[16px] leading-6 text-[#171717] placeholder:text-[#737373] border border-[#d4d4d4] shadow-[0_1px_2px_rgba(10,13,18,0.05)] focus:outline-none focus:border-[var(--br-300)] focus:ring-4 focus:ring-[var(--br-ring)]';
 export const labelCls = 'text-[14px] leading-5 font-medium text-[#404040]';
 
 /** Bijeli "filter bar" s pretragom i padajućim izbornicima. */
 export function FilterField({ label, children, className = '' }: { label: string; children: ReactNode; className?: string }) {
   return <label className={cx('flex flex-col gap-1.5', className)}><span className={labelCls}>{label}</span>{children}</label>;
+}
+
+/** Istaknuta objava: fotografija preko cijele širine sa staklenom (blur) karticom. */
+export function FeaturedPost({ href, image, title, excerpt, category, date, badge }: { href: string; image?: string | null; title: string; excerpt?: string | null; category?: string; date?: string; badge?: ReactNode }) {
+  return (
+    <Link href={href} className="group relative flex min-h-[420px] items-end overflow-hidden rounded-[24px] bg-[var(--br-950)] md:min-h-[520px]">
+      <img src={image || '/hero/prenj.jpg'} alt="" className="absolute inset-0 size-full object-cover transition-transform duration-700 group-hover:scale-[1.02]" />
+      <span className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+      <span className="relative m-3 flex w-full max-w-[760px] flex-col gap-3 rounded-[16px] bg-white/15 p-5 text-white ring-1 ring-inset ring-white/30 backdrop-blur-md md:m-6 md:p-8">
+        <span className="flex flex-wrap items-center gap-2 text-[14px] leading-5">
+          <span className="rounded-full bg-[var(--gr-50)] px-2.5 py-0.5 font-medium text-[var(--gr-700)]">Istaknuto</span>
+          {category && <span className="rounded-full bg-white/15 px-2.5 py-0.5 font-medium ring-1 ring-inset ring-white/30">{category}</span>}
+          {badge}
+          {date && <span className="text-white/80">{date}</span>}
+        </span>
+        <span className="flex items-start justify-between gap-4 text-[24px] leading-8 md:text-[30px] md:leading-[38px] font-semibold"><span className="line-clamp-3">{title}</span><ArrowUpRight size={28} className="mt-1 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" /></span>
+        {excerpt && <span className="line-clamp-2 text-[16px] leading-6 text-white/90">{excerpt}</span>}
+      </span>
+    </Link>
+  );
 }

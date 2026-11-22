@@ -74,7 +74,7 @@ export default async function PermitsPage({ searchParams }: { searchParams: Prom
               <FilterField label="Sortiranje"><select name="sort" defaultValue={sort} className={inputCls}><option value="newest">Najnovije rješenje</option><option value="expiry">Rok važenja</option><option value="operator">Operater (A–Ž)</option><option value="municipality">Općina</option></select></FilterField>
               <div className="flex gap-3 lg:col-span-6 lg:justify-end">
                 {pills.length > 0 && <Button href="/registri/okolisne-dozvole#rezultati" variant="tertiary">Očisti filtere</Button>}
-                <button className="inline-flex h-10 items-center justify-center gap-1.5 rounded-[8px] border-2 border-white/10 bg-[#7f56d9] px-[14px] text-[14px] font-semibold text-white shadow-[0_1px_2px_rgba(10,13,18,0.05),inset_0_-2px_0_rgba(10,13,18,0.05),inset_0_0_0_1px_rgba(10,13,18,0.18)] hover:bg-[#6941c6]"><FilterLines size={20} />Primijeni filtere</button>
+                <button className="inline-flex h-10 items-center justify-center gap-1.5 rounded-[8px] border-2 border-white/10 bg-[var(--br-600)] px-[14px] text-[14px] font-semibold text-white shadow-[0_1px_2px_rgba(10,13,18,0.05),inset_0_-2px_0_rgba(10,13,18,0.05),inset_0_0_0_1px_rgba(10,13,18,0.18)] hover:bg-[var(--br-700)]"><FilterLines size={20} />Primijeni filtere</button>
               </div>
             </form>
           </Card>
@@ -100,7 +100,7 @@ export default async function PermitsPage({ searchParams }: { searchParams: Prom
                     const r = remaining(p.validUntil);
                     return (
                       <tr key={p.id} className="hover:bg-[#fafafa]">
-                        <td className={td}><Link href={`/registri/okolisne-dozvole/${p.id}`} className="block font-medium text-[#6941c6] hover:underline whitespace-nowrap">{p.registerNumber}</Link><span className="text-[#737373]">{dateShort(p.issuedAt)}</span></td>
+                        <td className={td}><Link href={`/registri/okolisne-dozvole/${p.id}`} className="block font-medium text-[var(--br-700)] hover:underline whitespace-nowrap">{p.registerNumber}</Link><span className="text-[#737373]">{dateShort(p.issuedAt)}</span></td>
                         <td className={td}><span className="block font-medium text-[#171717]">{p.operator}{p.isDemo && <Badge tone="warning" className="ml-2">Demo</Badge>}</span><span>{p.facility}</span></td>
                         <td className={td}><span className="block font-medium text-[#171717]">{p.municipality}</span><span>{p.address}</span></td>
                         <td className={td}><Badge tone="gray">{p.activity}</Badge></td>

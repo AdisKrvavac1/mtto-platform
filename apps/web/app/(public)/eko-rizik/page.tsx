@@ -26,7 +26,7 @@ function Warn({ w }: { w: RiskSummary['warnings']['items'][number] }) {
       <p className="text-[16px] leading-6 font-semibold text-[#171717]">{w.event}</p>
       <p className="mt-0.5 text-[14px] leading-5 text-[#737373]">Regija {w.region} · {fmtTime(w.onset)} – {fmtTime(w.expires)}</p>
       {w.description && <p className="mt-2 text-[14px] leading-5 text-[#525252]">{w.description}</p>}
-      {w.instruction && <p className="mt-1 text-[14px] leading-5 text-[#6941c6]">{w.instruction}</p>}
+      {w.instruction && <p className="mt-1 text-[14px] leading-5 text-[var(--br-700)]">{w.instruction}</p>}
     </article>
   );
 }
@@ -57,7 +57,7 @@ export default async function EkoRizikPage() {
       <section className="relative overflow-hidden bg-white pt-12 pb-16 md:pt-16 md:pb-20">
         <div aria-hidden className="absolute inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_at_top,black_30%,transparent_70%)]" />
         <Container className="relative">
-          <nav aria-label="Putanja" className="mb-8 flex items-center gap-2 text-[14px] font-medium text-[#525252]"><Link href="/" className="hover:text-[#262626]">Naslovna</Link><span className="text-[#d4d4d4]">/</span><span className="font-semibold text-[#6941c6]" aria-current="page">Eko-rizik HNK</span></nav>
+          <nav aria-label="Putanja" className="mb-8 flex items-center gap-2 text-[14px] font-medium text-[#525252]"><Link href="/" className="hover:text-[#262626]">Naslovna</Link><span className="text-[#d4d4d4]">/</span><span className="font-semibold text-[var(--br-700)]" aria-current="page">Eko-rizik HNK</span></nav>
           <div className="flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-[768px]">
               <BadgeGroup label={lv.short} tone={LV_TONE[lvKey]}>Ažurirano {fmtTime(d.generatedAt)}</BadgeGroup>
@@ -107,7 +107,7 @@ export default async function EkoRizikPage() {
               {warn.slice(0, 5).map((w, i) => <Warn key={i} w={w} />)}
               {warn.length > 5 && (
                 <details>
-                  <summary className="cursor-pointer py-1.5 text-[14px] font-semibold text-[#6941c6]">Prikaži još {warn.length - 5} upozorenja</summary>
+                  <summary className="cursor-pointer py-1.5 text-[14px] font-semibold text-[var(--br-700)]">Prikaži još {warn.length - 5} upozorenja</summary>
                   <div className="flex flex-col gap-3 pt-2">{warn.slice(5).map((w, i) => <Warn key={i} w={w} />)}</div>
                 </details>
               )}
@@ -190,12 +190,12 @@ export default async function EkoRizikPage() {
             <Card key={b.t} className="p-6 md:p-8">
               <FeaturedIcon icon={b.icon} tone={b.tone} />
               <h3 className="mt-5 text-[20px] leading-[30px] font-semibold text-[#171717]">{b.t}</h3>
-              <ul className="mt-4 flex flex-col gap-3">{b.items.map((it) => <li key={it} className="flex gap-3 text-[16px] leading-6 text-[#525252]"><CheckCircle size={20} className="mt-0.5 shrink-0 text-[#7f56d9]" />{it}</li>)}</ul>
+              <ul className="mt-4 flex flex-col gap-3">{b.items.map((it) => <li key={it} className="flex gap-3 text-[16px] leading-6 text-[#525252]"><CheckCircle size={20} className="mt-0.5 shrink-0 text-[var(--br-600)]" />{it}</li>)}</ul>
             </Card>
           ))}
         </div>
         <div className="mt-8 flex flex-col gap-4 rounded-[16px] bg-[#fafafa] p-6 ring-1 ring-inset ring-[#e5e5e5] md:flex-row md:items-center md:justify-between md:p-8">
-          <p className="flex items-center gap-3 text-[18px] font-semibold text-[#171717]"><Phone01 size={24} className="text-[#7f56d9]" />Hitni brojevi</p>
+          <p className="flex items-center gap-3 text-[18px] font-semibold text-[#171717]"><Phone01 size={24} className="text-[var(--br-600)]" />Hitni brojevi</p>
           <div className="flex flex-wrap gap-3">
             {[['121', 'Civilna zaštita'], ['123', 'Vatrogasci'], ['124', 'Hitna pomoć'], ['122', 'Policija']].map(([n, l]) => (
               <a key={n} href={`tel:${n}`} className="flex items-baseline gap-2 rounded-[8px] bg-white px-4 py-2.5 ring-1 ring-inset ring-[#d4d4d4] shadow-[0_1px_2px_rgba(10,13,18,0.05)] hover:bg-[#fafafa]"><span className="text-[20px] font-semibold text-[#171717]">{n}</span><span className="text-[14px] text-[#525252]">{l}</span></a>
@@ -211,7 +211,7 @@ export default async function EkoRizikPage() {
 function ListCard({ icon: I, title, meta, children, footer }: { icon: any; title: string; meta: string; children: ReactNode; footer?: ReactNode }) {
   return (
     <Card className="flex flex-col overflow-hidden">
-      <div className="flex items-center justify-between gap-2 border-b border-[#e5e5e5] px-6 py-5"><h2 className="flex items-center gap-2 text-[18px] leading-7 font-semibold text-[#171717]"><I size={20} className="text-[#7f56d9]" />{title}</h2><Badge tone="gray">{meta}</Badge></div>
+      <div className="flex items-center justify-between gap-2 border-b border-[#e5e5e5] px-6 py-5"><h2 className="flex items-center gap-2 text-[18px] leading-7 font-semibold text-[#171717]"><I size={20} className="text-[var(--br-600)]" />{title}</h2><Badge tone="gray">{meta}</Badge></div>
       <div className="flex-1">{children}</div>
       {footer && <div className="border-t border-[#e5e5e5] px-6 py-3">{footer}</div>}
     </Card>

@@ -28,7 +28,7 @@ export default async function TurizamPage() {
         image="/fig/tile-neum.jpg"
         imageAlt="Neumski zaljev"
         actions={<><Button href="/turisticki-vodici" variant="secondary" size="xl" icon={Users01}>Ispit za vodiče</Button><Button href="/registri/ugostiteljski-objekti" size="xl" icon={Building07}>Kategorizirani objekti</Button></>}
-        card={<div className="flex items-center gap-4"><span className="flex size-12 items-center justify-center rounded-full bg-[#f9f5ff] text-[#7f56d9]"><Map01 size={24} /></span><div><p className="text-[14px] font-semibold text-[#171717]">Neum</p><p className="text-[14px] text-[#525252]">Jedini izlaz BiH na Jadransko more</p></div></div>}
+        card={<div className="flex items-center gap-4"><span className="flex size-12 items-center justify-center rounded-full bg-[var(--br-50)] text-[var(--br-600)]"><Map01 size={24} /></span><div><p className="text-[14px] font-semibold text-[#171717]">Neum</p><p className="text-[14px] text-[#525252]">Jedini izlaz BiH na Jadransko more</p></div></div>}
       >
         Kategorizacija ugostiteljskih objekata, licenciranje turističkih vodiča i poticaji za razvoj turističke ponude – od Starog grada Mostara do obale u Neumu.
       </SplitHero>
@@ -61,7 +61,7 @@ export default async function TurizamPage() {
             <Card className="flex flex-col gap-6 p-6 md:p-8 lg:flex-row lg:items-center lg:justify-between">
               <div className="max-w-[720px]">
                 <div className="flex flex-wrap gap-2">{open ? <Badge tone="success" dot>Otvoren poziv</Badge> : <Badge tone="gray" dot>Zatvoren poziv</Badge>}{call.deadline && <Badge tone="error"><Calendar size={12} className="mr-1" />Rok {dateTime(call.deadline)} h</Badge>}</div>
-                <h3 className="mt-4 text-[20px] leading-[30px] md:text-[24px] md:leading-8 font-semibold text-[#171717]"><Link href={`/vijesti/${call.slug}`} className="hover:text-[#6941c6]">{call.title}</Link></h3>
+                <h3 className="mt-4 text-[20px] leading-[30px] md:text-[24px] md:leading-8 font-semibold text-[#171717]"><Link href={`/vijesti/${call.slug}`} className="hover:text-[var(--br-700)]">{call.title}</Link></h3>
                 {call.excerpt && <p className="mt-2 text-[16px] leading-6 text-[#525252]">{call.excerpt}</p>}
               </div>
               <div className="flex shrink-0 flex-col gap-3 sm:flex-row lg:flex-col">

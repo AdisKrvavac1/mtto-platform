@@ -34,7 +34,7 @@ export default async function OkolisPage() {
         image="/fig/tile-hutovo.jpg"
         imageAlt="Park prirode Hutovo blato"
         actions={<><Button href="/registri/okolisne-dozvole" variant="secondary" size="xl" icon={File06}>Registar dozvola</Button><Button href="/eko-rizik" size="xl" icon={AlertTriangle}>Eko-rizik HNK</Button></>}
-        card={<div className="flex items-center gap-4"><span className="flex size-12 items-center justify-center rounded-full bg-[#f9f5ff] text-[#7f56d9]"><Globe04 size={24} /></span><div><p className="text-[14px] font-semibold text-[#171717]">Park prirode Hutovo blato</p><p className="text-[14px] text-[#525252]">Ramsarsko područje · Čapljina</p></div></div>}
+        card={<div className="flex items-center gap-4"><span className="flex size-12 items-center justify-center rounded-full bg-[var(--br-50)] text-[var(--br-600)]"><Globe04 size={24} /></span><div><p className="text-[14px] font-semibold text-[#171717]">Park prirode Hutovo blato</p><p className="text-[14px] text-[#525252]">Ramsarsko područje · Čapljina</p></div></div>}
       >
         Okolišne dozvole, upravljanje otpadom, javni uvidi i praćenje rizika od požara, poplava i klizišta na području Hercegovačko-neretvanskog kantona.
       </SplitHero>
@@ -70,7 +70,7 @@ export default async function OkolisPage() {
                 const [sl, tone] = PERMIT_ST[p.status] ?? PERMIT_ST.VAZECA;
                 return (
                   <tr key={p.id} className="hover:bg-[#fafafa]">
-                    <td className={td}><Link href={`/registri/okolisne-dozvole/${p.id}`} className="font-medium text-[#6941c6] hover:underline whitespace-nowrap">{p.registerNumber}</Link></td>
+                    <td className={td}><Link href={`/registri/okolisne-dozvole/${p.id}`} className="font-medium text-[var(--br-700)] hover:underline whitespace-nowrap">{p.registerNumber}</Link></td>
                     <td className={td}><span className="font-medium text-[#171717]">{p.operator}</span>{p.isDemo && <Badge tone="warning" className="ml-2">Demo</Badge>}</td>
                     <td className={td}>{p.municipality}</td>
                     <td className={td}>{p.activity}</td>
@@ -94,7 +94,7 @@ export default async function OkolisPage() {
             return (
               <Card key={p.id} className="flex flex-col p-6">
                 <div className="flex flex-wrap gap-2"><Badge tone="brand">{POST_TYPE[p.type]}</Badge>{p.deadline && <Badge tone={open ? 'error' : 'gray'} dot>{open ? `Rok ${dateShort(p.deadline)}` : 'Završeno'}</Badge>}</div>
-                <h3 className="mt-4 text-[18px] leading-7 font-semibold text-[#171717]"><Link href={`/vijesti/${p.slug}`} className="hover:text-[#6941c6]">{p.title}</Link></h3>
+                <h3 className="mt-4 text-[18px] leading-7 font-semibold text-[#171717]"><Link href={`/vijesti/${p.slug}`} className="hover:text-[var(--br-700)]">{p.title}</Link></h3>
                 {p.excerpt && <p className="mt-2 text-[16px] leading-6 text-[#525252] line-clamp-3">{p.excerpt}</p>}
                 <div className="mt-auto pt-6 flex items-center justify-between gap-3 text-[14px]">
                   <span className="flex items-center gap-1.5 text-[#737373]"><Calendar size={16} />{dateShort(p.publishedAt)}</span>

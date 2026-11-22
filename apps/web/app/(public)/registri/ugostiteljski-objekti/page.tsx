@@ -71,7 +71,7 @@ export default async function FacilitiesPage({ searchParams }: { searchParams: P
               <FilterField label="Zvjezdice"><select name="stars" defaultValue={sp.stars ?? ''} className={inputCls}><option value="">Sve kategorije</option>{[5, 4, 3, 2].map((n) => <option key={n} value={n}>{n} ★</option>)}</select></FilterField>
               <div className="flex gap-3 lg:col-span-5 lg:justify-end">
                 {pills.length > 0 && <Button href="/registri/ugostiteljski-objekti#rezultati" variant="tertiary">Očisti filtere</Button>}
-                <button className="inline-flex h-10 items-center justify-center gap-1.5 rounded-[8px] border-2 border-white/10 bg-[#7f56d9] px-[14px] text-[14px] font-semibold text-white shadow-[0_1px_2px_rgba(10,13,18,0.05),inset_0_-2px_0_rgba(10,13,18,0.05),inset_0_0_0_1px_rgba(10,13,18,0.18)] hover:bg-[#6941c6]"><FilterLines size={20} />Primijeni filtere</button>
+                <button className="inline-flex h-10 items-center justify-center gap-1.5 rounded-[8px] border-2 border-white/10 bg-[var(--br-600)] px-[14px] text-[14px] font-semibold text-white shadow-[0_1px_2px_rgba(10,13,18,0.05),inset_0_-2px_0_rgba(10,13,18,0.05),inset_0_0_0_1px_rgba(10,13,18,0.18)] hover:bg-[var(--br-700)]"><FilterLines size={20} />Primijeni filtere</button>
               </div>
             </form>
           </Card>
