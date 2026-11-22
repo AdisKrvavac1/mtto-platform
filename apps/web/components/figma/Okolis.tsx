@@ -30,11 +30,11 @@ export function OkolisBody(props: any) {
                       </div>
                     </div>
                     <div className="flex flex-col items-start max-w-[672px] relative shrink-0 w-[672px] max-w-full">
-                      <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#cbd5e1] text-[18px]">
-                        <p className="leading-[28px] mb-0">Službeni informacijsko-upravni portal HNŽ/HNK za okoliš i prirodu. Usklađujemo</p>
-                        <p className="leading-[28px] mb-0">dinamičan privredni rast, očuvanje jedinstvenog mediteransko-dinarskog</p>
-                        <p className="leading-[28px] mb-0">biodiverziteta Neretvanskog sliva i pružamo brze digitalne administrativne servise</p>
-                        <p className="leading-[28px]">građanima i privredi.</p>
+                      <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#cbd5e1] text-[18px] max-lg:block">
+                        <p className="leading-[28px] mb-0 max-lg:inline max-lg:after:content-['_']">Službeni informacijsko-upravni portal HNŽ/HNK za okoliš i prirodu. Usklađujemo</p>
+                        <p className="leading-[28px] mb-0 max-lg:inline max-lg:after:content-['_']">dinamičan privredni rast, očuvanje jedinstvenog mediteransko-dinarskog</p>
+                        <p className="leading-[28px] mb-0 max-lg:inline max-lg:after:content-['_']">biodiverziteta Neretvanskog sliva i pružamo brze digitalne administrativne servise</p>
+                        <p className="leading-[28px] max-lg:inline">građanima i privredi.</p>
                       </div>
                     </div>
                     <div className="content-center flex flex-col lg:flex-row flex-wrap gap-[12px] lg:items-center pt-[8px] relative min-w-0 max-w-full w-full">
@@ -136,7 +136,7 @@ export function OkolisBody(props: any) {
                 <div className="border-[#10345e] border-solid border-t flex flex-col lg:flex-row gap-[16px] items-start justify-center pt-[25px] relative min-w-0 max-w-full w-full flex-wrap">
                   <div className="bg-[rgba(255,255,255,0)] border border-[#163e69] border-solid h-[112px] relative rounded-[4px] shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)] w-full lg:w-auto lg:flex-[284_1_0%] min-w-0">
                     <div className="bg-clip-padding border-0 border-[transparent] border-solid flex flex-col items-start justify-center overflow-clip p-px relative rounded-[inherit] size-full">
-                      <div className="flex-[1_0_0] min-h-px relative w-full">
+                      <div className="flex-[1_0_auto] min-h-px relative w-full">
                         <div className="absolute bg-clip-padding border-0 border-[transparent] border-solid inset-0 overflow-hidden pointer-events-none">
                           <img alt="" className="absolute h-[143.2%] left-0 max-w-none top-[-21.6%] w-full" src="/fig/tile-neretva.jpg" />
                         </div>
@@ -156,7 +156,7 @@ export function OkolisBody(props: any) {
                   </div>
                   <div className="bg-[rgba(255,255,255,0)] border border-[#163e69] border-solid h-[112px] relative rounded-[4px] shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)] w-full lg:w-auto lg:flex-[284_1_0%] min-w-0">
                     <div className="bg-clip-padding border-0 border-[transparent] border-solid flex flex-col items-start justify-center overflow-clip p-px relative rounded-[inherit] size-full">
-                      <div className="flex-[1_0_0] min-h-px relative w-full">
+                      <div className="flex-[1_0_auto] min-h-px relative w-full">
                         <div className="absolute bg-clip-padding border-0 border-[transparent] border-solid inset-0 overflow-hidden pointer-events-none">
                           <img alt="" className="absolute h-[143.2%] left-0 max-w-none top-[-21.6%] w-full" src="/fig/tile-prenj.jpg" />
                         </div>
@@ -176,7 +176,7 @@ export function OkolisBody(props: any) {
                   </div>
                   <div className="bg-[rgba(255,255,255,0)] border border-[#163e69] border-solid h-[112px] relative rounded-[4px] shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)] w-full lg:w-auto lg:flex-[284_1_0%] min-w-0">
                     <div className="bg-clip-padding border-0 border-[transparent] border-solid flex flex-col items-start justify-center overflow-clip p-px relative rounded-[inherit] size-full">
-                      <div className="flex-[1_0_0] min-h-px relative w-full">
+                      <div className="flex-[1_0_auto] min-h-px relative w-full">
                         <div className="absolute bg-clip-padding border-0 border-[transparent] border-solid inset-0 overflow-hidden pointer-events-none">
                           <img alt="" className="absolute h-[143.2%] left-0 max-w-none top-[-21.6%] w-full" src="/fig/tile-hutovo.jpg" />
                         </div>
@@ -196,7 +196,7 @@ export function OkolisBody(props: any) {
                   </div>
                   <div className="bg-[rgba(255,255,255,0)] border border-[#163e69] border-solid h-[112px] relative rounded-[4px] shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)] w-full lg:w-auto lg:flex-[284_1_0%] min-w-0">
                     <div className="bg-clip-padding border-0 border-[transparent] border-solid flex flex-col items-start justify-center overflow-clip p-px relative rounded-[inherit] size-full">
-                      <div className="flex-[1_0_0] min-h-px relative w-full">
+                      <div className="flex-[1_0_auto] min-h-px relative w-full">
                         <div className="absolute bg-clip-padding border-0 border-[transparent] border-solid inset-0 overflow-hidden pointer-events-none">
                           <img alt="" className="absolute h-[143.2%] left-0 max-w-none top-[-21.6%] w-full" src="/fig/tile-neum.jpg" />
                         </div>
@@ -325,9 +325,9 @@ export function OkolisBody(props: any) {
                         <p className="font-rob font-bold min-w-0 max-w-full text-[19px] md:text-[24px] lg:text-[30px] text-white leading-[36px]">Automatski Eko-Monitoring Uživo <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-herzeg-gold-soft text-[#786000] border border-herzeg-gold font-label-badge text-label-badge uppercase align-middle" title="Primjer podataka: izvor podataka se povezuje u Fazi 2"><span className="material-symbols-outlined text-[13px]">science</span>Demo</span></p>
                       </div>
                       <div className="flex flex-col items-start relative min-w-0 max-w-full w-full">
-                        <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#cbd5e1] text-[14px]">
-                          <p className="leading-[20px] mb-0">Telemetrijski podaci s ovlaštenih mjernih stanica Federalnog hidrometeorološkog zavoda i senzora MTTO</p>
-                          <p className="leading-[20px]">duž riječnog koridora Neretve.</p>
+                        <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#cbd5e1] text-[14px] max-lg:block">
+                          <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">Telemetrijski podaci s ovlaštenih mjernih stanica Federalnog hidrometeorološkog zavoda i senzora MTTO</p>
+                          <p className="leading-[20px] max-lg:inline">duž riječnog koridora Neretve.</p>
                         </div>
                       </div>
                     </div>
@@ -581,10 +581,10 @@ export function OkolisBody(props: any) {
                 </div>
                 <div className="relative min-w-0 max-w-full w-full">
                   <div className="bg-clip-padding border-0 border-[transparent] border-solid flex flex-col items-start relative size-full">
-                    <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#64748b] text-[12px] w-full">
-                      <p className="leading-[16px] mb-0">Uočili ste divlje odlagalište otpada, nelegalnu sječu, ili</p>
-                      <p className="leading-[16px] mb-0">zagađenje vodotoka? Prijavite izravno kantonalnoj inspekciji</p>
-                      <p className="leading-[16px]">za zaštitu okoliša.</p>
+                    <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#64748b] text-[12px] w-full max-lg:block">
+                      <p className="leading-[16px] mb-0 max-lg:inline max-lg:after:content-['_']">Uočili ste divlje odlagalište otpada, nelegalnu sječu, ili</p>
+                      <p className="leading-[16px] mb-0 max-lg:inline max-lg:after:content-['_']">zagađenje vodotoka? Prijavite izravno kantonalnoj inspekciji</p>
+                      <p className="leading-[16px] max-lg:inline">za zaštitu okoliša.</p>
                     </div>
                   </div>
                 </div>
@@ -621,9 +621,9 @@ export function OkolisBody(props: any) {
                       <div className="bg-[#f1f5f9] border border-[#cbd5e1] border-solid flex items-start justify-center overflow-auto p-[9px] relative rounded-[2px] min-w-0 max-w-full w-full flex-wrap">
                         <div className="flex-[1_0_0] min-w-px relative">
                           <div className="bg-clip-padding border-0 border-[transparent] border-solid flex flex-col items-start relative size-full">
-                            <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#9ca3af] text-[12px] w-full whitespace-pre-wrap">
-                              <p className="leading-[16px] mb-0">{`Opišite stanje na terenu, procijenjenu količinu ili `}</p>
-                              <p className="leading-[16px]">registarske oznake vozila...</p>
+                            <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#9ca3af] text-[12px] w-full whitespace-pre-wrap max-lg:block">
+                              <p className="leading-[16px] mb-0 max-lg:inline max-lg:after:content-['_']">{`Opišite stanje na terenu, procijenjenu količinu ili `}</p>
+                              <p className="leading-[16px] max-lg:inline">registarske oznake vozila...</p>
                             </div>
                           </div>
                         </div>
@@ -666,9 +666,9 @@ export function OkolisBody(props: any) {
                   </div>
                 </div>
                 <div className="flex flex-col items-start max-w-[448px] pr-[24.98px] relative w-full lg:w-auto lg:flex-[448_1_0%] min-w-0">
-                  <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#64748b] text-[14px]">
-                    <p className="leading-[20px] mb-0">Ministarstvo provodi financiranje čuvarskih službi, valorizaciju krških</p>
-                    <p className="leading-[20px]">fenomena i planove upravljanja zaštićenim područjima kantona.</p>
+                  <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#64748b] text-[14px] max-lg:block">
+                    <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">Ministarstvo provodi financiranje čuvarskih službi, valorizaciju krških</p>
+                    <p className="leading-[20px] max-lg:inline">fenomena i planove upravljanja zaštićenim područjima kantona.</p>
                   </div>
                 </div>
               </div>
@@ -676,7 +676,7 @@ export function OkolisBody(props: any) {
                 <div className="bg-white border border-[rgba(226,232,240,0.9)] border-solid flex flex-col isolate items-start overflow-clip p-px relative rounded-[8px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] w-full lg:w-auto lg:flex-[321_1_0%] min-w-0">
                   <div className="h-[176px] relative min-w-0 max-w-full w-full z-[2]">
                     <div className="bg-clip-padding border-0 border-[transparent] border-solid flex flex-col items-start justify-center relative size-full">
-                      <div className="flex-[1_0_0] min-h-px relative w-full">
+                      <div className="flex-[1_0_auto] min-h-px relative w-full">
                         <div className="absolute inset-0 overflow-hidden pointer-events-none">
                           <img alt="" className="absolute h-full left-[-6.47%] max-w-none top-0 w-[112.93%]" src="/fig/pa-blidinje.jpg" />
                         </div>
@@ -693,10 +693,10 @@ export function OkolisBody(props: any) {
                           <p className="font-rob font-bold min-w-0 max-w-full text-[#0f172a] text-[16px] w-full leading-[24px]">{`Blidinje & Čvrsnica`}</p>
                         </div>
                         <div className="flex flex-col items-start relative min-w-0 max-w-full w-full">
-                          <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#475569] text-[12px] w-full">
-                            <p className="leading-[19.5px] mb-0">Prostrani planinski plato. Dom endemske</p>
-                            <p className="leading-[19.5px] mb-0">munike, Hajdučkih vrata i nekropola stećaka</p>
-                            <p className="leading-[19.5px]">pod UNESCO-m.</p>
+                          <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#475569] text-[12px] w-full max-lg:block">
+                            <p className="leading-[19.5px] mb-0 max-lg:inline max-lg:after:content-['_']">Prostrani planinski plato. Dom endemske</p>
+                            <p className="leading-[19.5px] mb-0 max-lg:inline max-lg:after:content-['_']">munike, Hajdučkih vrata i nekropola stećaka</p>
+                            <p className="leading-[19.5px] max-lg:inline">pod UNESCO-m.</p>
                           </div>
                         </div>
                       </div>
@@ -723,7 +723,7 @@ export function OkolisBody(props: any) {
                 <div className="bg-white border border-[rgba(226,232,240,0.9)] border-solid flex flex-col isolate items-start overflow-clip p-px relative rounded-[8px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] w-full lg:w-auto lg:flex-[321_1_0%] min-w-0">
                   <div className="h-[176px] relative min-w-0 max-w-full w-full z-[2]">
                     <div className="bg-clip-padding border-0 border-[transparent] border-solid flex flex-col items-start justify-center relative size-full">
-                      <div className="flex-[1_0_0] min-h-px relative w-full">
+                      <div className="flex-[1_0_auto] min-h-px relative w-full">
                         <div className="absolute inset-0 overflow-hidden pointer-events-none">
                           <img alt="" className="absolute h-full left-[-6.47%] max-w-none top-0 w-[112.93%]" src="/fig/tile-hutovo.jpg" />
                         </div>
@@ -740,10 +740,10 @@ export function OkolisBody(props: any) {
                           <p className="font-rob font-bold min-w-0 max-w-full text-[#0f172a] text-[16px] w-full leading-[24px]">Hutovo Blato</p>
                         </div>
                         <div className="flex flex-col items-start relative min-w-0 max-w-full w-full">
-                          <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#475569] text-[12px] w-full">
-                            <p className="leading-[19.5px] mb-0">Submediteranska močvara i ornitološki</p>
-                            <p className="leading-[19.5px] mb-0">rezervat s preko 240 zabilježenih vrsta ptica</p>
-                            <p className="leading-[19.5px]">močvarica i ribljim mrjestilištima.</p>
+                          <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#475569] text-[12px] w-full max-lg:block">
+                            <p className="leading-[19.5px] mb-0 max-lg:inline max-lg:after:content-['_']">Submediteranska močvara i ornitološki</p>
+                            <p className="leading-[19.5px] mb-0 max-lg:inline max-lg:after:content-['_']">rezervat s preko 240 zabilježenih vrsta ptica</p>
+                            <p className="leading-[19.5px] max-lg:inline">močvarica i ribljim mrjestilištima.</p>
                           </div>
                         </div>
                       </div>
@@ -770,7 +770,7 @@ export function OkolisBody(props: any) {
                 <div className="bg-white border border-[rgba(226,232,240,0.9)] border-solid flex flex-col isolate items-start overflow-clip p-px relative rounded-[8px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] w-full lg:w-auto lg:flex-[321_1_0%] min-w-0">
                   <div className="h-[176px] relative min-w-0 max-w-full w-full z-[2]">
                     <div className="bg-clip-padding border-0 border-[transparent] border-solid flex flex-col items-start justify-center relative size-full">
-                      <div className="flex-[1_0_0] min-h-px relative w-full">
+                      <div className="flex-[1_0_auto] min-h-px relative w-full">
                         <div className="absolute inset-0 overflow-hidden pointer-events-none">
                           <img alt="" className="absolute h-full left-[-6.47%] max-w-none top-0 w-[112.93%]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCR7QwsmCpti7mqAu-EuWuBYcIJb8pm0iU2Mm8LqS5OCLTwQHucKW2k3BaM6ZBcGDlHM3gB6z9kK4M3kdbo2gZkuZ3mbdwsvXHkdXfbBGlcrh7x0zHGwlFLt66lBWw3oE98eBWaY8eTMZeqjJoRD2mpCc-p6QBI8i2iTsaqP3gJSi18NVfkQRzwxCQo9Ttynl77DVoVQHc1Hop6tFO-KiAihd0TGPIkBhNM6fFsjI" />
                         </div>
@@ -787,11 +787,11 @@ export function OkolisBody(props: any) {
                           <p className="font-rob font-bold min-w-0 max-w-full text-[#0f172a] text-[16px] w-full leading-[24px]">{`Vjetrenica & Popovo Polje`}</p>
                         </div>
                         <div className="flex flex-col items-start pb-[0.75px] relative min-w-0 max-w-full w-full">
-                          <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#475569] text-[12px] w-full">
-                            <p className="leading-[19.5px] mb-0">Najbogatija špilja podzemnom</p>
-                            <p className="leading-[19.5px] mb-0">bioraznolikošću na svijetu, nalazi se na</p>
-                            <p className="leading-[19.5px] mb-0">UNESCO preliminarnoj listi svjetske baštine.</p>
-                            <p className="leading-[19.5px]"></p>
+                          <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#475569] text-[12px] w-full max-lg:block">
+                            <p className="leading-[19.5px] mb-0 max-lg:inline max-lg:after:content-['_']">Najbogatija špilja podzemnom</p>
+                            <p className="leading-[19.5px] mb-0 max-lg:inline max-lg:after:content-['_']">bioraznolikošću na svijetu, nalazi se na</p>
+                            <p className="leading-[19.5px] mb-0 max-lg:inline max-lg:after:content-['_']">UNESCO preliminarnoj listi svjetske baštine.</p>
+                            <p className="leading-[19.5px] max-lg:inline"></p>
                           </div>
                         </div>
                       </div>
@@ -818,7 +818,7 @@ export function OkolisBody(props: any) {
                 <div className="bg-white border border-[rgba(226,232,240,0.9)] border-solid flex flex-col isolate items-start overflow-clip p-px relative rounded-[8px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] w-full lg:w-auto lg:flex-[321_1_0%] min-w-0">
                   <div className="h-[176px] relative min-w-0 max-w-full w-full z-[2]">
                     <div className="bg-clip-padding border-0 border-[transparent] border-solid flex flex-col items-start justify-center relative size-full">
-                      <div className="flex-[1_0_0] min-h-px relative w-full">
+                      <div className="flex-[1_0_auto] min-h-px relative w-full">
                         <div className="absolute inset-0 overflow-hidden pointer-events-none">
                           <img alt="" className="absolute h-full left-[-6.47%] max-w-none top-0 w-[112.93%]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1U0NEsym6GMMMAHvH-TnhC3LJy2yxvTKCZtBv6D3HmU19JT8eV3c0atM1hajXukyJF7Xn4QhfhKNlDEo4A2aWUjltgqv4tF-bUM_v0ZvR1gbFm9ulVMl9AKqhyH4Tc-GXR9t3wq2wGqDtZpgX4nVZH544CVZaK4yVeXzF6MaBOZnqgCTRlH2Uma3_nsl34tLTRP6yQcs_V6E5bgiql9zIVBitfdBPPtRYdbq55YI" />
                         </div>
@@ -835,10 +835,10 @@ export function OkolisBody(props: any) {
                           <p className="font-rob font-bold min-w-0 max-w-full text-[#0f172a] text-[16px] w-full leading-[24px]">Boračko Jezero</p>
                         </div>
                         <div className="flex flex-col items-start relative min-w-0 max-w-full w-full">
-                          <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#475569] text-[12px] w-full">
-                            <p className="leading-[19.5px] mb-0">Planinsko glacijalno jezero na sjeveroistočnim</p>
-                            <p className="leading-[19.5px] mb-0">padinama Prenja s uređenim kamp zonama i</p>
-                            <p className="leading-[19.5px]">sustavom monitoringa čistoće vode.</p>
+                          <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#475569] text-[12px] w-full max-lg:block">
+                            <p className="leading-[19.5px] mb-0 max-lg:inline max-lg:after:content-['_']">Planinsko glacijalno jezero na sjeveroistočnim</p>
+                            <p className="leading-[19.5px] mb-0 max-lg:inline max-lg:after:content-['_']">padinama Prenja s uređenim kamp zonama i</p>
+                            <p className="leading-[19.5px] max-lg:inline">sustavom monitoringa čistoće vode.</p>
                           </div>
                         </div>
                       </div>
@@ -927,9 +927,9 @@ export function OkolisBody(props: any) {
                       <p className="font-rob font-bold min-w-0 max-w-full text-[#002e7c] text-[24px] leading-[32px]">Javni uvidi, rasprave i Aarhuška konvencija</p>
                     </div>
                     <div className="flex flex-col items-start relative min-w-0 max-w-full w-full">
-                      <div className="flex flex-col font-rmono font-medium justify-center relative min-w-0 max-w-full text-[#444651] text-[12px] tracking-[0.3px]">
-                        <p className="leading-[16px] mb-0">Pravo javnosti na pristup informacijama, sudjelovanje u odlučivanju i pravnu zaštitu</p>
-                        <p className="leading-[16px]">u okolišnim pitanjima.</p>
+                      <div className="flex flex-col font-rmono font-medium justify-center relative min-w-0 max-w-full text-[#444651] text-[12px] tracking-[0.3px] max-lg:block">
+                        <p className="leading-[16px] mb-0 max-lg:inline max-lg:after:content-['_']">Pravo javnosti na pristup informacijama, sudjelovanje u odlučivanju i pravnu zaštitu</p>
+                        <p className="leading-[16px] max-lg:inline">u okolišnim pitanjima.</p>
                       </div>
                     </div>
                   </div>
@@ -946,10 +946,10 @@ export function OkolisBody(props: any) {
                     </div>
                   </div>
                   <div className="flex flex-col items-start relative min-w-0 max-w-full w-full">
-                    <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#444651] text-[14px] w-full">
-                      <p className="leading-[20px] mb-0">Prema Aarhuškoj konvenciji, svaki građanin, udruga ili institucija</p>
-                      <p className="leading-[20px] mb-0">ima pravo poslati pisane komentare na aktivne studije i nacrte</p>
-                      <p className="leading-[20px]">odluka.</p>
+                    <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#444651] text-[14px] w-full max-lg:block">
+                      <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">Prema Aarhuškoj konvenciji, svaki građanin, udruga ili institucija</p>
+                      <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">ima pravo poslati pisane komentare na aktivne studije i nacrte</p>
+                      <p className="leading-[20px] max-lg:inline">odluka.</p>
                     </div>
                   </div>
                   <div className="flex flex-col gap-[12px] items-start pt-[8px] relative min-w-0 max-w-full w-full">
@@ -991,9 +991,9 @@ export function OkolisBody(props: any) {
                       </div>
                       <div className="bg-[#f2f3ff] flex items-start justify-center overflow-auto pb-[52px] pt-[12px] px-[12px] relative rounded-[2px] min-w-0 max-w-full w-full flex-wrap">
                         <div className="flex flex-[1_0_0] flex-col items-start min-w-px relative">
-                          <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#9ca3af] text-[14px] w-full whitespace-pre-wrap">
-                            <p className="leading-[20px] mb-0">{`Unesite argumentirane primjedbe, prijedloge izmjena ili `}</p>
-                            <p className="leading-[20px]">specifične zahtjeve vezane uz procjenu utjecaja...</p>
+                          <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#9ca3af] text-[14px] w-full whitespace-pre-wrap max-lg:block">
+                            <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">{`Unesite argumentirane primjedbe, prijedloge izmjena ili `}</p>
+                            <p className="leading-[20px] max-lg:inline">specifične zahtjeve vezane uz procjenu utjecaja...</p>
                           </div>
                         </div>
                       </div>
@@ -1001,9 +1001,9 @@ export function OkolisBody(props: any) {
                     <div className="flex gap-[8px] items-center relative min-w-0 max-w-full w-full flex-wrap">
                       <div className="bg-white border border-[#767676] border-solid relative rounded-[2.5px] shrink-0 size-[13px]" />
                       <div className="flex flex-col items-start pr-[18.44px] relative min-w-0 max-w-full">
-                        <div className="flex flex-col font-rmono font-medium justify-center relative min-w-0 max-w-full text-[#444651] text-[12px] tracking-[0.3px]">
-                          <p className="leading-[16px] mb-0">Suglasan/na sam s javnim objavljivanjem primjedbe u</p>
-                          <p className="leading-[16px]">izvještaju o javnoj raspravi.</p>
+                        <div className="flex flex-col font-rmono font-medium justify-center relative min-w-0 max-w-full text-[#444651] text-[12px] tracking-[0.3px] max-lg:block">
+                          <p className="leading-[16px] mb-0 max-lg:inline max-lg:after:content-['_']">Suglasan/na sam s javnim objavljivanjem primjedbe u</p>
+                          <p className="leading-[16px] max-lg:inline">izvještaju o javnoj raspravi.</p>
                         </div>
                       </div>
                     </div>
@@ -1018,9 +1018,9 @@ export function OkolisBody(props: any) {
                 <div className="flex gap-[8px] items-center pt-[12px] relative min-w-0 max-w-full w-full flex-wrap">
                   <span className="material-symbols-outlined shrink-0 leading-none text-[#444651]" style={{ fontSize: 17 }}>help</span>
                   <div className="flex flex-col items-start relative min-w-0 max-w-full">
-                    <div className="flex flex-col font-rmono font-medium justify-center relative min-w-0 max-w-full text-[#444651] text-[12px] tracking-[0.3px]">
-                      <p className="leading-[16px] mb-0">Zaprimljeni podaci štite se u skladu s GDPR i Zakonom</p>
-                      <p className="leading-[16px]">o zaštiti osobnih podataka BiH.</p>
+                    <div className="flex flex-col font-rmono font-medium justify-center relative min-w-0 max-w-full text-[#444651] text-[12px] tracking-[0.3px] max-lg:block">
+                      <p className="leading-[16px] mb-0 max-lg:inline max-lg:after:content-['_']">Zaprimljeni podaci štite se u skladu s GDPR i Zakonom</p>
+                      <p className="leading-[16px] max-lg:inline">o zaštiti osobnih podataka BiH.</p>
                     </div>
                   </div>
                 </div>
@@ -1036,29 +1036,29 @@ export function OkolisBody(props: any) {
                     <p className="font-rob font-bold min-w-0 max-w-full text-[#131b2e] text-[20px] md:text-[26px] lg:text-[32px] tracking-[-0.32px] leading-[40px]">Službeni registri i e-usluge zaštite okoliša</p>
                   </div>
                   <div className="flex flex-col items-start relative min-w-0 max-w-full w-full">
-                    <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#444651] text-[16px]">
-                      <p className="leading-[24px] mb-0">Pretražite registrirane subjekte, katastar zagađivača i preuzmite obrasce za ishođenje</p>
-                      <p className="leading-[24px]">dozvola.</p>
+                    <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#444651] text-[16px] max-lg:block">
+                      <p className="leading-[24px] mb-0 max-lg:inline max-lg:after:content-['_']">Pretražite registrirane subjekte, katastar zagađivača i preuzmite obrasce za ishođenje</p>
+                      <p className="leading-[24px] max-lg:inline">dozvola.</p>
                     </div>
                   </div>
                 </div>
                 <div className="bg-[#f2f3ff] flex items-center p-[4px] relative rounded-[4px] w-full lg:w-auto lg:flex-[515_1_0%] min-w-0 flex-wrap">
                   <button type="button" className="bg-white drop-shadow-[0px_1px_1px_rgba(0,0,0,0.05)] flex flex-col items-center justify-center pl-[33.22px] pr-[33.23px] py-[6px] relative rounded-[2px] min-w-0 max-w-full">
-                    <div className="flex flex-col font-rmono font-semibold justify-center relative min-w-0 max-w-full text-[#002e7c] text-[12px] text-center tracking-[0.3px]">
-                      <p className="leading-[16px] mb-0">Okolišne dozvole</p>
-                      <p className="leading-[16px]">({props.n.permits})</p>
+                    <div className="flex flex-col font-rmono font-semibold justify-center relative min-w-0 max-w-full text-[#002e7c] text-[12px] text-center tracking-[0.3px] max-lg:block">
+                      <p className="leading-[16px] mb-0 max-lg:inline max-lg:after:content-['_']">Okolišne dozvole</p>
+                      <p className="leading-[16px] max-lg:inline">({props.n.permits})</p>
                     </div>
                   </button>
                   <button type="button" className="flex flex-col items-center justify-center pl-[29.54px] pr-[29.52px] py-[6px] relative rounded-[2px] min-w-0 max-w-full">
-                    <div className="flex flex-col font-rmono font-medium justify-center relative min-w-0 max-w-full text-[#444651] text-[12px] text-center tracking-[0.3px]">
-                      <p className="leading-[16px] mb-0">Operateri otpada</p>
-                      <p className="leading-[16px]">(Faza 2)</p>
+                    <div className="flex flex-col font-rmono font-medium justify-center relative min-w-0 max-w-full text-[#444651] text-[12px] text-center tracking-[0.3px] max-lg:block">
+                      <p className="leading-[16px] mb-0 max-lg:inline max-lg:after:content-['_']">Operateri otpada</p>
+                      <p className="leading-[16px] max-lg:inline">(Faza 2)</p>
                     </div>
                   </button>
                   <button type="button" className="flex flex-col items-center justify-center px-[41.08px] py-[6px] relative rounded-[2px] min-w-0 max-w-full">
-                    <div className="flex flex-col font-rmono font-medium justify-center relative min-w-0 max-w-full text-[#444651] text-[12px] text-center tracking-[0.3px]">
-                      <p className="leading-[16px] mb-0">Katastar</p>
-                      <p className="leading-[16px]">emisija</p>
+                    <div className="flex flex-col font-rmono font-medium justify-center relative min-w-0 max-w-full text-[#444651] text-[12px] text-center tracking-[0.3px] max-lg:block">
+                      <p className="leading-[16px] mb-0 max-lg:inline max-lg:after:content-['_']">Katastar</p>
+                      <p className="leading-[16px] max-lg:inline">emisija</p>
                     </div>
                   </button>
                 </div>
@@ -1096,9 +1096,9 @@ export function OkolisBody(props: any) {
                       <p className="font-rmono font-semibold min-w-0 max-w-full text-[#444651] text-[12px] tracking-[0.6px] uppercase leading-[16px]">PRAVNI SUBJEKT / OPERATER</p>
                     </div>
                     <div className="flex flex-col items-start px-[16px] py-[12px] relative shrink-0 w-[161px]">
-                      <div className="flex flex-col font-rmono font-semibold justify-center relative min-w-0 max-w-full text-[#444651] text-[12px] tracking-[0.6px] uppercase">
-                        <p className="leading-[16px] mb-0">LOKACIJA /</p>
-                        <p className="leading-[16px]">OPĆINA</p>
+                      <div className="flex flex-col font-rmono font-semibold justify-center relative min-w-0 max-w-full text-[#444651] text-[12px] tracking-[0.6px] uppercase max-lg:block">
+                        <p className="leading-[16px] mb-0 max-lg:inline max-lg:after:content-['_']">LOKACIJA /</p>
+                        <p className="leading-[16px] max-lg:inline">OPĆINA</p>
                       </div>
                     </div>
                     <div className="flex flex-col items-start px-[16px] py-[20px] relative w-full lg:w-auto lg:flex-[282_1_0%] min-w-0">

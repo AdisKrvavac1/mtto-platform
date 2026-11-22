@@ -26,9 +26,9 @@ export function HomeBody(props: any) {
                     </p>
                 </div>
                 <div className="flex flex-col items-start relative min-w-0 max-w-full w-full">
-                  <div className="flex flex-col font-rob font-normal justify-center relative shrink-0 text-[#d3e4fe] text-[18px] w-[686px] max-w-full">
-                    <p className="leading-[29.25px] mb-0">Strateški balans ubrzanog turističkog rasta, očuvanja osjetljivih kraških horizonata,</p>
-                    <p className="leading-[29.25px]">smaragdnog kanjona rijeke Neretve i strogih europskih standarda biološke raznolikosti u srcu Hercegovine.</p>
+                  <div className="flex flex-col font-rob font-normal justify-center relative shrink-0 text-[#d3e4fe] text-[18px] w-[686px] max-w-full max-lg:block">
+                    <p className="leading-[29.25px] mb-0 max-lg:inline max-lg:after:content-['_']">Strateški balans ubrzanog turističkog rasta, očuvanja osjetljivih kraških horizonata,</p>
+                    <p className="leading-[29.25px] max-lg:inline">smaragdnog kanjona rijeke Neretve i strogih europskih standarda biološke raznolikosti u srcu Hercegovine.</p>
                   </div>
                 </div>
                 <div className="content-center flex flex-wrap gap-[16px] items-center relative min-w-0 max-w-full w-full">
@@ -47,7 +47,7 @@ export function HomeBody(props: any) {
                 </div>
               </div>
               <div className="flex flex-col h-[476px] items-start justify-end overflow-clip relative rounded-[8px] w-full lg:w-auto lg:flex-[584_1_0%] min-w-0">
-                <div className="flex-[1_0_0] min-h-px overflow-clip relative w-full">
+                <div className="flex-[1_0_auto] min-h-px overflow-clip relative w-full">
                   <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <img alt="" className="absolute h-[111.05%] left-0 max-w-none top-[-5.52%] w-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCEWKmLcSDOYxmpKuOYOdW5zJNpO5wlGksfagEFHM6lxrScad9BRLHLn73w5GJjHE0-Vj_CHG2rJTKAhFq173Djpo4uOwLtuUoeu_a1cIP3UBcS-l5c_ipPWZkV0piDEVmScCwnvR7HTpwObwcSwPr9KuF0O-RvlPUpv_YMaKa8KZTs2cqTAHK7TEEnb7JjR79yHKU18uRvW0iH19S4D4SHKawc3QMU3WxL_fD7j2A" />
                   </div>
@@ -73,7 +73,7 @@ export function HomeBody(props: any) {
             </div>
             <div className="flex flex-col lg:flex-row gap-[16px] items-start justify-center pt-[24px] relative min-w-0 max-w-full w-full flex-wrap">
               <div className="bg-[rgba(255,255,255,0)] flex flex-col h-[160px] items-start justify-center overflow-clip relative rounded-[8px] shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)] w-full lg:w-auto lg:flex-[332_1_0%] min-w-0">
-                <div className="flex-[1_0_0] min-h-px relative w-full">
+                <div className="flex-[1_0_auto] min-h-px relative w-full">
                   <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <img alt="" className="absolute h-[113.35%] left-0 max-w-none top-[-6.67%] w-full" src="/fig/tile-neretva.jpg" />
                   </div>
@@ -88,7 +88,7 @@ export function HomeBody(props: any) {
                 </div>
               </div>
               <div className="bg-[rgba(255,255,255,0)] flex flex-col h-[160px] items-start justify-center overflow-clip relative rounded-[8px] shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)] w-full lg:w-auto lg:flex-[332_1_0%] min-w-0">
-                <div className="flex-[1_0_0] min-h-px relative w-full">
+                <div className="flex-[1_0_auto] min-h-px relative w-full">
                   <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <img alt="" className="absolute h-full left-[-0.28%] max-w-none top-0 w-[100.55%]" src="/fig/tile-prenj.jpg" />
                   </div>
@@ -103,7 +103,7 @@ export function HomeBody(props: any) {
                 </div>
               </div>
               <div className="bg-[rgba(255,255,255,0)] flex flex-col h-[160px] items-start justify-center overflow-clip relative rounded-[8px] shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)] w-full lg:w-auto lg:flex-[332_1_0%] min-w-0">
-                <div className="flex-[1_0_0] min-h-px relative w-full">
+                <div className="flex-[1_0_auto] min-h-px relative w-full">
                   <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <img alt="" className="absolute h-[101.94%] left-0 max-w-none top-[-0.97%] w-full" src="/fig/tile-hutovo.jpg" />
                   </div>
@@ -118,7 +118,7 @@ export function HomeBody(props: any) {
                 </div>
               </div>
               <div className="bg-[rgba(255,255,255,0)] flex flex-col h-[160px] items-start justify-center overflow-clip relative rounded-[8px] shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)] w-full lg:w-auto lg:flex-[332_1_0%] min-w-0">
-                <div className="flex-[1_0_0] min-h-px relative w-full">
+                <div className="flex-[1_0_auto] min-h-px relative w-full">
                   <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <img alt="" className="absolute h-[101.94%] left-0 max-w-none top-[-0.97%] w-full" src="/fig/tile-neum.jpg" />
                   </div>
@@ -309,9 +309,9 @@ export function HomeBody(props: any) {
                 </div>
               </div>
               <div className="flex flex-col items-start relative min-w-0 max-w-full w-full">
-                <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#43474f] text-[14px] w-full">
-                  <p className="leading-[20px] mb-0">Službeni pozivi, javne rasprave o okolišnim procjenama</p>
-                  <p className="leading-[20px]">i otvoreni administrativni natječaji Vlade HNŽ.</p>
+                <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#43474f] text-[14px] w-full max-lg:block">
+                  <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">Službeni pozivi, javne rasprave o okolišnim procjenama</p>
+                  <p className="leading-[20px] max-lg:inline">i otvoreni administrativni natječaji Vlade HNŽ.</p>
                 </div>
               </div>
               {props.calls}
@@ -329,9 +329,9 @@ export function HomeBody(props: any) {
                 </div>
               </div>
               <div className="flex flex-col items-start relative min-w-0 max-w-full w-full">
-                <div className="flex flex-col font-pub font-normal justify-center relative min-w-0 max-w-full text-[#dce9ff] text-[13px] w-full">
-                  <p className="leading-[20px] mb-0">Rad sa strankama radnim danom u zgradi</p>
-                  <p className="leading-[20px]">Ministarstva, Braće Fejića bb, Mostar.</p>
+                <div className="flex flex-col font-pub font-normal justify-center relative min-w-0 max-w-full text-[#dce9ff] text-[13px] w-full max-lg:block">
+                  <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">Rad sa strankama radnim danom u zgradi</p>
+                  <p className="leading-[20px] max-lg:inline">Ministarstva, Braće Fejića bb, Mostar.</p>
                 </div>
               </div>
               <div className="flex gap-[24px] items-center pr-[0.01px] pt-[4px] relative min-w-0 max-w-full flex-wrap">
@@ -365,7 +365,7 @@ export function HomeBody(props: any) {
                   <p className="font-rob font-normal text-[#dce9ff] text-[15px] w-[672px] max-w-full leading-[24px]">Telemetrijski podaci s ovlaštenih mjernih stanica Federalnog hidrometeorološkog zavoda i senzora MTTO duž riječnog koridora Neretve.</p>
                 </div>
               </div>
-              <div className="flex flex-[1_0_0] flex-col gap-[16px] items-start min-h-px relative w-full">
+              <div className="flex flex-[1_0_auto] flex-col gap-[16px] items-start min-h-px relative w-full">
                 <div className="flex flex-col lg:flex-row gap-[16px] items-start justify-center relative min-w-0 max-w-full w-full flex-wrap">
                   <div className="backdrop-blur-[12px] bg-[rgba(255,255,255,0.1)] flex flex-col gap-[4px] items-start p-[16px] relative rounded-[8px] w-full lg:w-auto lg:flex-[267_1_0%] min-w-0">
                     <div className="absolute bg-[rgba(255,255,255,0)] inset-[0_-0.55px_0_0] rounded-[8px] shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)]" />
@@ -488,7 +488,7 @@ export function HomeBody(props: any) {
                     </div>
                   </div>
                 </div>
-                <div className="backdrop-blur-[12px] bg-[rgba(255,255,255,0.1)] flex flex-[1_0_0] flex-col items-start justify-between min-h-px p-[16px] relative rounded-[8px] w-full">
+                <div className="backdrop-blur-[12px] bg-[rgba(255,255,255,0.1)] flex flex-[1_0_auto] flex-col items-start justify-between min-h-px p-[16px] relative rounded-[8px] w-full">
                   <div className="flex items-center justify-between pr-[0.01px] relative min-w-0 max-w-full w-full flex-wrap">
                     <div className="flex gap-[8px] items-center relative min-w-0 max-w-full flex-wrap">
                       <span className="material-symbols-outlined shrink-0 leading-none text-secondary-fixed" style={{ fontSize: 20 }}>water</span>
@@ -560,9 +560,9 @@ export function HomeBody(props: any) {
                 </div>
               </div>
               <div className="flex flex-col items-start relative min-w-0 max-w-full w-full">
-                <div className="flex flex-col font-pub font-normal justify-center relative min-w-0 max-w-full text-[#334155] text-[13px] w-full">
-                  <p className="leading-[20px] mb-0">Uočili ste divlje odlagalište otpada, nelegalnu sječu šuma ili zagađenje</p>
-                  <p className="leading-[20px]">vodotoka? Prijavite izravno kantonalnoj inspekciji za zaštitu okoliša.</p>
+                <div className="flex flex-col font-pub font-normal justify-center relative min-w-0 max-w-full text-[#334155] text-[13px] w-full max-lg:block">
+                  <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">Uočili ste divlje odlagalište otpada, nelegalnu sječu šuma ili zagađenje</p>
+                  <p className="leading-[20px] max-lg:inline">vodotoka? Prijavite izravno kantonalnoj inspekciji za zaštitu okoliša.</p>
                 </div>
               </div>
               <div className="flex flex-col gap-[7.5px] items-start relative min-w-0 max-w-full w-full">
@@ -592,9 +592,9 @@ export function HomeBody(props: any) {
                   </div>
                   <div className="bg-[#eff4ff] flex items-start justify-center overflow-auto p-[12px] relative rounded-[2px] min-w-0 max-w-full w-full flex-wrap">
                     <div className="flex flex-[1_0_0] flex-col items-start min-w-px relative">
-                      <div className="flex flex-col font-pub font-normal justify-center relative min-w-0 max-w-full text-[#737780] text-[15px] w-full whitespace-pre-wrap">
-                        <p className="leading-[24px] mb-0">{`Opišite stanje na terenu, procijenjenu količinu ili `}</p>
-                        <p className="leading-[24px]">registarske oznake vozila...</p>
+                      <div className="flex flex-col font-pub font-normal justify-center relative min-w-0 max-w-full text-[#737780] text-[15px] w-full whitespace-pre-wrap max-lg:block">
+                        <p className="leading-[24px] mb-0 max-lg:inline max-lg:after:content-['_']">{`Opišite stanje na terenu, procijenjenu količinu ili `}</p>
+                        <p className="leading-[24px] max-lg:inline">registarske oznake vozila...</p>
                       </div>
                     </div>
                   </div>
@@ -641,7 +641,7 @@ export function HomeBody(props: any) {
           <div className="bg-white flex flex-col items-start justify-between overflow-clip relative rounded-[8px] shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)] w-full lg:w-auto lg:flex-[326_1_0%] min-w-0">
             <div className="flex flex-col isolate items-start relative min-w-0 max-w-full w-full">
               <div className="flex flex-col h-[192px] items-start justify-center overflow-clip relative min-w-0 max-w-full w-full z-[2]">
-                <div className="flex-[1_0_0] min-h-px relative w-full">
+                <div className="flex-[1_0_auto] min-h-px relative w-full">
                   <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <img alt="" className="absolute h-full left-[-10.09%] max-w-none top-0 w-[120.18%]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkvTHCqx-K8CxqDJbfR-jzq_YZ0FJ5E-z0ORgt0bgkx7i38jRA4QKO_ziHoTXpCesrIUfBgVq7eqDAOo06L2DQ5mVsi8rAm7F-nAKhSjHIX1Pf8Lv0FWZMhRgzUEWWlOaJCR9UI8-umA88J7JGtdp1JVST90PA2flSsOhYW90RTFBj6zwPT6GAit-hwe_NBpSpQQ2oRBCMtNtE3CuWpgOP9JgW6GbBXACaU4pqKXc" />
                   </div>
@@ -655,11 +655,11 @@ export function HomeBody(props: any) {
                   <p className="font-rob font-bold min-w-0 max-w-full text-[#002042] text-[18px] w-full leading-[26px]">{`Blidinje & Čvrsnica`}</p>
                 </div>
                 <div className="flex flex-col items-start relative min-w-0 max-w-full w-full">
-                  <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#334155] text-[13px] w-full">
-                    <p className="leading-[20px] mb-0">Prostrani planinski plato. Dom</p>
-                    <p className="leading-[20px] mb-0">endemske munike, Hajdučkih vrata i</p>
-                    <p className="leading-[20px] mb-0">nekropola stećaka pod zaštitom</p>
-                    <p className="leading-[20px]">UNESCO-a.</p>
+                  <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#334155] text-[13px] w-full max-lg:block">
+                    <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">Prostrani planinski plato. Dom</p>
+                    <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">endemske munike, Hajdučkih vrata i</p>
+                    <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">nekropola stećaka pod zaštitom</p>
+                    <p className="leading-[20px] max-lg:inline">UNESCO-a.</p>
                   </div>
                 </div>
               </div>
@@ -679,7 +679,7 @@ export function HomeBody(props: any) {
           <div className="bg-white flex flex-col gap-[20px] items-start overflow-clip relative rounded-[8px] shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)] w-full lg:w-auto lg:flex-[326_1_0%] min-w-0">
             <div className="flex flex-col isolate items-start relative min-w-0 max-w-full w-full">
               <div className="flex flex-col h-[192px] items-start justify-center overflow-clip relative min-w-0 max-w-full w-full z-[2]">
-                <div className="flex-[1_0_0] min-h-px relative w-full">
+                <div className="flex-[1_0_auto] min-h-px relative w-full">
                   <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <img alt="" className="absolute h-full left-[-10.09%] max-w-none top-0 w-[120.18%]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAArFCmv3dMABG6T3NKb3Vl4GqcIFQ394Umk3KPGHyufeKCv1pFsQ9Iz5aHgCcAsqRD6bduChvNQuYdsPsJA_NPHCLY-aP4UXtJM0RzkKq4Sy1N5kPDjkXNjuUXUmwJ7vw0pTvY5mh-XnEx6969Xqwqgc5oHJPT1OSCA3Vfm9Vl96f_UY7qbvrjg3-BorDitgjZDE4WxvMUivvPlxh3QeLYsT2jIYSslcKf0D8IgQw" />
                   </div>
@@ -693,10 +693,10 @@ export function HomeBody(props: any) {
                   <p className="font-rob font-bold min-w-0 max-w-full text-[#002042] text-[18px] w-full leading-[26px]">Hutovo Blato</p>
                 </div>
                 <div className="flex flex-col items-start relative min-w-0 max-w-full w-full">
-                  <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#334155] text-[13px] w-full">
-                    <p className="leading-[20px] mb-0">Submediteranska močvara i ornitološki</p>
-                    <p className="leading-[20px] mb-0">rezervat s preko 240 zabilježenih vrsta</p>
-                    <p className="leading-[20px]">ptica močvarica i ribljim mrjestilištima.</p>
+                  <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#334155] text-[13px] w-full max-lg:block">
+                    <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">Submediteranska močvara i ornitološki</p>
+                    <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">rezervat s preko 240 zabilježenih vrsta</p>
+                    <p className="leading-[20px] max-lg:inline">ptica močvarica i ribljim mrjestilištima.</p>
                   </div>
                 </div>
               </div>
@@ -716,7 +716,7 @@ export function HomeBody(props: any) {
           <div className="bg-white flex flex-col items-start justify-between overflow-clip relative rounded-[8px] shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)] w-full lg:w-auto lg:flex-[326_1_0%] min-w-0">
             <div className="flex flex-col isolate items-start relative min-w-0 max-w-full w-full">
               <div className="flex flex-col h-[192px] items-start justify-center overflow-clip relative min-w-0 max-w-full w-full z-[2]">
-                <div className="flex-[1_0_0] min-h-px relative w-full">
+                <div className="flex-[1_0_auto] min-h-px relative w-full">
                   <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <img alt="" className="absolute h-full left-[-10.09%] max-w-none top-0 w-[120.18%]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCR7QwsmCpti7mqAu-EuWuBYcIJb8pm0iU2Mm8LqS5OCLTwQHucKW2k3BaM6ZBcGDlHM3gB6z9kK4M3kdbo2gZkuZ3mbdwsvXHkdXfbBGlcrh7x0zHGwlFLt66lBWw3oE98eBWaY8eTMZeqjJoRD2mpCc-p6QBI8i2iTsaqP3gJSi18NVfkQRzwxCQo9Ttynl77DVoVQHc1Hop6tFO-KiAihd0TGPIkBhNM6fFsjI" />
                   </div>
@@ -730,11 +730,11 @@ export function HomeBody(props: any) {
                   <p className="font-rob font-bold min-w-0 max-w-full text-[#002042] text-[18px] w-full leading-[26px]">{`Vjetrenica & Popovo Polje`}</p>
                 </div>
                 <div className="flex flex-col items-start relative min-w-0 max-w-full w-full">
-                  <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#334155] text-[13px] w-full">
-                    <p className="leading-[20px] mb-0">Najbogatija špilja podzemnom</p>
-                    <p className="leading-[20px] mb-0">bioraznolikošću na svijetu, nalazi se</p>
-                    <p className="leading-[20px] mb-0">na UNESCO preliminarnoj listi svjetske</p>
-                    <p className="leading-[20px]">baštine.</p>
+                  <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#334155] text-[13px] w-full max-lg:block">
+                    <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">Najbogatija špilja podzemnom</p>
+                    <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">bioraznolikošću na svijetu, nalazi se</p>
+                    <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">na UNESCO preliminarnoj listi svjetske</p>
+                    <p className="leading-[20px] max-lg:inline">baštine.</p>
                   </div>
                 </div>
               </div>
@@ -754,7 +754,7 @@ export function HomeBody(props: any) {
           <div className="bg-white flex flex-col items-start justify-between overflow-clip relative rounded-[8px] shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)] w-full lg:w-auto lg:flex-[326_1_0%] min-w-0">
             <div className="flex flex-col isolate items-start relative min-w-0 max-w-full w-full">
               <div className="flex flex-col h-[192px] items-start justify-center overflow-clip relative min-w-0 max-w-full w-full z-[2]">
-                <div className="flex-[1_0_0] min-h-px relative w-full">
+                <div className="flex-[1_0_auto] min-h-px relative w-full">
                   <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <img alt="" className="absolute h-full left-[-10.09%] max-w-none top-0 w-[120.18%]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1U0NEsym6GMMMAHvH-TnhC3LJy2yxvTKCZtBv6D3HmU19JT8eV3c0atM1hajXukyJF7Xn4QhfhKNlDEo4A2aWUjltgqv4tF-bUM_v0ZvR1gbFm9ulVMl9AKqhyH4Tc-GXR9t3wq2wGqDtZpgX4nVZH544CVZaK4yVeXzF6MaBOZnqgCTRlH2Uma3_nsl34tLTRP6yQcs_V6E5bgiql9zIVBitfdBPPtRYdbq55YI" />
                   </div>
@@ -768,11 +768,11 @@ export function HomeBody(props: any) {
                   <p className="font-rob font-bold min-w-0 max-w-full text-[#002042] text-[18px] w-full leading-[26px]">Boračko Jezero</p>
                 </div>
                 <div className="flex flex-col items-start relative min-w-0 max-w-full w-full">
-                  <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#334155] text-[13px] w-full">
-                    <p className="leading-[20px] mb-0">Planinsko glacijalno jezero na</p>
-                    <p className="leading-[20px] mb-0">sjeveroistočnim padinama Prenja s</p>
-                    <p className="leading-[20px] mb-0">uređenim kamp zonama i sustavom</p>
-                    <p className="leading-[20px]">monitoringa čistoće vode.</p>
+                  <div className="flex flex-col font-rob font-normal justify-center relative min-w-0 max-w-full text-[#334155] text-[13px] w-full max-lg:block">
+                    <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">Planinsko glacijalno jezero na</p>
+                    <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">sjeveroistočnim padinama Prenja s</p>
+                    <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">uređenim kamp zonama i sustavom</p>
+                    <p className="leading-[20px] max-lg:inline">monitoringa čistoće vode.</p>
                   </div>
                 </div>
               </div>
@@ -981,9 +981,9 @@ export function HomeBody(props: any) {
                     </p>
                 </div>
                 <div className="flex flex-col h-[120px] items-start relative shrink-0 w-full">
-                  <div className="flex flex-col font-rob font-normal justify-center relative shrink-0 text-[#d3e4fe] text-[16px] w-full">
-                    <p className="leading-[1.4] mb-0">Strateški balans ubrzanog turističkog rasta, očuvanja osjetljivih kraških horizonata,</p>
-                    <p className="leading-[1.4]">smaragdnog kanjona rijeke Neretve i strogih europskih standarda biološke raznolikosti u srcu Hercegovine.</p>
+                  <div className="flex flex-col font-rob font-normal justify-center relative shrink-0 text-[#d3e4fe] text-[16px] w-full max-lg:block">
+                    <p className="leading-[1.4] mb-0 max-lg:inline max-lg:after:content-['_']">Strateški balans ubrzanog turističkog rasta, očuvanja osjetljivih kraških horizonata,</p>
+                    <p className="leading-[1.4] max-lg:inline">smaragdnog kanjona rijeke Neretve i strogih europskih standarda biološke raznolikosti u srcu Hercegovine.</p>
                   </div>
                 </div>
                 <div className="flex gap-[12px] items-start justify-center relative shrink-0 w-full">
@@ -1107,7 +1107,7 @@ export function HomeBody(props: any) {
                     </div>
                   </div>
                   <div className="flex flex-col h-[20px] items-start overflow-clip relative shrink-0 w-full">
-                    <p className="flex-[1_0_0] font-robflex font-normal min-h-px not-italic text-[#43474f] text-[13px] w-[147px] leading-[20px]">Pravni propisi, izuzeća i…</p>
+                    <p className="flex-[1_0_auto] font-robflex font-normal min-h-px not-italic text-[#43474f] text-[13px] w-[147px] leading-[20px]">Pravni propisi, izuzeća i…</p>
                   </div>
                 </div>
               </div>
@@ -1151,9 +1151,9 @@ export function HomeBody(props: any) {
                 </div>
               </div>
               <div className="flex flex-col h-[56px] items-start relative shrink-0 w-full">
-                <div className="flex flex-col font-rob font-normal justify-center relative shrink-0 text-[#43474f] text-[14px] w-full">
-                  <p className="leading-[20px] mb-0">Službeni pozivi, javne rasprave o okolišnim procjenama</p>
-                  <p className="leading-[20px]">i otvoreni administrativni natječaji Vlade HNŽ.</p>
+                <div className="flex flex-col font-rob font-normal justify-center relative shrink-0 text-[#43474f] text-[14px] w-full max-lg:block">
+                  <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">Službeni pozivi, javne rasprave o okolišnim procjenama</p>
+                  <p className="leading-[20px] max-lg:inline">i otvoreni administrativni natječaji Vlade HNŽ.</p>
                 </div>
               </div>
               {props.calls}
@@ -1171,9 +1171,9 @@ export function HomeBody(props: any) {
                 </div>
               </div>
               <div className="flex flex-col items-start relative shrink-0 w-full">
-                <div className="flex flex-col font-pub font-normal justify-center relative shrink-0 text-[#dce9ff] text-[13px] w-full">
-                  <p className="leading-[20px] mb-0">Rad sa strankama radnim danom u zgradi</p>
-                  <p className="leading-[20px]">Ministarstva, Braće Fejića bb, Mostar.</p>
+                <div className="flex flex-col font-pub font-normal justify-center relative shrink-0 text-[#dce9ff] text-[13px] w-full max-lg:block">
+                  <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">Rad sa strankama radnim danom u zgradi</p>
+                  <p className="leading-[20px] max-lg:inline">Ministarstva, Braće Fejića bb, Mostar.</p>
                 </div>
               </div>
               <div className="flex gap-[24px] items-center pr-[0.01px] pt-[4px] relative shrink-0">
@@ -1197,7 +1197,7 @@ export function HomeBody(props: any) {
           <div className="flex gap-[16px] items-start justify-center relative shrink-0 w-full">
             <div className="flex flex-[1_0_0] flex-col gap-[16px] items-start justify-center min-w-px relative">
               <div className="bg-[rgba(255,255,255,0)] flex flex-col h-[160px] items-start justify-center overflow-clip relative rounded-[8px] shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)] shrink-0 w-full">
-                <div className="flex-[1_0_0] min-h-px relative w-full">
+                <div className="flex-[1_0_auto] min-h-px relative w-full">
                   <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <img alt="" className="absolute h-[113.35%] left-0 max-w-none top-[-6.67%] w-full" src="/fig/tile-prenj.jpg" />
                   </div>
@@ -1212,7 +1212,7 @@ export function HomeBody(props: any) {
                 </div>
               </div>
               <div className="bg-[rgba(255,255,255,0)] flex flex-col h-[160px] items-start justify-center overflow-clip relative rounded-[8px] shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)] shrink-0 w-full">
-                <div className="flex-[1_0_0] min-h-px relative w-full">
+                <div className="flex-[1_0_auto] min-h-px relative w-full">
                   <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <img alt="" className="absolute h-full left-[-0.28%] max-w-none top-0 w-[100.55%]" src="/fig/tile-hutovo.jpg" />
                   </div>
@@ -1229,7 +1229,7 @@ export function HomeBody(props: any) {
             </div>
             <div className="flex flex-[1_0_0] flex-col gap-[16px] items-start justify-center min-w-px relative">
               <div className="bg-[rgba(255,255,255,0)] flex flex-col h-[160px] items-start justify-center overflow-clip relative rounded-[8px] shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)] shrink-0 w-full">
-                <div className="flex-[1_0_0] min-h-px relative w-full">
+                <div className="flex-[1_0_auto] min-h-px relative w-full">
                   <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <img alt="" className="absolute h-[101.94%] left-0 max-w-none top-[-0.97%] w-full" src="/fig/tile-neum.jpg" />
                   </div>
@@ -1244,7 +1244,7 @@ export function HomeBody(props: any) {
                 </div>
               </div>
               <div className="bg-[rgba(255,255,255,0)] flex flex-col h-[160px] items-start justify-center overflow-clip relative rounded-[8px] shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)] shrink-0 w-full">
-                <div className="flex-[1_0_0] min-h-px relative w-full">
+                <div className="flex-[1_0_auto] min-h-px relative w-full">
                   <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <img alt="" className="absolute h-[101.94%] left-0 max-w-none top-[-0.97%] w-full" src="/fig/missing.png" />
                   </div>
@@ -1612,7 +1612,7 @@ export function HomeBody(props: any) {
           <div className="bg-white flex flex-col items-start overflow-clip relative rounded-[8px] shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)] shrink-0 w-[320px]">
             <div className="flex flex-col isolate items-start relative shrink-0 w-full">
               <div className="flex flex-col h-[192px] items-start justify-center overflow-clip relative shrink-0 w-full z-[2]">
-                <div className="flex-[1_0_0] min-h-px relative w-full">
+                <div className="flex-[1_0_auto] min-h-px relative w-full">
                   <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <img alt="" className="absolute h-full left-[-10.09%] max-w-none top-0 w-[120.18%]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkvTHCqx-K8CxqDJbfR-jzq_YZ0FJ5E-z0ORgt0bgkx7i38jRA4QKO_ziHoTXpCesrIUfBgVq7eqDAOo06L2DQ5mVsi8rAm7F-nAKhSjHIX1Pf8Lv0FWZMhRgzUEWWlOaJCR9UI8-umA88J7JGtdp1JVST90PA2flSsOhYW90RTFBj6zwPT6GAit-hwe_NBpSpQQ2oRBCMtNtE3CuWpgOP9JgW6GbBXACaU4pqKXc" />
                   </div>
@@ -1626,11 +1626,11 @@ export function HomeBody(props: any) {
                   <p className="font-rob font-bold text-[#002042] text-[18px] w-full leading-[26px]">{`Blidinje & Čvrsnica`}</p>
                 </div>
                 <div className="flex flex-col items-start relative shrink-0 w-full">
-                  <div className="flex flex-col font-rob font-normal justify-center relative shrink-0 text-[#334155] text-[13px] w-full">
-                    <p className="leading-[20px] mb-0">Prostrani planinski plato. Dom</p>
-                    <p className="leading-[20px] mb-0">endemske munike, Hajdučkih vrata i</p>
-                    <p className="leading-[20px] mb-0">nekropola stećaka pod zaštitom</p>
-                    <p className="leading-[20px]">UNESCO-a.</p>
+                  <div className="flex flex-col font-rob font-normal justify-center relative shrink-0 text-[#334155] text-[13px] w-full max-lg:block">
+                    <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">Prostrani planinski plato. Dom</p>
+                    <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">endemske munike, Hajdučkih vrata i</p>
+                    <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">nekropola stećaka pod zaštitom</p>
+                    <p className="leading-[20px] max-lg:inline">UNESCO-a.</p>
                   </div>
                 </div>
               </div>
@@ -1650,7 +1650,7 @@ export function HomeBody(props: any) {
           <div className="bg-white flex flex-col gap-[20px] items-start overflow-clip relative rounded-[8px] shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)] shrink-0 w-[320px]">
             <div className="flex flex-col isolate items-start relative shrink-0 w-full">
               <div className="flex flex-col h-[192px] items-start justify-center overflow-clip relative shrink-0 w-full z-[2]">
-                <div className="flex-[1_0_0] min-h-px relative w-full">
+                <div className="flex-[1_0_auto] min-h-px relative w-full">
                   <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <img alt="" className="absolute h-full left-[-10.09%] max-w-none top-0 w-[120.18%]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAArFCmv3dMABG6T3NKb3Vl4GqcIFQ394Umk3KPGHyufeKCv1pFsQ9Iz5aHgCcAsqRD6bduChvNQuYdsPsJA_NPHCLY-aP4UXtJM0RzkKq4Sy1N5kPDjkXNjuUXUmwJ7vw0pTvY5mh-XnEx6969Xqwqgc5oHJPT1OSCA3Vfm9Vl96f_UY7qbvrjg3-BorDitgjZDE4WxvMUivvPlxh3QeLYsT2jIYSslcKf0D8IgQw" />
                   </div>
@@ -1664,10 +1664,10 @@ export function HomeBody(props: any) {
                   <p className="font-rob font-bold text-[#002042] text-[18px] w-full leading-[26px]">Hutovo Blato</p>
                 </div>
                 <div className="flex flex-col items-start relative shrink-0 w-full">
-                  <div className="flex flex-col font-rob font-normal justify-center relative shrink-0 text-[#334155] text-[13px] w-full">
-                    <p className="leading-[20px] mb-0">Submediteranska močvara i ornitološki</p>
-                    <p className="leading-[20px] mb-0">rezervat s preko 240 zabilježenih vrsta</p>
-                    <p className="leading-[20px]">ptica močvarica i ribljim mrjestilištima.</p>
+                  <div className="flex flex-col font-rob font-normal justify-center relative shrink-0 text-[#334155] text-[13px] w-full max-lg:block">
+                    <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">Submediteranska močvara i ornitološki</p>
+                    <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">rezervat s preko 240 zabilježenih vrsta</p>
+                    <p className="leading-[20px] max-lg:inline">ptica močvarica i ribljim mrjestilištima.</p>
                   </div>
                 </div>
               </div>
@@ -1687,7 +1687,7 @@ export function HomeBody(props: any) {
           <div className="bg-white flex flex-col items-start overflow-clip relative rounded-[8px] shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)] shrink-0 w-[320px]">
             <div className="flex flex-col isolate items-start relative shrink-0 w-full">
               <div className="flex flex-col h-[192px] items-start justify-center overflow-clip relative shrink-0 w-full z-[2]">
-                <div className="flex-[1_0_0] min-h-px relative w-full">
+                <div className="flex-[1_0_auto] min-h-px relative w-full">
                   <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <img alt="" className="absolute h-full left-[-10.09%] max-w-none top-0 w-[120.18%]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCR7QwsmCpti7mqAu-EuWuBYcIJb8pm0iU2Mm8LqS5OCLTwQHucKW2k3BaM6ZBcGDlHM3gB6z9kK4M3kdbo2gZkuZ3mbdwsvXHkdXfbBGlcrh7x0zHGwlFLt66lBWw3oE98eBWaY8eTMZeqjJoRD2mpCc-p6QBI8i2iTsaqP3gJSi18NVfkQRzwxCQo9Ttynl77DVoVQHc1Hop6tFO-KiAihd0TGPIkBhNM6fFsjI" />
                   </div>
@@ -1701,11 +1701,11 @@ export function HomeBody(props: any) {
                   <p className="font-rob font-bold text-[#002042] text-[18px] w-full leading-[26px]">{`Vjetrenica & Popovo Polje`}</p>
                 </div>
                 <div className="flex flex-col items-start relative shrink-0 w-full">
-                  <div className="flex flex-col font-rob font-normal justify-center relative shrink-0 text-[#334155] text-[13px] w-full">
-                    <p className="leading-[20px] mb-0">Najbogatija špilja podzemnom</p>
-                    <p className="leading-[20px] mb-0">bioraznolikošću na svijetu, nalazi se</p>
-                    <p className="leading-[20px] mb-0">na UNESCO preliminarnoj listi svjetske</p>
-                    <p className="leading-[20px]">baštine.</p>
+                  <div className="flex flex-col font-rob font-normal justify-center relative shrink-0 text-[#334155] text-[13px] w-full max-lg:block">
+                    <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">Najbogatija špilja podzemnom</p>
+                    <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">bioraznolikošću na svijetu, nalazi se</p>
+                    <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">na UNESCO preliminarnoj listi svjetske</p>
+                    <p className="leading-[20px] max-lg:inline">baštine.</p>
                   </div>
                 </div>
               </div>
@@ -1725,7 +1725,7 @@ export function HomeBody(props: any) {
           <div className="bg-white flex flex-col items-start overflow-clip relative rounded-[8px] shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)] shrink-0 w-[320px]">
             <div className="flex flex-col isolate items-start relative shrink-0 w-full">
               <div className="flex flex-col h-[192px] items-start justify-center overflow-clip relative shrink-0 w-full z-[2]">
-                <div className="flex-[1_0_0] min-h-px relative w-full">
+                <div className="flex-[1_0_auto] min-h-px relative w-full">
                   <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <img alt="" className="absolute h-full left-[-10.09%] max-w-none top-0 w-[120.18%]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1U0NEsym6GMMMAHvH-TnhC3LJy2yxvTKCZtBv6D3HmU19JT8eV3c0atM1hajXukyJF7Xn4QhfhKNlDEo4A2aWUjltgqv4tF-bUM_v0ZvR1gbFm9ulVMl9AKqhyH4Tc-GXR9t3wq2wGqDtZpgX4nVZH544CVZaK4yVeXzF6MaBOZnqgCTRlH2Uma3_nsl34tLTRP6yQcs_V6E5bgiql9zIVBitfdBPPtRYdbq55YI" />
                   </div>
@@ -1739,11 +1739,11 @@ export function HomeBody(props: any) {
                   <p className="font-rob font-bold text-[#002042] text-[18px] w-full leading-[26px]">Boračko Jezero</p>
                 </div>
                 <div className="flex flex-col items-start relative shrink-0 w-full">
-                  <div className="flex flex-col font-rob font-normal justify-center relative shrink-0 text-[#334155] text-[13px] w-full">
-                    <p className="leading-[20px] mb-0">Planinsko glacijalno jezero na</p>
-                    <p className="leading-[20px] mb-0">sjeveroistočnim padinama Prenja s</p>
-                    <p className="leading-[20px] mb-0">uređenim kamp zonama i sustavom</p>
-                    <p className="leading-[20px]">monitoringa čistoće vode.</p>
+                  <div className="flex flex-col font-rob font-normal justify-center relative shrink-0 text-[#334155] text-[13px] w-full max-lg:block">
+                    <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">Planinsko glacijalno jezero na</p>
+                    <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">sjeveroistočnim padinama Prenja s</p>
+                    <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">uređenim kamp zonama i sustavom</p>
+                    <p className="leading-[20px] max-lg:inline">monitoringa čistoće vode.</p>
                   </div>
                 </div>
               </div>

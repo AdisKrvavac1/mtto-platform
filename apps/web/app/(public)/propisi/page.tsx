@@ -1,8 +1,7 @@
 import Link from 'next/link';
 import { apiSafe, type Doc } from '@/lib/api';
-import { DemoBadge } from '@/components/site/ui';
 import { DOC_TYPE, dateLong, dateShort, fileExt, fileSize } from '@/lib/format';
-import { PropisiHero, PropisiForms, PropisiTable, PropisiHowTo, PropisiContact } from '@/components/stitch/Propisi';
+import { PropisiBody } from '@/components/figma/Propisi';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Propisi, zakoni i obrasci' };
@@ -26,74 +25,62 @@ export default async function PropisiPage({ searchParams }: { searchParams: Prom
   const count = (t: string) => all.filter((d) => d.docType === t).length;
   const latest = all.reduce<string | null>((m, d) => (!m || d.createdAt > m ? d.createdAt : m), null);
 
+  const fmtBtn = (d: Doc, primary: boolean) => (
+    <a key={d.id} href={`/api/documents/${d.id}/file`} target="_blank" rel="noopener" className={`flex flex-1 gap-[8px] items-center justify-center px-[12px] py-[4px] rounded-[8px] font-pub font-semibold text-[12px] tracking-[0.14px] leading-[20px] ${primary ? 'bg-[#002042] text-white hover:bg-[#062343]' : 'bg-white text-[#002042] hover:bg-[#dce9ff]'}`}>
+      <span aria-hidden className="material-symbols-outlined text-[16px]">{fileExt(d.fileName) === 'PDF' ? 'picture_as_pdf' : 'description'}</span>{fileExt(d.fileName)} {fileSize(d.size)}
+    </a>
+  );
   return (
-    <>
-      <PropisiHero updated={dateLong(latest || new Date())} n={{ zakoni: count('ZAKON'), pravilnici: count('PRAVILNIK') + count('ODLUKA'), obrasci: count('OBRAZAC') }} />
-      <PropisiForms
-        forms={
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-md">
-            {forms.map((d, i) => (
-              <div key={d.id} className="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between hover:shadow-md transition-all border border-slate-border">
-                <div>
-                  <div className="flex items-center justify-between mb-space-sm">
-                    <span className={`${SECTOR_BADGE[d.sector] ?? 'badge-trade'} px-2.5 py-1 font-label-badge rounded font-bold uppercase tracking-wider`}>OBRAZAC {String(i + 1).padStart(2, '0')} • {d.sector.split(' ')[0].toUpperCase()}</span>
-                    <span className="condensed-text font-bold text-outline text-[13px]">{d.number}</span>
-                  </div>
-                  <h3 className="font-title-md text-title-md text-primary mb-space-xs leading-snug font-bold">{d.title}</h3>
-                  <p className="font-body-sm text-body-sm text-text-body mb-space-md">{d.description || 'Standardizirani obrazac za podnošenje zahtjeva Ministarstvu.'} <DemoBadge show={d.isDemo} /></p>
-                </div>
-                <div className="pt-space-sm bg-surface-container-low p-space-sm rounded-lg flex items-center justify-between">
-                  <span className="condensed-text font-bold text-primary text-[13px] uppercase">Dostupni formati:</span>
-                  <a href={`/api/documents/${d.id}/file`} target="_blank" rel="noopener" className="px-3 py-1 download-accent-btn rounded font-button text-button inline-flex items-center gap-1 transition-colors condensed-text font-semibold">
-                    <span className="material-symbols-outlined text-[16px]">picture_as_pdf</span> {fileExt(d.fileName)} {fileSize(d.size)}
-                  </a>
-                </div>
-              </div>
-            ))}
+    <PropisiBody
+      updated={dateLong(latest || new Date())}
+      n={{ zakoni: count('ZAKON'), pravilnici: count('PRAVILNIK') + count('ODLUKA'), obrasci: count('OBRAZAC') }}
+      forms={forms.slice(0, 5).map((d, i) => (
+        <div key={d.id} className="bg-white drop-shadow-[0px_1px_1px_rgba(0,0,0,0.05)] flex flex-col justify-between p-[24px] rounded-[8px] gap-[16px]">
+          <div className="flex flex-col gap-[4px]">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <span className="bg-[#ecfdf5] px-[10px] py-[4px] rounded-[2px] font-pub font-bold text-[#006c4a] text-[11px] tracking-[0.44px] leading-[14px] uppercase">Obrazac {String(i + 1).padStart(2, '0')} • {d.sector.split(' ')[0]}</span>
+              <span className="font-pub text-[#737780] text-[13px] leading-[20px]">{d.number || ''}</span>
+            </div>
+            <h3 className="font-pub font-semibold text-[#002042] text-[18px] leading-[24.75px] pt-[3px]">{d.title}{d.isDemo && <span className="ml-2 align-middle inline-flex px-1.5 rounded bg-[#fffde6] border border-[#fadc12] text-[#786000] text-[10px] font-bold uppercase">Demo</span>}</h3>
+            <p className="font-pub text-[#334155] text-[13px] leading-[20px]">{d.description || 'Standardizirani obrazac za podnošenje zahtjeva Ministarstvu.'}</p>
           </div>
-        }
-      />
-      <PropisiTable
-        tabs={
-          <div className="flex items-center gap-2 overflow-x-auto pb-space-sm mb-space-md" id="tabContainer">
-            {TABS.map((t) => (
-              <Link key={t.key} href={`/propisi?docType=${t.key}#pravna-tablica`} scroll={false} className={`px-4 py-2.5 rounded font-button text-button shadow-sm whitespace-nowrap transition-all flex items-center gap-2 font-semibold ${tab === t.key ? 'bg-[#00abeb] text-white' : 'bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container'}`}>
-                <span className="material-symbols-outlined text-[18px]">{t.icon}</span><span>{t.label}</span>
-                <span className="font-label-badge text-label-badge opacity-80">({count(t.key)})</span>
-              </Link>
-            ))}
+          <div className="bg-[#eff4ff] flex items-center justify-between gap-2 p-[8px] rounded-[4px] flex-wrap">
+            <span className="font-pub font-bold text-[#002042] text-[11px] tracking-[0.44px] leading-[14px]">Dostupni formati:</span>
+            <div className="flex flex-1 gap-[4px] items-center min-w-[140px]">{fmtBtn(d, true)}</div>
           </div>
-        }
-        search={
-          <form action="/propisi#pravna-tablica">
-            <input type="hidden" name="docType" value={tab} />
-            <input name="q" defaultValue={sp.q} className="w-full sm:w-80 pl-10 pr-space-md py-2 bg-surface-container-lowest rounded text-on-surface font-body-sm text-body-sm shadow-sm border-0 focus:outline-none focus:ring-2 focus:ring-primary" id="propisSearch" placeholder="Pretraži po nazivu ili broju akta..." type="text" />
-          </form>
-        }
-        rows={
-          <tbody className="divide-y-0 text-text-body font-body-sm text-body-sm">
-            {rows.length === 0 && <tr><td colSpan={5} className="py-8 px-space-md text-center text-outline">Nema dokumenata u ovoj cjelini.</td></tr>}
-            {rows.map((d, i) => (
-              <tr key={d.id} className={`law-row hover:bg-surface-container-low transition-colors border-b border-slate-border ${i % 2 ? 'bg-surface-bright' : ''}`}>
-                <td className="py-4 px-space-md align-top">
-                  <div className="font-bold text-primary text-body-regular">{d.title}</div>
-                  <span className="text-outline font-label-badge uppercase condensed-text">{DOC_TYPE[d.docType]} · {d.status === 'VAZECI' ? 'Važeći' : 'Arhiviran'}</span> <DemoBadge show={d.isDemo} />
-                </td>
-                <td className="py-4 px-space-md align-top whitespace-nowrap"><span className="px-2.5 py-1 bg-surface-container rounded font-bold text-primary condensed-text text-[13px]">{d.number || '—'}</span></td>
-                <td className="py-4 px-space-md align-top whitespace-nowrap text-outline condensed-text">{dateShort(d.issuedAt)}</td>
-                <td className="py-4 px-space-md align-top max-w-md">{d.description || d.sector}</td>
-                <td className="py-4 px-space-md align-top text-right whitespace-nowrap">
-                  <a href={`/api/documents/${d.id}/file`} target="_blank" rel="noopener" className="px-3 py-1.5 btn-primary-ds rounded font-button text-button inline-flex items-center gap-1 transition-colors shadow-sm condensed-text font-semibold">
-                    <span className="material-symbols-outlined text-[16px]">download</span> {fileExt(d.fileName)} ({fileSize(d.size)})
-                  </a>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        }
-      />
-      <PropisiHowTo />
-      <PropisiContact />
-    </>
+        </div>
+      ))}
+      tabs={
+        <div className="flex gap-[8px] items-center overflow-x-auto py-[8px] w-full [scrollbar-width:none]">
+          {TABS.map((t) => (
+            <Link key={t.key} href={`/propisi?docType=${t.key}#pravna-tablica`} scroll={false} className={`drop-shadow-[0px_1px_1px_rgba(0,0,0,0.05)] flex gap-[8px] items-center px-[16px] py-[10px] rounded-[2px] shrink-0 font-pub font-semibold text-[14px] tracking-[0.14px] leading-[20px] whitespace-nowrap ${tab === t.key ? 'bg-[#002042] text-white' : 'bg-white text-[#43474f] hover:text-[#002042]'}`}>
+              <span aria-hidden className="material-symbols-outlined text-[18px]">{t.icon}</span>{t.label} <span className="opacity-70 text-[12px]">({count(t.key)})</span>
+            </Link>
+          ))}
+        </div>
+      }
+      search={
+        <form action="/propisi#pravna-tablica" className="bg-white border border-[rgba(195,198,208,0.4)] flex items-center gap-2 h-[38px] px-[12px] rounded-[8px] w-full md:w-[320px] focus-within:border-[#00abeb]">
+          <input type="hidden" name="docType" value={tab} />
+          <span aria-hidden className="material-symbols-outlined text-[18px] text-[#9ca3af]">search</span>
+          <input name="q" defaultValue={sp.q} aria-label="Pretraga propisa" placeholder="Pretraži po nazivu, broju glasnika..." className="flex-1 min-w-0 bg-transparent border-0 p-0 focus:ring-0 focus:outline-none font-pub text-[13px] text-[#191c1f] placeholder:text-[#9ca3af]" />
+        </form>
+      }
+      rows={rows.length === 0 ? <p className="p-[16px] font-pub text-[13px] text-[#737780]">Nema dokumenata u ovoj cjelini.</p> : rows.map((d) => (
+        <div key={d.id} className="grid grid-cols-1 lg:grid-cols-[minmax(0,359fr)_minmax(0,194fr)_minmax(0,186fr)_minmax(0,323fr)_167px] border-b border-[#e5eeff] last:border-0 hover:bg-[#f8f9ff]">
+          <div className="flex flex-col gap-[3px] px-[16px] pt-[16px] lg:pb-[16px]">
+            <span className="font-pub font-bold text-[#002042] text-[15px] leading-[24px]">{d.title}</span>
+            <span className="font-pub font-bold text-[#737780] text-[11px] tracking-[0.44px] uppercase leading-[14px]">{DOC_TYPE[d.docType]} · {d.status === 'VAZECI' ? 'važeći' : 'arhiviran'}{d.isDemo ? ' · demo' : ''}</span>
+          </div>
+          <div className="px-[16px] pt-[8px] lg:pt-[14px]"><span className="inline-flex bg-[#e5eeff] px-[10px] py-[1.5px] rounded-[2px] font-pub font-bold text-[#002042] text-[13px] leading-[20px]">{d.number || '—'}</span></div>
+          <div className="px-[16px] pt-[8px] lg:pt-[15.5px] font-pub text-[#737780] text-[13px] leading-[20px]">{dateShort(d.issuedAt)}</div>
+          <div className="px-[16px] py-[8px] lg:py-[16px] font-pub text-[#334155] text-[13px] leading-[20px]">{d.description || d.sector}</div>
+          <div className="px-[16px] pb-[16px] lg:pt-[16px] lg:text-right">
+            <a href={`/api/documents/${d.id}/file`} target="_blank" rel="noopener" className="inline-flex bg-[#002042] hover:bg-[#062343] gap-[4px] items-center px-[12px] py-[6px] rounded-[8px] font-pub font-semibold text-[14px] text-white tracking-[0.14px] leading-[20px]"><span aria-hidden className="material-symbols-outlined text-[15px]">download</span>{fileExt(d.fileName)} ({fileSize(d.size)})</a>
+          </div>
+        </div>
+      ))}
+      countText={`Prikazano je ${rows.length} dokumenata u odabranoj cjelini.`}
+    />
   );
 }

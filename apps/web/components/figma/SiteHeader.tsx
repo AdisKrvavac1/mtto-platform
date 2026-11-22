@@ -8,7 +8,7 @@ export const NAV: [string, string][] = [
   ['Naslovna', '/'],
   ['Vijesti', '/vijesti'],
   ['O nama', '/o-nama'],
-  ['E-Usluge & Registri', '/registri/okolisne-dozvole'],
+  ['E-Usluge & Registri', '/e-usluge'],
   ['Natječaji & Javne nabavke', '/vijesti?type=JAVNI_POZIV'],
   ['Propisi i Obrasci', '/propisi'],
   ['Turizam & Baština', '/turizam-i-bastina'],

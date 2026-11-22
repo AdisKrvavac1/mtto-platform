@@ -146,9 +146,9 @@ export function ArticleBody(props: any) {
                           <p className="font-pub font-semibold min-w-0 max-w-full text-[#062343] text-[18px] leading-[26px]">Trebate dodatna pojašnjenja?</p>
                         </div>
                         <div className="flex flex-col items-start relative min-w-0 max-w-full w-full">
-                          <div className="flex flex-col font-pub font-normal justify-center relative min-w-0 max-w-full text-[#43474f] text-[13px]">
-                            <p className="leading-[20px] mb-0">Ministarstvo stoji na raspolaganju radnim danom.</p>
-                            <p className="leading-[20px]"></p>
+                          <div className="flex flex-col font-pub font-normal justify-center relative min-w-0 max-w-full text-[#43474f] text-[13px] max-lg:block">
+                            <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">Ministarstvo stoji na raspolaganju radnim danom.</p>
+                            <p className="leading-[20px] max-lg:inline"></p>
                           </div>
                         </div>
                       </div>
@@ -211,10 +211,10 @@ export function ArticleBody(props: any) {
                     <p className="font-pub font-semibold min-w-0 max-w-full text-[20px] text-white w-full leading-[25px]">Pretplatite se na e-Bilten MTTO <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-high text-primary border border-slate-border font-label-badge text-label-badge uppercase align-middle" title="Funkcionalnost iz Faze 2: prikazan dizajn"><span className="material-symbols-outlined text-[13px]">schedule</span>Faza 2</span></p>
                   </div>
                   <div className="flex flex-col items-start relative min-w-0 max-w-full w-full">
-                    <div className="flex flex-col font-pub font-normal justify-center relative min-w-0 max-w-full text-[#a6c8fe] text-[13px] w-full">
-                      <p className="leading-[21.13px] mb-0">Primajte obavijesti o novim grantovima, okolišnim</p>
-                      <p className="leading-[21.13px] mb-0">dozvolama i zakonskim izmjenama izravno u vaš</p>
-                      <p className="leading-[21.13px]">pretinac.</p>
+                    <div className="flex flex-col font-pub font-normal justify-center relative min-w-0 max-w-full text-[#a6c8fe] text-[13px] w-full max-lg:block">
+                      <p className="leading-[21.13px] mb-0 max-lg:inline max-lg:after:content-['_']">Primajte obavijesti o novim grantovima, okolišnim</p>
+                      <p className="leading-[21.13px] mb-0 max-lg:inline max-lg:after:content-['_']">dozvolama i zakonskim izmjenama izravno u vaš</p>
+                      <p className="leading-[21.13px] max-lg:inline">pretinac.</p>
                     </div>
                   </div>
                   <div className="flex flex-col items-start pt-[4px] relative min-w-0 max-w-full w-full">
@@ -230,9 +230,9 @@ export function ArticleBody(props: any) {
                             <div className="bg-white border border-[#767676] border-solid relative rounded-[2.5px] shrink-0 size-[13px]" />
                           </div>
                           <div className="h-[32.5px] relative shrink-0 w-[315px]">
-                            <div className="-translate-y-1/2 absolute flex flex-col font-pub font-normal justify-center leading-[0] left-0 text-[#a6c8fe] text-[13px] top-[15.63px]">
-                              <p className="leading-[16.25px] mb-0">Prihvaćam uvjete obrade podataka u svrhu primanja</p>
-                              <p className="leading-[16.25px]">biltena MTTO.</p>
+                            <div className="-translate-y-1/2 absolute flex flex-col font-pub font-normal justify-center leading-[0] left-0 text-[#a6c8fe] text-[13px] top-[15.63px] max-lg:block">
+                              <p className="leading-[16.25px] mb-0 max-lg:inline max-lg:after:content-['_']">Prihvaćam uvjete obrade podataka u svrhu primanja</p>
+                              <p className="leading-[16.25px] max-lg:inline">biltena MTTO.</p>
                             </div>
                           </div>
                         </div>
@@ -261,10 +261,10 @@ export function ArticleBody(props: any) {
                     </div>
                   </div>
                   <div className="flex flex-col items-start relative min-w-0 max-w-full w-full">
-                    <div className="flex flex-col font-pub font-normal justify-center relative min-w-0 max-w-full text-[#43474f] text-[13px] w-full">
-                      <p className="leading-[20px] mb-0">Uočili ste divlju deponiju, ispuštanje otpadnih voda u</p>
-                      <p className="leading-[20px] mb-0">Neretvu ili bespravnu sječu šuma? Prijavite izravno</p>
-                      <p className="leading-[20px]">kantonalnoj inspekciji.</p>
+                    <div className="flex flex-col font-pub font-normal justify-center relative min-w-0 max-w-full text-[#43474f] text-[13px] w-full max-lg:block">
+                      <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">Uočili ste divlju deponiju, ispuštanje otpadnih voda u</p>
+                      <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">Neretvu ili bespravnu sječu šuma? Prijavite izravno</p>
+                      <p className="leading-[20px] max-lg:inline">kantonalnoj inspekciji.</p>
                     </div>
                   </div>
                   <a href="/e-usluge/eko-prijava" className="bg-[#fef2f2] flex gap-[8px] items-center justify-center px-[12px] py-[8px] relative rounded-[2px] min-w-0 max-w-full w-full flex-wrap">
@@ -320,9 +320,9 @@ export function ArticleBody(props: any) {
                         <p className="font-pub font-bold min-w-0 max-w-full text-[#737780] text-[11px] tracking-[0.44px] uppercase w-full leading-[14px]">SHA-256 VERIFIKACIJSKI KOD:</p>
                       </div>
                       <div className="flex flex-col items-start relative min-w-0 max-w-full w-full">
-                        <div className="flex flex-col font-pub justify-center not-italic relative min-w-0 max-w-full text-[#062343] text-[12px] w-full">
-                          <p className="leading-[16px] mb-0">{props.hash1}</p>
-                          <p className="leading-[16px]">{props.hash2}</p>
+                        <div className="flex flex-col font-pub justify-center not-italic relative min-w-0 max-w-full text-[#062343] text-[12px] w-full max-lg:block">
+                          <p className="leading-[16px] mb-0 max-lg:inline max-lg:after:content-['_']">{props.hash1}</p>
+                          <p className="leading-[16px] max-lg:inline">{props.hash2}</p>
                         </div>
                       </div>
                     </div>
@@ -479,10 +479,10 @@ export function ArticleBody(props: any) {
                 <p className="font-pub font-semibold text-[20px] text-white w-full leading-[25px]">Pretplatite se na e-Bilten MTTO <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-high text-primary border border-slate-border font-label-badge text-label-badge uppercase align-middle" title="Funkcionalnost iz Faze 2: prikazan dizajn"><span className="material-symbols-outlined text-[13px]">schedule</span>Faza 2</span></p>
               </div>
               <div className="flex flex-col items-start relative shrink-0 w-full">
-                <div className="flex flex-col font-pub font-normal justify-center relative shrink-0 text-[#a6c8fe] text-[13px] w-full">
-                  <p className="leading-[21.13px] mb-0">Primajte obavijesti o novim grantovima, okolišnim</p>
-                  <p className="leading-[21.13px] mb-0">dozvolama i zakonskim izmjenama izravno u vaš</p>
-                  <p className="leading-[21.13px]">pretinac.</p>
+                <div className="flex flex-col font-pub font-normal justify-center relative shrink-0 text-[#a6c8fe] text-[13px] w-full max-lg:block">
+                  <p className="leading-[21.13px] mb-0 max-lg:inline max-lg:after:content-['_']">Primajte obavijesti o novim grantovima, okolišnim</p>
+                  <p className="leading-[21.13px] mb-0 max-lg:inline max-lg:after:content-['_']">dozvolama i zakonskim izmjenama izravno u vaš</p>
+                  <p className="leading-[21.13px] max-lg:inline">pretinac.</p>
                 </div>
               </div>
               <div className="flex flex-col items-start pt-[4px] relative shrink-0 w-full">
@@ -498,9 +498,9 @@ export function ArticleBody(props: any) {
                         <div className="bg-white border border-[#767676] border-solid relative rounded-[2.5px] shrink-0 size-[13px]" />
                       </div>
                       <div className="h-[32.5px] relative shrink-0 w-[315px]">
-                        <div className="-translate-y-1/2 absolute flex flex-col font-pub font-normal justify-center leading-[0] left-0 text-[#a6c8fe] text-[13px] top-[15.63px]">
-                          <p className="leading-[16.25px] mb-0">Prihvaćam uvjete obrade podataka u svrhu primanja</p>
-                          <p className="leading-[16.25px]">biltena MTTO.</p>
+                        <div className="-translate-y-1/2 absolute flex flex-col font-pub font-normal justify-center leading-[0] left-0 text-[#a6c8fe] text-[13px] top-[15.63px] max-lg:block">
+                          <p className="leading-[16.25px] mb-0 max-lg:inline max-lg:after:content-['_']">Prihvaćam uvjete obrade podataka u svrhu primanja</p>
+                          <p className="leading-[16.25px] max-lg:inline">biltena MTTO.</p>
                         </div>
                       </div>
                     </div>
@@ -529,10 +529,10 @@ export function ArticleBody(props: any) {
                 </div>
               </div>
               <div className="flex flex-col items-start relative shrink-0 w-full">
-                <div className="flex flex-col font-pub font-normal justify-center relative shrink-0 text-[#43474f] text-[13px] w-full">
-                  <p className="leading-[20px] mb-0">Uočili ste divlju deponiju, ispuštanje otpadnih voda u</p>
-                  <p className="leading-[20px] mb-0">Neretvu ili bespravnu sječu šuma? Prijavite izravno</p>
-                  <p className="leading-[20px]">kantonalnoj inspekciji.</p>
+                <div className="flex flex-col font-pub font-normal justify-center relative shrink-0 text-[#43474f] text-[13px] w-full max-lg:block">
+                  <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">Uočili ste divlju deponiju, ispuštanje otpadnih voda u</p>
+                  <p className="leading-[20px] mb-0 max-lg:inline max-lg:after:content-['_']">Neretvu ili bespravnu sječu šuma? Prijavite izravno</p>
+                  <p className="leading-[20px] max-lg:inline">kantonalnoj inspekciji.</p>
                 </div>
               </div>
               <a href="/e-usluge/eko-prijava" className="bg-[#fef2f2] flex gap-[8px] items-center justify-center px-[12px] py-[8px] relative rounded-[2px] shrink-0 w-full">
@@ -588,9 +588,9 @@ export function ArticleBody(props: any) {
                     <p className="font-pub font-bold text-[#737780] text-[11px] tracking-[0.44px] uppercase w-full leading-[14px]">SHA-256 VERIFIKACIJSKI KOD:</p>
                   </div>
                   <div className="flex flex-col items-start relative shrink-0 w-full">
-                    <div className="flex flex-col font-pub justify-center not-italic relative shrink-0 text-[#062343] text-[12px] w-full">
-                      <p className="leading-[16px] mb-0">{props.hash1}</p>
-                      <p className="leading-[16px]">{props.hash2}</p>
+                    <div className="flex flex-col font-pub justify-center not-italic relative shrink-0 text-[#062343] text-[12px] w-full max-lg:block">
+                      <p className="leading-[16px] mb-0 max-lg:inline max-lg:after:content-['_']">{props.hash1}</p>
+                      <p className="leading-[16px] max-lg:inline">{props.hash2}</p>
                     </div>
                   </div>
                 </div>
