@@ -1,17 +1,19 @@
 import Link from 'next/link';
 import { apiSafe, type Doc, type Facility, type Permit, type PostListItem } from '@/lib/api';
-import { DOC_TYPE, dateLong, fileExt, fileSize } from '@/lib/format';
-import { Badge, Button, Card, Container, CtaBox, FeaturedIcon, PageHeader, Section, SectionHeader } from '@/components/uui';
+import { dateLong, daysUntil, fileExt, fileSize } from '@/lib/format';
+import { Badge, Button, Card, Container, FeaturedIcon, GRAD, Head, PageHero } from '@/components/uui';
 import {
-  ArrowRight, Building07, Calendar, Clock, Download01, FileSearch02, Mail01, MarkerPin02, Phone01, BankNote01, Scales02, SearchLg, ShieldTick, Trash03, Users01,
+  ArrowRight, Building07, Calendar, CheckVerified01, Clock, Download01, Edit05, File06, FileSearch02, FilterLines, MarkerPin02, Phone01, SearchLg, ShieldTick, Trash03, UploadCloud02, Users01,
 } from '@untitledui/icons';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'E-usluge i registri' };
 
 type Stats = { documents: number; permits: number; facilities: number };
-type List = { items: PostListItem[]; total?: number };
+type List = { items: PostListItem[] };
 const fmt = (n: number) => n.toLocaleString('bs-BA');
+const MUNI = ['Čapljina', 'Čitluk', 'Jablanica', 'Konjic', 'Mostar', 'Neum', 'Prozor-Rama', 'Ravno', 'Stolac'];
+const fieldCls = 'h-11 w-full rounded-[8px] bg-white px-3.5 text-[16px] text-[#171717] ring-1 ring-inset ring-[#d4d4d4] border-0 focus:outline-none focus:ring-2 focus:ring-[var(--br-500)]';
 
 function countBy<T>(rows: T[], key: (r: T) => string) {
   const m = new Map<string, number>();
@@ -20,137 +22,150 @@ function countBy<T>(rows: T[], key: (r: T) => string) {
 }
 
 export default async function EUslugePage() {
-  const [stats, permits, facilities, docs, env] = await Promise.all([
+  const [stats, permits, facilities, docs, env, calls] = await Promise.all([
     apiSafe<Stats>('/stats', { documents: 0, permits: 0, facilities: 0 }),
     apiSafe<Permit[]>('/permits', []),
     apiSafe<Facility[]>('/facilities', []),
     apiSafe<Doc[]>('/documents', []),
     apiSafe<List>(`/posts?category=${encodeURIComponent('Zaštita okoliša')}&limit=3`, { items: [] }),
+    apiSafe<List>('/posts?type=JAVNI_POZIV&limit=4', { items: [] }),
   ]);
   const towns = countBy(permits, (p) => p.municipality).slice(0, 4);
-  const forms = [...docs].sort((a, b) => (a.docType === 'OBRAZAC' ? -1 : 0) - (b.docType === 'OBRAZAC' ? -1 : 0)).slice(0, 6);
-
-  const registries = [
-    { icon: FileSearch02, title: 'Registar okolišnih dozvola', count: `${fmt(stats.permits)} dozvola`, href: '/registri/okolisne-dozvole', cta: 'Pretraži registar', text: 'Važeće, obnovljene i istekle okolišne dozvole za industrijske pogone, energetske objekte i kamenolome.', extra: towns.map(([t, c]) => <Link key={t} href={`/registri/okolisne-dozvole?municipality=${encodeURIComponent(t)}`}><Badge tone="gray">{t} ({c})</Badge></Link>) },
-    { icon: Building07, title: 'Kategorizacija ugostiteljskih objekata', count: `${fmt(stats.facilities)} objekata`, href: '/registri/ugostiteljski-objekti', cta: 'Otvori registar', text: 'Hoteli, moteli, pansioni, kampovi i privatni smještaj s dodijeljenom kategorijom. Izvoz u CSV.', extra: null },
-    { icon: Users01, title: 'Registar turističkih vodiča', count: 'Faza 2', href: '/turisticki-vodici', cta: 'Stručni ispit', text: 'Uslovi za polaganje stručnog ispita za turističke vodiče i budući javni registar licenci.', extra: null },
-    { icon: Trash03, title: 'Upravljanje otpadom', count: 'Faza 2', href: '/registri/upravljanje-otpadom', cta: 'Saznaj više', text: 'Registar ovlaštenih operatera za sakupljanje, skladištenje i obradu otpada digitalizira se u Fazi 2.', extra: null },
-  ];
+  const forms = docs.filter((d) => d.docType === 'OBRAZAC').slice(0, 5);
+  const byKind = countBy(facilities, (f) => f.kind);
+  const openCalls = calls.items.filter((c) => !c.deadline || new Date(c.deadline) > new Date());
+  const uvidi = [...env.items, ...calls.items.filter((c) => !env.items.some((e) => e.id === c.id))].slice(0, 3);
 
   return (
     <>
-      <PageHeader
-        crumbs={[{ label: 'Naslovna', href: '/' }, { label: 'E-usluge' }]}
-        eyebrow="Centar e-usluga"
-        title="Registri, obrasci i javni uvidi"
-        after={
-          <form action="/registri/okolisne-dozvole" role="search" className="flex w-full max-w-[640px] flex-col gap-3 sm:flex-row">
-            <label className="flex h-12 flex-1 items-center gap-2 rounded-[8px] bg-white px-3.5 ring-1 ring-inset ring-[#d4d4d4] shadow-[0_1px_2px_rgba(10,13,18,0.05)] focus-within:ring-2 focus-within:ring-[var(--br-500)]">
-              <SearchLg size={20} className="text-[#a3a3a3]" />
-              <input name="q" aria-label="Pretraga dozvola" placeholder="Operater, broj rješenja ili lokacija" className="min-w-0 flex-1 border-0 bg-transparent p-0 text-[16px] leading-6 text-[#171717] placeholder:text-[#737373] shadow-none focus:outline-none focus:ring-0" />
-            </label>
-            <Button type="submit" size="xl">Pretraži dozvole</Button>
-          </form>
-        }
+      <PageHero
+        crumbs={[{ label: 'Naslovna', href: '/' }, { label: 'E-usluge i registri' }]}
+        eyebrow="Regulatorni centar · Hercegovačko-neretvanski kanton"
+        title="Digitalni centar e-usluga i javnih registara"
+        actions={<><Button href="/registri/okolisne-dozvole" size="lg" icon={CheckVerified01} className="!bg-[var(--gr-600)] hover:!bg-[var(--gr-700)]">Provjeri dozvolu</Button><Button href="/o-nama#upit" size="lg" variant="secondary" icon={Edit05}>Upiti i pitanja</Button></>}
+        stats={[
+          { label: 'Okolišnih dozvola', value: stats.permits, sub: 'U javnom registru', icon: FileSearch02 },
+          { label: 'Obrazaca', value: forms.length || docs.length, sub: 'Spremni za preuzimanje', icon: File06 },
+          { label: 'Javnih poziva', value: openCalls.length, sub: 'Trenutno otvoreno', icon: Calendar },
+          { label: 'Ugostiteljskih objekata', value: stats.facilities, sub: 'Kategorizirano', icon: Building07 },
+        ]}
       >
-        Jedinstvena tačka pristupa bazama podataka, elektronskim obrascima i javnim uvidima Ministarstva trgovine, turizma i zaštite okoliša HNK.
-      </PageHeader>
+        Jedinstvena službena tačka pristupa bazama podataka, elektronskim obrascima, licencama i javnim uvidima Ministarstva.
+      </PageHero>
 
-      {/* Registri – kartice (Untitled "Pricing / feature cards") */}
-      <Section tone="gray">
-        <SectionHeader eyebrow="Javne evidencije" title="Temeljni registri kantona">Podaci se objavljuju direktno iz CMS-a Ministarstva i dostupni su svima, bez prijave.</SectionHeader>
-        <div className="mt-12 grid gap-6 md:grid-cols-2">
-          {registries.map((r) => (
-            <Card key={r.title} className="group uui-lift flex flex-col p-6 md:p-8">
-              <div className="flex items-start justify-between gap-4">
-                <FeaturedIcon icon={r.icon} />
-                <Badge tone={r.count === 'Faza 2' ? 'gray' : 'brand'} size="md">{r.count}</Badge>
-              </div>
-              <h3 className="mt-6 text-[20px] leading-[30px] font-semibold text-[#171717]">{r.title}</h3>
-              <p className="mt-2 text-[16px] leading-6 text-[#525252]">{r.text}</p>
-              {r.extra && r.extra.length > 0 && <div className="mt-4 flex flex-wrap gap-2">{r.extra}</div>}
-              <div className="mt-auto pt-8"><Button href={r.href} variant={r.count === 'Faza 2' ? 'secondary' : 'primary'} iconRight={ArrowRight}>{r.cta}</Button></div>
+      {/* FILTER TRAKA */}
+      <Container className="relative z-10 -mt-8">
+        <form action="/registri/okolisne-dozvole" className="grid gap-3 rounded-[16px] bg-white p-3 ring-1 ring-inset ring-[#e5e5e5] shadow-[0_20px_24px_-4px_rgba(10,13,18,0.08),0_8px_8px_-4px_rgba(10,13,18,0.03)] md:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_auto]">
+          <label className="relative"><span className="sr-only">Pretraga</span><SearchLg size={20} className="pointer-events-none absolute left-3.5 top-3 text-[#a3a3a3]" /><input name="q" placeholder="Naziv subjekta, broj rješenja ili postrojenje" className={`${fieldCls} pl-11`} /></label>
+          <select name="activity" aria-label="Djelatnost" className={fieldCls} defaultValue=""><option value="">Sve djelatnosti</option>{['Industrija', 'Energetika', 'Otpad', 'Turizam', 'Ostalo'].map((a) => <option key={a}>{a}</option>)}</select>
+          <select name="municipality" aria-label="Općina" className={fieldCls} defaultValue=""><option value="">Sve općine i gradovi</option>{MUNI.map((m) => <option key={m}>{m}</option>)}</select>
+          <button className="inline-flex h-11 items-center justify-center gap-1.5 rounded-[8px] border-2 border-white/10 bg-[#062343] px-5 text-[16px] font-semibold text-white hover:bg-[var(--br-900)]"><FilterLines size={20} />Filtriraj</button>
+        </form>
+      </Container>
+
+      {/* TEMELJNI REGISTRI */}
+      <section className="bg-white py-16 md:py-24">
+        <Container>
+          <Head k="Službene javne evidencije" t="Temeljni registri kantona" action={<span className="flex items-center gap-1.5 text-[14px] text-[#525252]"><ShieldTick size={16} className="text-[var(--gr-600)]" />Podaci se ažuriraju direktno iz CMS-a Ministarstva</span>} />
+          <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+            <Card className="group uui-lift flex flex-col overflow-hidden border-t-4 border-t-[var(--gr-600)] p-6">
+              <div className="flex items-start justify-between"><FeaturedIcon icon={FileSearch02} tone="success" size="md" ripple={false} /><Badge tone="gray">{fmt(stats.permits)} akata</Badge></div>
+              <h3 className="mt-4 text-[18px] font-semibold text-[#171717]">Registar okolišnih dozvola</h3>
+              <p className="mt-1 text-[14px] text-[#525252]">Važeće, obnovljene i istekle dozvole za industrijske pogone, energetske objekte i kamenolome.</p>
+              <p className="mt-4 text-[12px] font-semibold text-[#737373]">Brzi filter općina</p>
+              <div className="mt-2 flex flex-wrap gap-1.5">{towns.map(([t, c]) => <Link key={t} href={`/registri/okolisne-dozvole?municipality=${encodeURIComponent(t)}`}><Badge tone="gray">{t} ({c})</Badge></Link>)}</div>
+              <Link href="/registri/okolisne-dozvole" className="mt-auto flex items-center gap-1.5 pt-6 text-[14px] font-semibold text-[var(--gr-700)]">Pretraži bazu<ArrowRight size={18} className="transition-transform group-hover:translate-x-1" /></Link>
             </Card>
-          ))}
-        </div>
-      </Section>
-
-      {/* Javni uvidi + obrasci */}
-      <Section>
-        <div className="grid gap-16 lg:grid-cols-2 lg:gap-12">
-          <div>
-            <SectionHeader eyebrow="Učešće javnosti" title="Javni uvidi i rasprave" actions={<Button href={`/vijesti?category=${encodeURIComponent('Zaštita okoliša')}`} variant="link" iconRight={ArrowRight}>Sve objave</Button>}>
-              Građani i udruženja mogu dati primjedbe na studije utjecaja i planove.
-            </SectionHeader>
-            <ul className="mt-8 flex flex-col gap-4">
-              {env.items.map((p) => (
-                <li key={p.id}>
-                  <Link href={`/vijesti/${p.slug}`} className="group flex flex-col gap-2 rounded-[12px] p-5 ring-1 ring-inset ring-[#e5e5e5] hover:ring-[var(--br-300)] hover:bg-[var(--br-25)]">
-                    <div className="flex flex-wrap items-center gap-2"><Badge tone="success" dot>Objavljeno</Badge><span className="flex items-center gap-1.5 text-[14px] text-[#525252]"><Calendar size={14} className="text-[#a3a3a3]" />{dateLong(p.publishedAt)}</span>{p.isDemo && <Badge tone="warning">Demo</Badge>}</div>
-                    <p className="text-[16px] leading-6 font-semibold text-[#171717] group-hover:text-[var(--br-700)]">{p.title}</p>
-                    {p.excerpt && <p className="text-[14px] leading-5 text-[#525252] line-clamp-2">{p.excerpt}</p>}
-                  </Link>
-                </li>
-              ))}
-              {env.items.length === 0 && <li className="text-[16px] text-[#525252]">Trenutno nema objavljenih javnih uvida.</li>}
-            </ul>
+            <Card className="group uui-lift flex flex-col overflow-hidden border-t-4 border-t-[var(--br-600)] p-6">
+              <div className="flex items-start justify-between"><FeaturedIcon icon={Trash03} tone="brand" size="md" ripple={false} /><Badge tone="gray">Faza 2</Badge></div>
+              <h3 className="mt-4 text-[18px] font-semibold text-[#171717]">Upravljanje otpadom</h3>
+              <p className="mt-1 text-[14px] text-[#525252]">Registar pravnih osoba ovlaštenih za sakupljanje, skladištenje i obradu neopasnog i opasnog otpada.</p>
+              <ul className="mt-4 space-y-1.5 text-[14px] text-[#525252]">{['Neopasni otpad', 'Opasni otpad', 'Odlagališta komunalnog otpada'].map((x) => <li key={x} className="flex items-center gap-2"><span className="size-1.5 rounded-full bg-[var(--br-500)]" />{x}</li>)}</ul>
+              <Link href="/registri/upravljanje-otpadom" className="mt-auto flex items-center gap-1.5 pt-6 text-[14px] font-semibold text-[var(--br-700)]">Saznaj više<ArrowRight size={18} className="transition-transform group-hover:translate-x-1" /></Link>
+            </Card>
+            <Card className="group uui-lift flex flex-col overflow-hidden border-t-4 border-t-[#f79009] p-6">
+              <div className="flex items-start justify-between"><FeaturedIcon icon={Building07} tone="warning" size="md" ripple={false} /><Badge tone="gray">{fmt(stats.facilities)} objekata</Badge></div>
+              <h3 className="mt-4 text-[18px] font-semibold text-[#171717]">Kategorizacija objekata</h3>
+              <p className="mt-1 text-[14px] text-[#525252]">Hoteli, moteli, pansioni, kampovi i privatni smještaj s dodijeljenom kategorijom.</p>
+              <dl className="mt-4 space-y-1.5 rounded-[8px] bg-[#fafafa] p-3 text-[14px]">{byKind.slice(0, 3).map(([k, n]) => <div key={k} className="flex justify-between"><dt className="text-[#525252]">{k}</dt><dd className="font-semibold text-[#171717]">{n}</dd></div>)}{byKind.length === 0 && <div className="text-[#737373]">Registar je prazan.</div>}</dl>
+              <Link href="/registri/ugostiteljski-objekti" className="mt-auto flex items-center gap-1.5 pt-6 text-[14px] font-semibold text-[#b54708]">Otvori registar<ArrowRight size={18} className="transition-transform group-hover:translate-x-1" /></Link>
+            </Card>
+            <Card className="group uui-lift flex flex-col overflow-hidden border-t-4 border-t-[#062343] p-6">
+              <div className="flex items-start justify-between"><FeaturedIcon icon={Users01} tone="brand" size="md" ripple={false} /><Badge tone="success">E-prijava · Faza 2</Badge></div>
+              <h3 className="mt-4 text-[18px] font-semibold text-[#171717]">Registar turističkih vodiča</h3>
+              <p className="mt-1 text-[14px] text-[#525252]">Certificirani vodiči s verifikacijom jezičnih kompetencija i prijava na stručni ispit.</p>
+              <Link href="/turisticki-vodici" className="mt-auto flex items-center gap-1.5 pt-6 text-[14px] font-semibold text-[var(--br-700)]">Uslovi i prijava na ispit<ArrowRight size={18} className="transition-transform group-hover:translate-x-1" /></Link>
+            </Card>
           </div>
+        </Container>
+      </section>
+
+      {/* JAVNI UVIDI + BOČNA KOLONA */}
+      <section className="bg-[#fafafa] py-16 md:py-24">
+        <Container className="grid gap-8 lg:grid-cols-[1fr_400px]">
           <div>
-            <SectionHeader eyebrow="Obrasci" title="Službeni obrasci" actions={<Button href="/propisi" variant="link" iconRight={ArrowRight}>Svi propisi</Button>}>
-              Standardizirani obrasci za zahtjeve prema nadležnim sektorima.
-            </SectionHeader>
-            <ul className="mt-8 flex flex-col gap-3">
-              {forms.map((d) => (
-                <li key={d.id} className="flex items-center gap-3 rounded-[12px] bg-white p-4 ring-1 ring-inset ring-[#e5e5e5]">
-                  <span className="relative flex h-10 w-8 shrink-0 rounded-[4px] ring-1 ring-inset ring-[#d4d4d4]"><span className={`absolute -left-1.5 bottom-1.5 rounded-[2px] px-1 text-[10px] leading-[14px] font-bold text-white ${fileExt(d.fileName) === 'PDF' ? 'bg-[#d92d20]' : 'bg-[#155eef]'}`}>{fileExt(d.fileName).slice(0, 4)}</span></span>
-                  <div className="min-w-0 flex-1"><p className="truncate text-[14px] leading-5 font-medium text-[#404040]">{d.title}</p><p className="text-[14px] leading-5 text-[#525252]">{DOC_TYPE[d.docType] ?? d.docType} · {fileSize(d.size)}</p></div>
-                  {d.isDemo && <Badge tone="warning">Demo</Badge>}
-                  <Button href={`/api/documents/${d.id}/file`} variant="tertiary" size="sm" icon={Download01} external>Preuzmi</Button>
-                </li>
-              ))}
-              {forms.length === 0 && <li className="text-[16px] text-[#525252]">Obrasci se objavljuju u rubrici Propisi.</li>}
-            </ul>
+            <Head k="Demokratsko sudjelovanje javnosti" t="Aktivni javni uvidi i rasprave" s="U skladu sa Zakonom o zaštiti okoliša, Ministarstvo osigurava pravo građanima i organizacijama na uvid u studije utjecaja i podnošenje primjedbi." action={<Link href="/vijesti?category=Za%C5%A1tita%20okoli%C5%A1a" className="flex items-center gap-1.5 text-[16px] font-semibold text-[var(--br-700)]">Svi arhivirani uvidi<ArrowRight size={20} /></Link>} />
+            <div className="mt-8 flex flex-col gap-4">
+              {uvidi.map((p) => {
+                const left = daysUntil(p.deadline);
+                const open = left === null || left >= 0;
+                return (
+                  <Card key={p.id} className="group uui-lift p-5 md:p-6">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex flex-wrap items-center gap-2"><Badge tone={open ? 'success' : 'gray'} dot>{open ? 'Otvoreno za primjedbe' : 'Završeno'}</Badge><span className="text-[12px] text-[#737373]">{p.category}</span></div>
+                      {p.deadline && <span className={`flex items-center gap-1.5 text-[14px] font-semibold ${open ? 'text-[#d92d20]' : 'text-[#737373]'}`}><Clock size={16} />{open ? `Još ${left} dana (do ${dateLong(p.deadline)})` : `Zaključeno ${dateLong(p.deadline)}`}</span>}
+                    </div>
+                    <h3 className="mt-3 text-[18px] leading-7 font-semibold text-[#171717]"><Link href={`/vijesti/${p.slug}`} className="hover:text-[var(--br-700)]">{p.title}</Link></h3>
+                    {p.excerpt && <p className="mt-2 line-clamp-2 text-[14px] leading-5 text-[#525252]">{p.excerpt}</p>}
+                    <div className="mt-4 flex flex-col gap-3 border-t border-[#e5e5e5] pt-4 sm:flex-row sm:items-center sm:justify-between">
+                      <Button href={`/vijesti/${p.slug}#dokumenti`} variant="secondary" size="sm" icon={Download01}>{p.attachmentCount ? `Dokumentacija (${p.attachmentCount})` : 'Tekst objave'}</Button>
+                      {open && <Button href={`/vijesti/${p.slug}#prijava`} size="sm" icon={Edit05} className="!bg-[#062343] hover:!bg-[var(--br-900)]">Podnesi primjedbu</Button>}
+                    </div>
+                  </Card>
+                );
+              })}
+              {uvidi.length === 0 && <p className="text-[16px] text-[#525252]">Trenutno nema otvorenih javnih uvida.</p>}
+              <Card className="p-5 md:p-6">
+                <div className="flex flex-wrap items-center justify-between gap-2"><h3 className="text-[16px] font-semibold text-[#171717]">Status obrade okolišnih predmeta u tekućem kvartalu</h3><Badge tone="gray">Faza 2 · e-pisarnica</Badge></div>
+                <p className="mt-1 text-[14px] text-[#525252]">Pregled riješenih i zaprimljenih zahtjeva prikazivat će se automatski iz e-pisarnice.</p>
+                <div className="mt-4 grid gap-3 sm:grid-cols-3">{[['Zahtjevi u obradi', 'var(--br-600)'], ['Izdano novih dozvola', 'var(--gr-600)'], ['Odbijeno ili vraćeno', '#f04438']].map(([l, c]) => <div key={l} className="rounded-[8px] bg-[#fafafa] p-3"><p className="text-[12px] font-medium text-[#737373]">{l}</p><p className="mt-1 text-[20px] font-semibold text-[#a3a3a3]">—</p><div className="mt-2 h-1.5 rounded-full bg-[#e5e5e5]"><div className="h-full w-1/4 rounded-full opacity-30" style={{ background: c }} /></div></div>)}</div>
+              </Card>
+            </div>
           </div>
-        </div>
-      </Section>
 
-      {/* Kako podnijeti zahtjev – koraci */}
-      <Section tone="gray">
-        <SectionHeader eyebrow="Postupak" title="Kako podnijeti zahtjev" align="center">Četiri koraka od obrasca do rješenja.</SectionHeader>
-        <ol className="mt-12 md:mt-16 grid gap-10 md:grid-cols-2 lg:grid-cols-4">
-          {[
-            [Scales02, 'Provjerite propise', 'Pročitajte zakon i pravilnik koji uređuju vaš zahtjev.'],
-            [Download01, 'Preuzmite obrazac', 'Popunite standardizirani obrazac i pripremite priloge.'],
-            [BankNote01, 'Uplatite taksu', 'Kantonalna administrativna taksa prema tarifi za vrstu zahtjeva.'],
-            [Mail01, 'Predajte zahtjev', 'U pisarnici Ministarstva ili poštom na Braće Fejića bb, Mostar.'],
-          ].map(([I, t, d], i) => (
-            <li key={t as string} className="flex flex-col items-center text-center">
-              <FeaturedIcon icon={I as any} tone="brand" />
-              <p className="mt-5 text-[14px] font-semibold text-[var(--br-700)]">Korak {i + 1}</p>
-              <h3 className="mt-1 text-[20px] leading-[30px] font-semibold text-[#171717]">{t as string}</h3>
-              <p className="mt-2 text-[16px] leading-6 text-[#525252]">{d as string}</p>
-            </li>
-          ))}
-        </ol>
-      </Section>
-
-      {/* Kontakt + e-potpis */}
-      <Section>
-        <div className="grid gap-8 lg:grid-cols-2">
-          <CtaBox icon={<FeaturedIcon icon={ShieldTick} tone="brand" />} title={<span className="inline-flex items-center gap-2">Provjera elektronskog potpisa <Badge tone="gray">Faza 2</Badge></span>}>
-            Provjera vjerodostojnosti digitalno potpisanih rješenja Ministarstva bit će dostupna nakon uvođenja kvalificiranog e-potpisa.
-          </CtaBox>
-          <Card className="p-6 md:p-8">
-            <h3 className="text-[20px] leading-[30px] font-semibold text-[#171717]">Pisarnica i prijem podnesaka</h3>
-            <ul className="mt-6 flex flex-col gap-5 text-[16px] leading-6 text-[#525252]">
-              <li className="flex gap-3"><MarkerPin02 size={24} className="text-[var(--br-600)] shrink-0" /><span><b className="block font-semibold text-[#171717]">Sjedište Ministarstva</b>Braće Fejića bb, 88000 Mostar</span></li>
-              <li className="flex gap-3"><Clock size={24} className="text-[var(--br-600)] shrink-0" /><span><b className="block font-semibold text-[#171717]">Rad sa strankama</b>Radnim danom, prema dogovoru</span></li>
-              <li className="flex gap-3"><Phone01 size={24} className="text-[var(--br-600)] shrink-0" /><span><b className="block font-semibold text-[#171717]">Kontakt</b><a href="tel:+38736551823" className="hover:text-[var(--br-700)]">+387 36 551 823</a> · <a href="mailto:info@mtto.gov.ba" className="hover:text-[var(--br-700)]">info@mtto.gov.ba</a></span></li>
-            </ul>
-            <div className="mt-8"><Button href="https://www.google.com/maps/search/?api=1&query=Bra%C4%87e+Fej%C4%87a+bb%2C+Mostar" variant="secondary" icon={MarkerPin02}>Upute za dolazak</Button></div>
-          </Card>
-        </div>
-      </Section>
+          <aside className="flex flex-col gap-6">
+            <Card className="overflow-hidden">
+              <div className="flex items-center justify-between border-b border-[#e5e5e5] px-5 py-4"><h3 className="flex items-center gap-2 text-[18px] font-semibold text-[#171717]"><File06 size={20} className="text-[var(--br-600)]" />Službeni obrasci</h3><Badge tone="brand">{forms.length}</Badge></div>
+              <ul className="divide-y divide-[#e5e5e5]">
+                {forms.map((d) => (
+                  <li key={d.id}><a href={`/api/documents/${d.id}/file`} target="_blank" rel="noopener" className="group flex items-start gap-3 px-5 py-3.5 hover:bg-[#fafafa]">
+                    <span className="mt-0.5 rounded-[4px] bg-[#d92d20] px-1 text-[10px] font-bold leading-4 text-white">{fileExt(d.fileName)}</span>
+                    <span className="min-w-0 flex-1"><span className="block line-clamp-2 text-[14px] font-semibold text-[#171717] group-hover:text-[var(--br-700)]">{d.title}</span><span className="text-[12px] text-[#737373]">{d.sector} · {fileSize(d.size)}</span></span>
+                    <Download01 size={18} className="mt-0.5 shrink-0 text-[#a3a3a3] group-hover:text-[var(--br-600)]" />
+                  </a></li>
+                ))}
+                {forms.length === 0 && <li className="px-5 py-4 text-[14px] text-[#525252]">Obrasci još nisu objavljeni.</li>}
+              </ul>
+              <div className="p-4"><Link href="/propisi?docType=OBRAZAC#tablica" className="flex h-10 items-center justify-center rounded-[8px] bg-[var(--br-50)] text-[14px] font-semibold text-[var(--br-700)] hover:bg-[var(--br-100)]">Svi obrasci u repozitoriju</Link></div>
+            </Card>
+            <div className={`rounded-[16px] p-6 text-white ${GRAD}`}>
+              <p className="flex items-center gap-2 text-[18px] font-semibold"><ShieldTick size={20} className="text-[var(--gr-300)]" />Verifikacija e-potpisa</p>
+              <p className="mt-2 text-[14px] text-[var(--br-100)]">Provjera digitalnog potpisa i autentičnosti rješenja izdanog od strane Ministarstva.</p>
+              <div className="mt-4 flex flex-col items-center gap-2 rounded-[12px] border border-dashed border-white/25 bg-white/5 px-4 py-6 text-center"><UploadCloud02 size={24} className="text-[var(--br-200)]" /><span className="text-[14px] text-[var(--br-100)]">Prevucite potpisani PDF dokument</span></div>
+              <Badge tone="gray" className="mt-4">Faza 2</Badge>
+            </div>
+            <Card className="p-6">
+              <h3 className="flex items-center gap-2 text-[18px] font-semibold text-[#171717]"><Building07 size={20} className="text-[var(--br-600)]" />Šalter sala i prijem podnesaka</h3>
+              <ul className="mt-4 space-y-4 text-[14px] text-[#525252]">
+                <li className="flex gap-3"><MarkerPin02 size={20} className="shrink-0 text-[#a3a3a3]" /><span><b className="block font-semibold text-[#171717]">Sjedište Ministarstva</b>Braće Fejića bb, 88000 Mostar</span></li>
+                <li className="flex gap-3"><Clock size={20} className="shrink-0 text-[#a3a3a3]" /><span><b className="block font-semibold text-[#171717]">Rad sa strankama</b>Ponedjeljak – petak, 08:00 – 16:00</span></li>
+                <li className="flex gap-3"><Phone01 size={20} className="shrink-0 text-[#a3a3a3]" /><span><b className="block font-semibold text-[#171717]">Pisarnica</b>+387 36 551 823 · info@mtto.gov.ba</span></li>
+              </ul>
+              <div className="mt-5 flex items-center justify-between border-t border-[#e5e5e5] pt-4 text-[14px]"><Badge tone="success" dot>Pon – pet</Badge><Link href="/o-nama#kontakt" className="font-semibold text-[var(--br-700)]">Upute za dolazak</Link></div>
+            </Card>
+          </aside>
+        </Container>
+      </section>
     </>
   );
 }

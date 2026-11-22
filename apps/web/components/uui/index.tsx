@@ -283,3 +283,64 @@ export function FeaturedPost({ href, image, title, excerpt, category, date, badg
     </Link>
   );
 }
+
+/** Zaglavlje podstranice po MTTO Figma kosturu: gradijent, oznaka, naslov, uvod, desna kartica i red statistika. */
+export type HeroStat = { label: string; value: string | number; sub?: string; icon?: Icon };
+export function PageHero({ crumbs, eyebrow, title, children, aside, stats, actions }: { crumbs?: { label: string; href?: string }[]; eyebrow?: string; title: ReactNode; children?: ReactNode; aside?: ReactNode; stats?: HeroStat[]; actions?: ReactNode }) {
+  return (
+    <section className={cx('relative isolate overflow-hidden text-white', GRAD)}>
+      <div aria-hidden className="absolute inset-0 opacity-25 [background-image:radial-gradient(rgba(255,255,255,0.14)_1px,transparent_1px)] [background-size:24px_24px] [mask-image:linear-gradient(to_bottom,black,transparent_70%)]" />
+      <Container className="relative pb-12 pt-10 md:pb-16 md:pt-14">
+        {crumbs && (
+          <nav aria-label="Putanja" className="mb-6 flex flex-wrap items-center gap-2 text-[14px] leading-5 font-medium text-[var(--br-200)]">
+            {crumbs.map((c, i) => <span key={i} className="flex items-center gap-2">{i > 0 && <span className="text-white/30">/</span>}{c.href ? <Link href={c.href} className="hover:text-white">{c.label}</Link> : <span className="font-semibold text-white" aria-current="page">{c.label}</span>}</span>)}
+          </nav>
+        )}
+        <div className={cx('grid gap-8', !!aside && 'lg:grid-cols-[1fr_auto] lg:items-start')}>
+          <div className="max-w-[820px]">
+            {eyebrow && <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--gr-500)]/15 px-2.5 py-0.5 text-[12px] leading-[18px] font-semibold text-[var(--gr-200)] ring-1 ring-inset ring-[var(--gr-500)]/40"><span className="size-1.5 rounded-full bg-[var(--gr-400)]" />{eyebrow}</span>}
+            <h1 className="mt-4 text-[36px] leading-[44px] md:text-[48px] md:leading-[60px] font-semibold tracking-[-0.02em] text-white text-balance">{title}</h1>
+            {children && <div className="mt-4 max-w-[720px] text-[18px] leading-7 text-[var(--br-100)]">{children}</div>}
+            {actions && <div className="mt-8 flex flex-col gap-3 sm:flex-row">{actions}</div>}
+          </div>
+          {aside}
+        </div>
+        {stats && stats.length > 0 && (
+          <div className={cx('mt-10 grid grid-cols-2 gap-3 md:gap-4', stats.length >= 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-3')}>
+            {stats.map((s) => (
+              <div key={s.label} className="rounded-[12px] bg-white/10 p-4 ring-1 ring-inset ring-white/15 backdrop-blur-md md:p-5">
+                <p className="flex items-center justify-between gap-2 text-[14px] font-medium text-[var(--br-200)]">{s.label}{s.icon && <s.icon size={20} className="shrink-0 text-[var(--gr-300)]" />}</p>
+                <p className="mt-2 text-[26px] leading-8 md:text-[30px] md:leading-[38px] font-semibold text-white"><CountUp value={s.value} /></p>
+                {s.sub && <p className="mt-1 text-[12px] leading-[18px] font-medium text-[var(--gr-300)]">{s.sub}</p>}
+              </div>
+            ))}
+          </div>
+        )}
+      </Container>
+    </section>
+  );
+}
+
+/** Staklena info-kartica za desnu stranu PageHero (npr. "Ažurnost arhiva"). */
+export function HeroInfo({ icon: I, label, value, children }: { icon: Icon; label: string; value: ReactNode; children?: ReactNode }) {
+  return (
+    <div className="flex items-start gap-4 rounded-[16px] bg-white/10 p-5 ring-1 ring-inset ring-white/20 backdrop-blur-md lg:min-w-[300px]">
+      <span className="flex size-12 shrink-0 items-center justify-center rounded-[10px] bg-[var(--gr-600)] text-white"><I size={24} /></span>
+      <div><p className="text-[12px] font-semibold text-[var(--gr-200)]">{label}</p><p className="text-[20px] leading-[30px] font-semibold text-white">{value}</p>{children && <div className="mt-1 text-[14px] text-[var(--br-100)]">{children}</div>}</div>
+    </div>
+  );
+}
+
+/** Zaglavlje sekcije u Figma kosturu (zelena oznaka iznad, naslov, akcija desno). */
+export function Head({ k, t, s, dark, action }: { k?: string; t: ReactNode; s?: ReactNode; dark?: boolean; action?: ReactNode }) {
+  return (
+    <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <div>
+        {k && <p className={cx('text-[14px] leading-5 font-semibold', dark ? 'text-[var(--gr-300)]' : 'text-[var(--br-700)]')}>{k}</p>}
+        <h2 className={cx('mt-2 text-[28px] leading-9 md:text-[36px] md:leading-[44px] font-semibold tracking-[-0.02em]', dark ? 'text-white' : 'text-[#171717]')}>{t}</h2>
+        {s && <div className={cx('mt-3 max-w-[720px] text-[16px] leading-6 md:text-[18px] md:leading-7', dark ? 'text-[var(--br-200)]' : 'text-[#525252]')}>{s}</div>}
+      </div>
+      {action}
+    </div>
+  );
+}

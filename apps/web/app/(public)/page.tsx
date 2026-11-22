@@ -6,7 +6,8 @@ import { EMPTY, aqiClass, type RiskSummary } from '@/lib/risk';
 import { dateLong, dateShort } from '@/lib/format';
 import MapSection from '@/components/site/MapSection';
 import { Badge, Card, Container, CountUp, FeaturedIcon, GRAD } from '@/components/uui';
-import { KINDS } from '@/lib/reportKinds';
+import EkoMonitoring from '@/components/uui/EkoMonitoring';
+import ProtectedAreas from '@/components/uui/ProtectedAreas';
 import {
   ArrowRight, ArrowUpRight, Award01, Building07, Calendar, CheckVerified01, Download01, File06, Globe01, LayersThree01, Map01,
   MarkerPin02, Phone01, Ticket01, Users01, Waves, Wind01, Mail01, Bell01, Send01,
@@ -100,8 +101,6 @@ export default async function Home() {
     { href: '/zastita-okolisa', kind: 'Javna rasprava', tone: 'warning', title: 'Proglašenje zaštićenog staništa Vrtaljica, Konjic', text: 'Uvid u nacrt rješenja i elaborat o zaštiti rijetke flore i dolomitnih tala.', deadline: '10. 12. 2026.', file: 'PDF 1,8 MB', demo: true, ripple: true },
     { href: '/zastita-okolisa', kind: 'Strateški dokument', tone: 'brand', title: 'Plan upravljanja otpadom HNK 2025–2030 (javni uvid)', text: 'Građani i pravne osobe mogu dostaviti pisane primjedbe resornom povjerenstvu.', deadline: null, file: 'Komentiraj online', demo: true, ripple: false },
   ].slice(0, 3) as Call[];
-  const air = risk.air?.items ?? [];
-  const rivers = risk.rivers.items.slice(0, 3);
 
   return (
     <>
@@ -177,82 +176,12 @@ export default async function Home() {
         </Container>
       </section>
 
-      {/* EKO-MONITORING UŽIVO */}
-      <section id="eko-monitoring" className={`py-16 md:py-24 ${GRAD}`}>
-        <Container className="grid gap-8 lg:grid-cols-[1fr_440px]">
-          <div>
-            <Head dark k="Mreža mjernih podataka" t="Eko-monitoring uživo" s="Kvalitet zraka (Copernicus CAMS), meteo upozorenja (Meteoalarm) i protok rijeka (GloFAS) za područje kantona." action={<Link href="/eko-rizik" className={`${glass} h-11 px-4 text-[16px]`}>Karta rizika<ArrowRight size={20} /></Link>} />
-            <div className="mt-8 grid gap-4 sm:grid-cols-3">
-              {(air.length ? air : [{ key: 'm', name: 'Mostar', aqi: null, pm25: null, pm10: null, o3: null, time: null }]).map((a) => {
-                const c = aqiClass(a.aqi);
-                return (
-                  <div key={a.key} className="rounded-[12px] bg-white/10 p-5 ring-1 ring-inset ring-white/15 backdrop-blur-md">
-                    <p className="flex items-center justify-between gap-2 text-[18px] font-semibold text-white">{a.name}<span className={`rounded-full px-2 py-0.5 text-[12px] font-medium ${c.tone === 'success' ? 'bg-[var(--gr-50)] text-[var(--gr-700)]' : c.tone === 'warning' ? 'bg-[#fffaeb] text-[#b54708]' : c.tone === 'error' ? 'bg-[#fef3f2] text-[#b42318]' : 'bg-white/15 text-white'}`}>AQI {a.aqi != null ? <CountUp value={a.aqi} /> : '—'}</span></p>
-                    <p className="flex items-center gap-1.5 text-[14px] text-[var(--gr-300)]"><Wind01 size={14} />Kvalitet: {c.label.toLowerCase()}</p>
-                    <dl className="mt-4 space-y-1.5 text-[14px] text-[var(--br-100)]">{([['PM2.5', a.pm25], ['PM10', a.pm10], ['O₃', a.o3]] as const).map(([l, v]) => <div key={l} className="flex justify-between"><dt>{l}</dt><dd className="font-semibold text-white">{v != null ? `${v} µg/m³` : '—'}</dd></div>)}</dl>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="mt-4 rounded-[12px] bg-white/10 p-5 ring-1 ring-inset ring-white/15 backdrop-blur-md">
-              <p className="flex items-center justify-between gap-2 text-[18px] font-semibold text-white"><span className="flex items-center gap-2"><Waves size={20} className="text-[var(--gr-300)]" />Protok sliva Neretve</span><span className="text-[12px] font-medium text-[var(--br-200)]">Model GloFAS</span></p>
-              <div className="mt-4 grid gap-4 sm:grid-cols-3">
-                {rivers.map((r) => (
-                  <div key={r.key} className="flex items-center gap-3"><span className="flex size-10 shrink-0 items-center justify-center rounded-[8px] bg-[var(--gr-500)]/20 text-[var(--gr-200)]"><Waves size={20} /></span><span><span className="block text-[12px] text-[var(--br-200)]">{r.name}</span><span className="text-[18px] font-semibold text-white"><CountUp value={Math.round(r.discharge[r.todayIndex] ?? 0)} /> m³/s</span></span></div>
-                ))}
-                {rivers.length === 0 && <p className="text-[14px] text-[var(--br-200)]">Model protoka trenutno nije dostupan.</p>}
-              </div>
-            </div>
-            {risk.air?.error && <p className="mt-3 text-[12px] text-[var(--br-200)]">Podaci o zraku trenutno nisu dostupni.</p>}
-          </div>
-          <div className="self-start rounded-[16px] bg-white p-5 shadow-[0_24px_48px_-12px_rgba(10,13,18,0.25)] md:p-6">
-            <div className="flex items-center justify-between gap-3"><span className="flex items-center gap-3"><FeaturedIcon icon={Bell01} tone="success" size="md" /><span className="text-[18px] font-semibold text-[#171717]">Građanski eko-alarm</span></span><Badge tone="success">Prijava 24/7</Badge></div>
-            <p className="mt-4 text-[14px] leading-5 text-[#525252]">Uočili ste divlju deponiju, požar, zagađenje vode ili klizište? Odaberite vrstu incidenta i prijavite ga direktno Ministarstvu, s lokacijom i fotografijom.</p>
-            <div className="mt-5 grid grid-cols-2 gap-2">
-              {KINDS.map(([k, l, I]) => (
-                <Link key={k} href={`/eko-rizik/prijava?vrsta=${k}`} className="group flex items-center gap-2 rounded-[8px] px-3 py-2.5 text-[14px] font-medium text-[#404040] ring-1 ring-inset ring-[#e5e5e5] transition-colors hover:bg-[var(--br-25)] hover:ring-[var(--br-300)]">
-                  <I size={18} className="shrink-0 text-[var(--br-600)] transition-transform group-hover:scale-110" /><span className="truncate">{l}</span>
-                </Link>
-              ))}
-            </div>
-            <Link href="/eko-rizik/prijava" className={`${green} mt-5 h-11 w-full text-[16px]`}><Send01 size={20} />Prijavi incident</Link>
-            <p className="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[12px] text-[#737373]"><span>Hitno:</span>{[['123', 'vatrogasci'], ['121', 'civilna zaštita'], ['124', 'hitna']].map(([n, l]) => <a key={n} href={`tel:${n}`} className="font-semibold text-[#404040] hover:text-[var(--br-700)]">{n} <span className="font-normal text-[#737373]">{l}</span></a>)}</p>
-          </div>
-        </Container>
-      </section>
+      <EkoMonitoring risk={risk} />
 
       {/* ZAŠTIĆENA PODRUČJA */}
       <section className="bg-[#fafafa] py-16 md:py-24">
         <Container>
-          <Head k="Resor zaštite okoliša i prirode" t="Zaštićena područja i prirodni rezervati" s="Čuvarske službe, valorizacija kraških fenomena i planovi upravljanja zaštićenim krajolicima." action={<More href="/zastita-okolisa">Zaštita okoliša</More>} />
-          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {[['Park prirode', 'Blidinje i Čvrsnica', '/fig/pa-blidinje.jpg', 'Planinski plato i nekropola stećaka.', '/zastita-okolisa'], ['Ramsar lokalitet', 'Hutovo blato', '/fig/tile-hutovo.jpg', 'Submediteranska močvara i stanište ptica.', '/foto-albumi/hutovo-blato'], ['Kulturni krajolik', 'Vrelo Bune, Blagaj', '/hero/blagaj-m.jpg', 'Krško vrelo i tekija pod liticom.', '/turizam-i-bastina'], ['Hidrološki spomenik', 'Kanjon Neretve', '/hero/neretva-m.jpg', 'Riječni koridor od Konjica do Čapljine.', '/zastita-okolisa']].map(([k, t, img, d, href]) => (
-              <Link key={t} href={href} className="group uui-lift flex flex-col overflow-hidden rounded-[12px] bg-white ring-1 ring-inset ring-[#e5e5e5] shadow-[0_1px_2px_rgba(10,13,18,0.05)]">
-                <span className="relative block aspect-[4/3] overflow-hidden"><img src={img} alt="" className="size-full object-cover transition-transform duration-700 group-hover:scale-[1.05]" /><span className="absolute left-3 top-3"><Badge tone="brand">{k}</Badge></span></span>
-                <span className="flex flex-1 flex-col p-5"><span className="text-[18px] font-semibold text-[#171717]">{t}</span><span className="mt-1 text-[14px] text-[#525252]">{d}</span><span className="mt-auto flex items-center justify-between pt-4 text-[14px] font-semibold text-[var(--br-700)]">Detalji<ArrowRight size={18} className="transition-transform group-hover:translate-x-1" /></span></span>
-              </Link>
-            ))}
-          </div>
-
-          {/* GIS */}
-          <Card className="mt-10 overflow-hidden">
-            <div className="flex flex-col gap-4 border-b border-[#e5e5e5] px-5 py-5 md:flex-row md:items-center md:justify-between md:px-6">
-              <div className="flex items-center gap-3"><FeaturedIcon icon={Map01} size="md" /><div><p className="flex flex-wrap items-center gap-2 text-[18px] font-semibold text-[#171717]">GIS registar zaštićenih područja<Badge tone="brand">WGS-84</Badge></p><p className="text-[14px] text-[#525252]">Dozvole, ugostiteljski objekti, zaštićena područja i projekti na jednoj karti.</p></div></div>
-              <Badge tone="success" dot>{points.length} lokacija</Badge>
-            </div>
-            <div className="grid lg:grid-cols-[1.4fr_1fr]">
-              <div className="p-2"><div className="overflow-hidden rounded-[8px]"><MapSection points={points} compact title={false} height={460} /></div></div>
-              <div className="border-t border-[#e5e5e5] p-5 md:p-6 lg:border-l lg:border-t-0">
-                <Badge tone="success">Park prirode</Badge>
-                <p className="mt-3 text-[24px] font-semibold text-[#171717]">Blidinje i Masna Luka</p>
-                <p className="mt-2 text-[14px] text-[#525252]">Planinski plato između Čvrsnice i Vran planine, stanište munike i nekropole stećaka.</p>
-                <img src="/fig/pa-blidinje.jpg" alt="Park prirode Blidinje" className="mt-4 aspect-[16/8] w-full rounded-[12px] object-cover" />
-                <dl className="mt-4 grid grid-cols-2 gap-3 text-[14px]">{[['Površina', '364 km²'], ['Općine', 'Posušje, Tomislavgrad, Jablanica']].map(([a, b]) => <div key={a} className="rounded-[8px] bg-[#fafafa] p-3"><dt className="text-[12px] text-[#737373]">{a}</dt><dd className="font-semibold text-[#171717]">{b}</dd></div>)}</dl>
-                <Link href="/mapa" className={`${btn} ${skeu} mt-4 h-11 w-full bg-[var(--br-600)] text-[16px] text-white hover:bg-[var(--br-700)]`}><MarkerPin02 size={20} />Otvori punu GIS kartu</Link>
-                <p className="mt-3 flex items-center justify-center gap-1.5 text-[12px] text-[#737373]"><Download01 size={14} />Preuzimanje KML sloja – Faza 2</p>
-              </div>
-            </div>
-          </Card>
+          <ProtectedAreas points={points} />
 
           {/* REGISTRI */}
           <div className="mt-16">
