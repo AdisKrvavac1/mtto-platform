@@ -75,7 +75,7 @@ export function GuidesF2(props: any) {
 </div>
 <div>
 <span className="font-label-kicker text-label-kicker text-on-surface-variant uppercase">Aktivnih iskaznica</span>
-<div className="font-headline-md text-headline-md font-bold text-text-heading mt-0.5">314 vodiča</div>
+<div className="font-headline-md text-headline-md font-bold text-text-heading mt-0.5">Faza 2</div>
 <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">Verificirani vodiči s pravom vođenja na lokalitetima HNŽ/HNK.</p>
 </div>
 </div>
@@ -90,7 +90,7 @@ export function GuidesF2(props: any) {
 </div>
 <div>
 <span className="font-label-kicker text-label-kicker text-on-surface-variant uppercase">Kategorizirani objekti</span>
-<div className="font-headline-md text-headline-md font-bold text-text-heading mt-0.5">1.280 objekata</div>
+<div className="font-headline-md text-headline-md font-bold text-text-heading mt-0.5">{props.facilities} objekata</div>
 <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">Hoteli, pansioni, kampovi i seoska domaćinstva s važećim rješenjem.</p>
 </div>
 </div>
