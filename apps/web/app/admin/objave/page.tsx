@@ -145,7 +145,7 @@ export default function PostsAdmin() {
           <div className="overflow-x-auto w-full">
             <table className="w-full text-left border-collapse">
               <thead><tr className="bg-surface-container-low text-outline font-label-kicker text-[11px] uppercase tracking-wider select-none">
-                <th className="p-space-md w-12 text-center"><span className="sr-only">Odabir</span></th><th className="p-space-md min-w-[320px]">Naslov i sažetak</th><th className="p-space-md min-w-[170px]">Kategorija</th><th className="p-space-md min-w-[160px]">Autor</th><th className="p-space-md min-w-[150px]">Datum i status</th><th className="p-space-md min-w-[130px]">Pregledi</th><th className="p-space-md w-44 text-right pr-space-lg">Brze akcije</th>
+                <th className="p-space-md w-12 text-center"><span className="sr-only">Odabir</span></th><th className="p-space-md min-w-[280px]">Naslov i sažetak</th><th className="p-space-md min-w-[170px]">Kategorija</th><th className="p-space-md min-w-[160px]">Autor</th><th className="p-space-md min-w-[150px]">Datum i status</th><th className="p-space-md min-w-[130px]">Pregledi</th><th className="p-space-md w-44 text-right pr-space-lg">Brze akcije</th>
               </tr></thead>
               <tbody className="text-text-body font-body-regular text-body-regular">
                 {all === null && <tr><td colSpan={7} className="p-space-lg"><div className="h-24 rounded-lg bg-surface-container-low animate-pulse" /></td></tr>}
@@ -157,7 +157,7 @@ export default function PostsAdmin() {
                       <td className="p-space-md text-center align-top pt-5"><input className="w-4 h-4 rounded accent-primary cursor-pointer" type="checkbox" checked={picked.has(r.id)} onChange={() => toggle(r.id)} /></td>
                       <td className="p-space-md align-top">
                         <div className="flex items-start gap-3">
-                          <div className="w-16 h-12 rounded-lg bg-surface-container bg-cover bg-center shrink-0" style={r.coverImage ? { backgroundImage: `url('${r.coverImage}')` } : undefined} />
+                          {r.coverImage && <div className="hidden xl:block w-16 h-12 rounded-lg bg-surface-container bg-cover bg-center shrink-0" style={{ backgroundImage: `url('${r.coverImage}')` }} />}
                           <div className="min-w-0">
                             <Link href={`/admin/objave/${r.id}`} className="font-title-md text-title-md font-bold text-primary group-hover:text-secondary transition-colors block leading-snug">{r.title}</Link>
                             {r.excerpt && <p className="font-body-sm text-body-sm text-outline mt-1 line-clamp-2">{r.excerpt}</p>}
@@ -170,7 +170,7 @@ export default function PostsAdmin() {
                       <td className="p-space-md align-top"><div className="flex flex-col gap-1"><span className="font-body-sm text-body-sm font-semibold text-text-heading">{dateShort(r.publishedAt)}</span><span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-label-badge font-label-badge font-bold uppercase w-max ${sc}`}><span className={`w-1.5 h-1.5 rounded-full ${sd}`} />{sl}</span></div></td>
                       <td className="p-space-md align-top"><span className="font-button text-button font-bold text-text-heading flex items-center gap-1"><span className="material-symbols-outlined text-[16px] text-outline">visibility</span>{r.views.toLocaleString('bs-BA')}</span></td>
                       <td className="p-space-md align-top text-right pr-space-lg">
-                        <div className="flex items-center justify-end gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                        <div className="flex flex-wrap items-center justify-end gap-1 max-w-[112px] ml-auto opacity-80 group-hover:opacity-100 transition-opacity">
                           <Link href={`/admin/objave/${r.id}`} className="p-1.5 rounded-lg hover:bg-surface-container text-outline hover:text-primary transition-colors" title="Uredi objavu"><span className="material-symbols-outlined text-[19px]">edit</span></Link>
                           {r.status === 'OBJAVLJENO' && <a href={`/vijesti/${r.slug}`} target="_blank" rel="noopener" className="p-1.5 rounded-lg hover:bg-surface-container text-outline hover:text-primary transition-colors" title="Otvori na portalu"><span className="material-symbols-outlined text-[19px]">open_in_new</span></a>}
                           <button type="button" onClick={() => setStatusOf([r.id], r.status === 'OBJAVLJENO' ? 'NACRT' : 'OBJAVLJENO')} className={`px-2 py-1 rounded-lg font-label-badge text-label-badge font-bold ${r.status === 'OBJAVLJENO' ? 'bg-surface-container-high text-on-surface-variant' : 'bg-secondary text-on-secondary'}`}>{r.status === 'OBJAVLJENO' ? 'Povuci' : 'Objavi'}</button>

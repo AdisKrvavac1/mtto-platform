@@ -159,23 +159,22 @@ export default function DocumentsAdmin() {
             <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse min-w-[860px]">
-                  <thead><tr className="bg-surface-container-low text-outline font-label-kicker text-[11px] uppercase tracking-wider">{['Naziv datoteke i format', 'Kategorija', 'Veličina', 'Zadnja izmjena', 'Veza', 'Status dijeljenja', ''].map((h) => <th key={h} className="p-space-md">{h}</th>)}</tr></thead>
+                  <thead><tr className="bg-surface-container-low text-outline font-label-kicker text-[11px] uppercase tracking-wider">{['Naziv datoteke i format', 'Kategorija', 'Veličina', 'Zadnja izmjena', 'Dijeljenje', ''].map((h) => <th key={h} className="p-space-md">{h}</th>)}</tr></thead>
                   <tbody>
-                    {all === null && <tr><td colSpan={7} className="p-space-lg"><div className="h-20 rounded-lg bg-surface-container-low animate-pulse" /></td></tr>}
-                    {all && rows.length === 0 && <tr><td colSpan={7} className="p-space-lg text-center text-outline">Nema dokumenata u ovoj mapi.</td></tr>}
+                    {all === null && <tr><td colSpan={6} className="p-space-lg"><div className="h-20 rounded-lg bg-surface-container-low animate-pulse" /></td></tr>}
+                    {all && rows.length === 0 && <tr><td colSpan={6} className="p-space-lg text-center text-outline">Nema dokumenata u ovoj mapi.</td></tr>}
                     {rows.map((d) => (
                       <Fragment key={d.id}>
                         <tr className="hover:bg-surface-container-low/60 transition-colors group">
                           <td className="p-space-md">
                             <div className="flex items-center gap-3">
                               <span className={`w-10 h-10 shrink-0 rounded-lg flex items-center justify-center font-label-badge text-[11px] font-bold ${EXT_CLS[fileExt(d.fileName)] ?? 'bg-surface-container-high text-primary'}`}>{fileExt(d.fileName)}</span>
-                              <div className="min-w-0"><span className="block font-button text-button font-bold text-text-heading line-clamp-1">{d.title}</span><span className="font-mono text-[12px] text-outline line-clamp-1">{d.fileName}{d.number ? ` • ${d.number}` : ''}</span>{d.isDemo && <span className="inline-flex font-label-badge text-[10px] text-[#786000] bg-herzeg-gold-soft px-1.5 rounded uppercase">Demo</span>}</div>
+                              <div className="min-w-0"><span className="block font-button text-button font-bold text-text-heading line-clamp-2 min-w-[220px]">{d.title}</span><span className="font-mono text-[12px] text-outline line-clamp-1">{d.fileName}{d.number ? ` • ${d.number}` : ''}</span>{d.isDemo && <span className="inline-flex font-label-badge text-[10px] text-[#786000] bg-herzeg-gold-soft px-1.5 rounded uppercase">Demo</span>}</div>
                             </div>
                           </td>
-                          <td className="p-space-md"><span className="font-label-badge text-label-badge px-2 py-0.5 rounded bg-surface-container text-primary uppercase">{DOC_TYPE[d.docType] ?? d.docType}</span><span className="block font-body-sm text-[12px] text-outline mt-0.5">{d.sector}</span></td>
-                          <td className="p-space-md font-mono text-body-sm">{fileSize(d.size)}</td>
-                          <td className="p-space-md font-mono text-body-sm text-outline">{dateTime(d.createdAt)}</td>
-                          <td className="p-space-md font-body-sm text-body-sm text-on-surface-variant">{d.postId ? 'Prilog objave' : d.permitId ? 'Dosje dozvole' : 'Biblioteka propisa'}</td>
+                          <td className="p-space-md"><span className="font-label-badge text-label-badge px-2 py-0.5 rounded bg-surface-container text-primary uppercase">{DOC_TYPE[d.docType] ?? d.docType}</span><span className="block font-body-sm text-[12px] text-outline mt-0.5">{d.sector} · {d.postId ? 'prilog objave' : d.permitId ? 'dosje dozvole' : 'biblioteka'}</span></td>
+                          <td className="p-space-md font-mono text-body-sm whitespace-nowrap">{fileSize(d.size)}</td>
+                          <td className="p-space-md font-mono text-body-sm text-outline whitespace-nowrap">{dateTime(d.createdAt)}</td>
                           <td className="p-space-md">{d.status === 'VAZECI' ? <span className="inline-flex items-center gap-1 font-label-badge text-label-badge text-secondary"><span className="material-symbols-outlined text-[16px]">globe</span>Javno na portalu</span> : <span className="inline-flex items-center gap-1 font-label-badge text-label-badge text-outline"><span className="material-symbols-outlined text-[16px]">inventory_2</span>Arhivirano</span>}<span className="block font-body-sm text-[12px] text-outline">{d.downloads} preuzimanja</span></td>
                           <td className="p-space-md text-right">
                             <div className="flex gap-1 justify-end">
@@ -187,7 +186,7 @@ export default function DocumentsAdmin() {
                         </tr>
                         {edit?.id === d.id && (
                           <tr className="bg-surface-container-low/60">
-                            <td colSpan={7} className="p-space-md">
+                            <td colSpan={6} className="p-space-md">
                               <form onSubmit={saveEdit} className="grid grid-cols-1 md:grid-cols-12 gap-space-sm items-end">
                                 <label className="md:col-span-4 flex flex-col gap-1"><span className={kick}>Naziv</span><input required className={field} value={edit.title} onChange={(e) => setEdit({ ...edit, title: e.target.value })} /></label>
                                 <label className="md:col-span-2 flex flex-col gap-1"><span className={kick}>Vrsta</span><select className={field} value={edit.docType} onChange={(e) => setEdit({ ...edit, docType: e.target.value })}>{Object.entries(DOC_TYPE).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></label>

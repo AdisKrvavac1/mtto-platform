@@ -52,12 +52,9 @@ export default function CmsShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-surface">
       <aside className={`fixed left-0 top-0 h-full w-72 bg-institutional-navy-deep z-50 flex flex-col text-on-primary shadow-[0_1px_8px_rgba(0,0,0,0.04)] transition-transform lg:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="h-16 px-space-md flex items-center justify-between bg-primary shrink-0">
-          <div className="flex items-center gap-space-sm">
-            <div className="w-8 h-8 rounded-lg bg-surface-container-lowest flex items-center justify-center p-1"><img src="/mtto-logo.svg" alt="" className="w-full h-full" /></div>
-            <div className="flex flex-col"><span className="font-label-kicker text-label-kicker uppercase tracking-wider text-surface-variant">Vlada HNK</span><span className="font-button text-button font-bold leading-tight text-on-primary truncate max-w-[155px]">MTTO Back-Office</span></div>
-          </div>
-          <span className="font-label-badge text-label-badge px-space-xs py-0.5 rounded-lg bg-secondary text-on-secondary">MVP</span>
+        <div className="h-[74px] px-space-md flex items-center justify-between bg-[#002042] shrink-0">
+          <a href="/admin" aria-label="MTTO CMS – kontrolna ploča" className="bg-white rounded-[6px] px-[8px] py-[5px] flex items-center"><img src="/mtto-logo.svg" alt="Ministarstvo trgovine, turizma i zaštite okoliša HNK" className="h-[42px] w-auto" /></a>
+          <span className="font-pub font-bold text-[11px] tracking-[0.44px] px-[8px] py-[2px] rounded-[2px] bg-[#006c4a] text-white">CMS</span>
         </div>
         <div className="px-space-md py-space-sm bg-primary/40 border-b border-primary-container/40">
           <span className="font-label-kicker text-[10px] uppercase tracking-wider text-on-primary-container block mb-1">Upravno tijelo</span>
@@ -92,7 +89,7 @@ export default function CmsShell({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-space-md">
             <button type="button" className="lg:hidden w-10 h-10 rounded-lg bg-surface-container-low flex items-center justify-center" onClick={() => setOpen(true)} aria-label="Meni"><span className="material-symbols-outlined">menu</span></button>
             <form action="/admin/objave" className="relative hidden md:flex items-center w-80"><span className="material-symbols-outlined absolute left-3 text-outline text-[18px]">search</span><input name="q" className="w-full h-10 pl-9 pr-3 rounded-lg bg-surface-container-low border border-slate-border text-body-sm text-text-heading placeholder:text-outline focus:outline-none focus:border-primary-container" placeholder="Pretraga objava..." type="text" /></form>
-            <div className="hidden sm:flex items-center gap-space-xs px-2.5 py-1 rounded-lg bg-emerald-light border border-secondary-container/60"><span className="w-2 h-2 rounded-full bg-secondary" /><span className="font-label-badge text-label-badge uppercase tracking-wider text-on-secondary-container">Staging · MVP</span></div>
+            <div className="hidden sm:flex items-center gap-space-xs px-2.5 py-1 rounded-lg bg-emerald-light border border-secondary-container/60"><span className="w-2 h-2 rounded-full bg-secondary" /><span className="font-label-badge text-label-badge uppercase tracking-wider text-on-secondary-container">Demo okruženje</span></div>
           </div>
           <div className="flex items-center gap-space-md">
             <Link className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface text-body-sm font-button" href="/admin/korisnici#audit"><span className="material-symbols-outlined text-[18px]">history_edu</span><span>Audit log</span></Link>

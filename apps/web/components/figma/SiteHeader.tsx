@@ -28,7 +28,7 @@ function useActive() {
     const [base, q] = href.split('#')[0].split('?');
     if (href.includes('#')) return false;
     if (base === '/') return path === '/';
-    if (base === '/registri/okolisne-dozvole') return REGISTRI.some((r) => path.startsWith(r));
+    if (base === '/e-usluge') return REGISTRI.some((r) => path.startsWith(r));
     if (base === '/vijesti') return path.startsWith('/vijesti') && (q ? sp.toString() === q : sp.get('type') !== 'JAVNI_POZIV');
     return path.startsWith(base);
   };
