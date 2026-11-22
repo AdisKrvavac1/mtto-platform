@@ -438,10 +438,7 @@ export function DossierBody(props: any) {
 </div>
 <div className="pt-space-xs flex flex-wrap gap-2">
 <span className="inline-flex items-center gap-1 px-space-sm py-1 bg-surface-container-low text-primary rounded font-label-badge text-label-badge">
-<span className="material-symbols-outlined text-[14px]">verified</span> ISO 14001:2015
-            </span>
-<span className="inline-flex items-center gap-1 px-space-sm py-1 bg-surface-container-low text-primary rounded font-label-badge text-label-badge">
-<span className="material-symbols-outlined text-[14px]">verified</span> ISO 50001 (Energija)
+<span className="material-symbols-outlined text-[14px]">verified</span> Certifikati operatera (primjer)
             </span>
 </div>
 </div>
