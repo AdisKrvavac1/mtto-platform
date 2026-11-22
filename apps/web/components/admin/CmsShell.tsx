@@ -101,7 +101,7 @@ export default function CmsShell({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </header>
-        <main className="w-full pt-16 bg-surface min-h-screen"><div className="px-space-md lg:px-space-lg py-space-xl">{children}</div></main>
+        <main className="w-full pt-16 bg-surface min-h-screen"><div className="px-space-md lg:px-space-lg py-space-xl max-w-[1600px] mx-auto">{children}</div></main>
       </div>
     </div>
   );
