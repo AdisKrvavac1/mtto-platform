@@ -52,6 +52,18 @@ CREATE TABLE IF NOT EXISTS audit_log (
   "id" text PRIMARY KEY, "userName" text NOT NULL, "action" text NOT NULL, "target" text NOT NULL,
   "createdAt" timestamptz NOT NULL DEFAULT now()
 );
+CREATE TABLE IF NOT EXISTS landslides (
+  "id" text PRIMARY KEY, "name" text NOT NULL, "municipality" text NOT NULL, "lat" double precision NOT NULL, "lng" double precision NOT NULL,
+  "status" text NOT NULL DEFAULT 'AKTIVNO', "risk" int NOT NULL DEFAULT 2, "description" text NOT NULL DEFAULT '',
+  "source" text NOT NULL DEFAULT '', "isDemo" boolean NOT NULL DEFAULT false,
+  "createdAt" timestamptz NOT NULL DEFAULT now(), "updatedAt" timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS eco_reports (
+  "id" text PRIMARY KEY, "code" text UNIQUE NOT NULL, "kind" text NOT NULL, "municipality" text NOT NULL, "location" text NOT NULL DEFAULT '',
+  "lat" double precision, "lng" double precision, "description" text NOT NULL, "contactName" text, "contactEmail" text,
+  "status" text NOT NULL DEFAULT 'NOVO', "isPublic" boolean NOT NULL DEFAULT false, "note" text NOT NULL DEFAULT '',
+  "createdAt" timestamptz NOT NULL DEFAULT now(), "updatedAt" timestamptz NOT NULL DEFAULT now()
+);
 CREATE INDEX IF NOT EXISTS posts_pub ON posts("status", "publishedAt" DESC);
 CREATE INDEX IF NOT EXISTS docs_post ON documents("postId");
 CREATE INDEX IF NOT EXISTS docs_permit ON documents("permitId");

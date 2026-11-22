@@ -552,7 +552,7 @@ export function HomeBody(props: any) {
                     <span className="material-symbols-outlined shrink-0 leading-none text-[#002042]" style={{ fontSize: 20 }}>notifications_active</span>
                   </div>
                   <div className="flex flex-col items-start relative min-w-0 max-w-full">
-                    <p className="font-pub font-bold min-w-0 max-w-full text-[#002042] text-[20px] leading-[28px]">Građanski Eko-Alarm <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-high text-primary border border-slate-border font-label-badge text-label-badge uppercase align-middle" title="Funkcionalnost iz Faze 2: prikazan dizajn"><span className="material-symbols-outlined text-[13px]">schedule</span>Faza 2</span></p>
+                    <p className="font-pub font-bold min-w-0 max-w-full text-[#002042] text-[20px] leading-[28px]">Građanski Eko-Alarm</p>
                   </div>
                 </div>
                 <div className="bg-[#ecfdf5] flex flex-col items-start px-[8px] py-[2px] relative rounded-[2px] min-w-0 max-w-full">
@@ -1529,7 +1529,7 @@ export function HomeBody(props: any) {
                     <span className="material-symbols-outlined shrink-0 leading-none text-[#002042]" style={{ fontSize: 20 }}>report_problem</span>
                   </div>
                   <div className="flex flex-col items-start relative shrink-0">
-                    <p className="font-pub font-bold text-[#002042] text-[16px] leading-[28px]">Građanski Eko-Alarm <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-high text-primary border border-slate-border font-label-badge text-label-badge uppercase align-middle" title="Funkcionalnost iz Faze 2: prikazan dizajn"><span className="material-symbols-outlined text-[13px]">schedule</span>Faza 2</span></p>
+                    <p className="font-pub font-bold text-[#002042] text-[16px] leading-[28px]">Građanski Eko-Alarm</p>
                   </div>
                 </div>
                 <div className="bg-[#ecfdf5] flex flex-col items-start px-[8px] py-[2px] relative rounded-[2px] shrink-0">

@@ -105,7 +105,7 @@ export function SiteHeader() {
           <Link href="/" aria-label="MTTO HNK – naslovna" className="h-[57.824px] w-[161px] shrink-0"><img src="/mtto-logo.svg" alt="Ministarstvo trgovine, turizma i zaštite okoliša HNK" className="h-full w-auto" /></Link>
           <div className="flex gap-[12px] items-center w-[584px] max-w-[60%]">
             <Search className="flex-1" />
-            <Link href="/e-usluge/eko-prijava" className="bg-[#006c4a] drop-shadow-[0px_1px_1.5px_rgba(0,0,0,0.08)] flex gap-[4px] items-center px-[16px] py-[8px] rounded-[8px] shrink-0 hover:bg-[#005339] transition-colors">
+            <Link href="/eko-rizik" className="bg-[#006c4a] drop-shadow-[0px_1px_1.5px_rgba(0,0,0,0.08)] flex gap-[4px] items-center px-[16px] py-[8px] rounded-[8px] shrink-0 hover:bg-[#005339] transition-colors">
               <Icon n="notifications_active" size={18} cls="text-white" />
               <span className="font-pub font-semibold text-[12px] text-white tracking-[0.14px] leading-[20px]">Eko-alarm</span>
             </Link>
@@ -147,7 +147,7 @@ export function SiteHeader() {
             })}
           </nav>
           <div className="grid grid-cols-2 gap-[8px] px-[16px] py-[24px]">
-            <Link href="/e-usluge/eko-prijava" className="bg-[#006c4a] rounded-[8px] h-[36px] flex items-center justify-center gap-1 font-pub font-semibold text-[14px] text-white"><Icon n="notifications_active" size={18} />Eko-alarm</Link>
+            <Link href="/eko-rizik" className="bg-[#006c4a] rounded-[8px] h-[36px] flex items-center justify-center gap-1 font-pub font-semibold text-[14px] text-white"><Icon n="notifications_active" size={18} />Eko-alarm</Link>
             <Link href="/admin" className="bg-[#002042] rounded-[8px] h-[36px] flex items-center justify-center gap-1 font-pub font-semibold text-[14px] text-white"><Icon n="person" size={18} />Prijava</Link>
           </div>
         </div>

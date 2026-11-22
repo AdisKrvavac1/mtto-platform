@@ -720,7 +720,7 @@ export function TurizamBody(props: any) {
                       <div className="bg-clip-padding border-0 border-[transparent] border-solid flex gap-[8px] items-center relative size-full flex-wrap">
                         <span className="material-symbols-outlined shrink-0 leading-none text-[#00714e]" style={{ fontSize: 18 }}>notifications_active</span>
                         <div className="flex flex-col items-start relative min-w-0 max-w-full">
-                          <p className="font-rob font-bold min-w-0 max-w-full text-[#00714e] text-[14px] leading-[21px]">Građanski Eko-Alarm <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-high text-primary border border-slate-border font-label-badge text-label-badge uppercase align-middle" title="Funkcionalnost iz Faze 2: prikazan dizajn"><span className="material-symbols-outlined text-[13px]">schedule</span>Faza 2</span></p>
+                          <p className="font-rob font-bold min-w-0 max-w-full text-[#00714e] text-[14px] leading-[21px]">Građanski Eko-Alarm</p>
                         </div>
                       </div>
                     </div>

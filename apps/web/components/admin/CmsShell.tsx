@@ -13,6 +13,7 @@ const NAV: { group: string; items: { href: string; label: string; icon: string; 
       { href: '/admin/dokumenti', label: 'Dokumenti i propisi', icon: 'folder_open' },
       { href: '/admin/multimedija', label: 'Multimedija i galerije', icon: 'photo_library', f2: true },
       { href: '/admin/mapa', label: 'Lokacije na mapi', icon: 'map' },
+      { href: '/admin/eko-rizik', label: 'Eko-rizik i prijave', icon: 'crisis_alert' },
     ],
   },
   {
