@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { MapPoint } from '@/lib/api';
+import { GOOGLE_MAPS_KEY, loadGoogleMaps, onGoogleAuthFailure } from '@/lib/googleMaps';
 
 export const LAYERS: Record<MapPoint['layer'], { label: string; color: string; icon: string }> = {
   TURIZAM: { label: 'Turizam', color: '#00abeb', icon: 'travel_explore' },
@@ -9,7 +10,7 @@ export const LAYERS: Record<MapPoint['layer'], { label: string; color: string; i
   PROJEKT: { label: 'Projekti Ministarstva', color: '#eb851c', icon: 'flag' },
 };
 
-const GOOGLE_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY;
+const GOOGLE_KEY = GOOGLE_MAPS_KEY;
 const CENTER = { lat: 43.33, lng: 17.8 };
 
 function pinSvg(color: string) {
@@ -40,11 +41,11 @@ export default function MapView({ points, height = 520, compact = false }: { poi
   // inicijalizacija
   useEffect(() => {
     let cancelled = false;
+    let unsubAuth: (() => void) | undefined;
     if (!ref.current || mapRef.current) return;
     if (engine === 'google') {
       // Rezerva: ako Google ključ ne prođe (ograničenja, naplata) ili skripta ne stigne, prelazi se na OpenStreetMap.
       const fallback = () => { if (cancelled) return; cancelled = true; mapRef.current = null; markersRef.current = []; if (ref.current) ref.current.innerHTML = ''; setEngine('leaflet'); };
-      (window as any).gm_authFailure = fallback;
       const timer = window.setTimeout(() => { if (!mapRef.current) fallback(); }, 8000);
       const init = () => {
         window.clearTimeout(timer);
@@ -54,15 +55,8 @@ export default function MapView({ points, height = 520, compact = false }: { poi
         mapRef.current.__info = new g.maps.InfoWindow();
         setTick((t) => t + 1);
       };
-      if ((window as any).google?.maps) init();
-      else {
-        const s = document.createElement('script');
-        s.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_KEY}&language=bs&region=BA`;
-        s.async = true;
-        s.onload = init;
-        s.onerror = fallback;
-        document.head.appendChild(s);
-      }
+      unsubAuth = onGoogleAuthFailure(fallback);
+      loadGoogleMaps().then(init).catch(fallback);
     } else {
       import('leaflet').then((L) => {
         if (cancelled || !ref.current) return;
@@ -75,6 +69,7 @@ export default function MapView({ points, height = 520, compact = false }: { poi
     }
     return () => {
       cancelled = true;
+      unsubAuth?.();
     };
   }, [engine]);
 

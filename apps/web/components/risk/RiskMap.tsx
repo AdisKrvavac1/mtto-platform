@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { RiskSummary } from '@/lib/risk';
 import { LS_STATUS, fireConfidence, fireTime, fmtTime, peakForecast } from '@/lib/risk';
+import { GOOGLE_DARK_STYLE, GOOGLE_MAPS_KEY, loadGoogleMaps, onGoogleAuthFailure } from '@/lib/googleMaps';
 
 const CENTER: [number, number] = [43.42, 17.82];
 const EFFIS_WMS = 'https://maps.effis.emergency.copernicus.eu/effis';
@@ -27,20 +28,37 @@ export default function RiskMap({ data, height = 560, dark = false }: { data: Ri
   const [on, setOn] = useState<Record<LayerKey, boolean>>({ fires: true, fwi: true, landslides: true, reports: true, rivers: true });
   const [ready, setReady] = useState(false);
   const [legendOk, setLegendOk] = useState(true);
+  const [engine, setEngine] = useState<'google' | 'osm' | null>(null);
 
   useEffect(() => {
     let cancelled = false;
+    let unsubAuth: (() => void) | undefined;
     import('leaflet').then((L) => {
       if (cancelled || !el.current || map.current) return;
       const m = L.map(el.current, { scrollWheelZoom: false, zoomControl: true }).setView(CENTER, 9);
-      L.tileLayer(dark ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      // Podloga: Google Maps kad ključ radi, inače OpenStreetMap (CARTO dark za krizni prikaz).
+      const osm = () => L.tileLayer(dark ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: dark ? '© OpenStreetMap © CARTO' : '© OpenStreetMap', maxZoom: 18,
-      }).addTo(m);
+      });
+      let base: any = null;
+      const useOsm = () => { if (cancelled) return; if (base) m.removeLayer(base); base = osm().addTo(m); base.bringToBack(); setEngine('osm'); };
+      if (GOOGLE_MAPS_KEY) {
+        unsubAuth = onGoogleAuthFailure(useOsm);
+        Promise.all([loadGoogleMaps(), import('leaflet.gridlayer.googlemutant')])
+          .then(([, mod]) => {
+            if (cancelled) return;
+            const GoogleMutant = (mod as any).default;
+            base = new GoogleMutant({ type: 'roadmap', maxZoom: 18, styles: dark ? GOOGLE_DARK_STYLE : [] }).addTo(m);
+            base.bringToBack();
+            setEngine('google');
+          })
+          .catch(useOsm);
+      } else useOsm();
       (m as any).__L = L;
       map.current = m;
       setReady(true);
     });
-    return () => { cancelled = true; map.current?.remove(); map.current = null; };
+    return () => { cancelled = true; unsubAuth?.(); map.current?.remove(); map.current = null; };
   }, [dark]);
 
   useEffect(() => {
@@ -124,7 +142,7 @@ export default function RiskMap({ data, height = 560, dark = false }: { data: Ri
         ))}
       </div>
       <div className="relative">
-        <div ref={el} style={{ height }} className="w-full z-0" aria-label="Karta rizika Hercegovačko-neretvanskog kantona" />
+        <div ref={el} style={{ height }} className="w-full z-0" aria-label="Karta rizika Hercegovačko-neretvanskog kantona" data-engine={engine ?? ''} />
         {on.fwi && legendOk && (
           <div className="absolute left-[12px] bottom-[12px] z-[400] bg-white/95 rounded-[4px] shadow p-[8px] max-w-[220px]">
             <p className="font-pub font-bold text-[#002042] text-[11px] tracking-[0.44px] uppercase leading-[14px] mb-[4px]">Indeks opasnosti od požara (FWI)</p>
