@@ -50,7 +50,9 @@ export default function RiskMap({ data, height = 560, dark = false }: { data: Ri
           .then(([, mod]) => {
             if (cancelled) return;
             const w = window as any;
-            const GoogleMutant = [(mod as any)?.default, (mod as any)?.default?.GoogleMutant, (L as any).GridLayer?.GoogleMutant, w.L?.GridLayer?.GoogleMutant].find((c) => typeof c === 'function');
+            const md = mod as any;
+            // Dev build koristi ES modul (default export), produkcijski build dist verziju koja klasu stavlja na exports.L.GridLayer.
+            const GoogleMutant = [md?.default, md?.default?.GoogleMutant, md?.L?.GridLayer?.GoogleMutant, md?.default?.L?.GridLayer?.GoogleMutant, (L as any).GridLayer?.GoogleMutant, w.L?.GridLayer?.GoogleMutant].find((c) => typeof c === 'function');
             if (!GoogleMutant) throw new Error('GoogleMutant nije učitan');
             base = new GoogleMutant({ type: 'roadmap', maxZoom: 18, styles: dark ? GOOGLE_DARK_STYLE : [] }).addTo(m);
             base.bringToBack();
