@@ -3,7 +3,7 @@ services:
   - type: web
     name: mtto-platform
     runtime: node
-    plan: free
+    plan: 0.5c-512mb
     region: frankfurt
     buildCommand: npm ci --include=dev && npm run build
     startCommand: node scripts/start.js
