@@ -1,4 +1,6 @@
-import { BadRequestException, Body, Controller, Delete, Get, Injectable, Logger, NotFoundException, OnModuleInit, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Injectable, Logger, NotFoundException, OnModuleInit, Param, Patch, Post, Req, Res, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import type { Response } from 'express';
 import { Db, id } from './db';
 import { AuthGuard } from './auth';
 import { toFloat } from './util';
@@ -213,7 +215,17 @@ const REPORT_KINDS: Record<string, string> = {
 const hits = new Map<string, number[]>();
 
 function publicReport(r: any) {
-  return { id: r.id, code: r.code, kind: r.kind, kindLabel: REPORT_KINDS[r.kind] ?? r.kind, municipality: r.municipality, location: r.location, lat: r.lat, lng: r.lng, description: r.description, status: r.status, createdAt: r.createdAt };
+  const photos: string[] = r.photosPublic ? (r.photos ?? []).map((p: string) => `/api/eco-reports/${r.id}/photos/${p}`) : [];
+  return { id: r.id, code: r.code, kind: r.kind, kindLabel: REPORT_KINDS[r.kind] ?? r.kind, municipality: r.municipality, location: r.location, lat: r.lat, lng: r.lng, description: r.description, status: r.status, createdAt: r.createdAt, updatedAt: r.updatedAt, publicNote: r.publicNote ?? '', photos };
+}
+const PHOTOS_AGG = `COALESCE((SELECT json_agg(p."id" ORDER BY p."createdAt") FROM eco_report_photos p WHERE p."reportId"=r."id"), '[]'::json) "photos"`;
+const MAX_PHOTO = 8 * 1024 * 1024;
+/** Prepoznaje stvarni format slike po potpisu (ne vjeruje mimetype-u). */
+function sniffImage(b: Buffer): string | null {
+  if (b.length > 3 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return 'image/jpeg';
+  if (b.length > 8 && b.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return 'image/png';
+  if (b.length > 12 && b.subarray(0, 4).toString() === 'RIFF' && b.subarray(8, 12).toString() === 'WEBP') return 'image/webp';
+  return null;
 }
 
 @Controller()
@@ -225,7 +237,7 @@ export class RiskController {
     const [f, w, r, a, landslides, reports] = await Promise.all([
       this.risk.fires(), this.risk.warnings(), this.risk.rivers(), this.risk.air(),
       this.db.q(`SELECT * FROM landslides ORDER BY "risk" DESC, "updatedAt" DESC`),
-      this.db.q(`SELECT * FROM eco_reports WHERE "isPublic" AND "createdAt" > now() - interval '60 days' ORDER BY "createdAt" DESC LIMIT 100`),
+      this.db.q(`SELECT r.*, ${PHOTOS_AGG} FROM eco_reports r WHERE r."isPublic" AND r."createdAt" > now() - interval '60 days' ORDER BY r."createdAt" DESC LIMIT 100`),
     ]);
     const today = new Date().toISOString().slice(0, 10);
     const fires24 = f.data.filter((x: Fire) => x.date >= new Date(Date.now() - 86400000).toISOString().slice(0, 10)).length;
@@ -245,7 +257,8 @@ export class RiskController {
   }
 
   @Post('eco-reports')
-  async report(@Body() b: any, @Req() req: any) {
+  @UseInterceptors(FilesInterceptor('photos', 3, { limits: { fileSize: MAX_PHOTO, files: 3 } }))
+  async report(@Body() b: any, @Req() req: any, @UploadedFiles() files: Express.Multer.File[] = []) {
     if (b?.website) return { ok: true, code: 'EKO-0000' }; // honeypot
     const ip = String(req.headers['x-forwarded-for'] ?? req.ip ?? '').split(',')[0].trim();
     const now = Date.now();
@@ -261,14 +274,29 @@ export class RiskController {
     const inArea = lat != null && lng != null && lat > BBOX.s && lat < BBOX.n && lng > BBOX.w && lng < BBOX.e;
     const email = String(b?.contactEmail ?? '').trim();
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new BadRequestException('Neispravna e-mail adresa');
+    const photos = (files ?? []).map((f) => ({ f, type: sniffImage(f.buffer) }));
+    if (photos.some((p) => !p.type)) throw new BadRequestException('Fotografije moraju biti u formatu JPG, PNG ili WEBP');
     const n = await this.db.count(`SELECT count(*) n FROM eco_reports`);
     const code = `EKO-${new Date().getFullYear()}-${String(n + 1).padStart(4, '0')}`;
+    const rid = id();
     await this.db.insert('eco_reports', {
-      id: id(), code, kind, municipality, location: String(b?.location ?? '').slice(0, 200), lat: inArea ? lat : null, lng: inArea ? lng : null,
+      id: rid, code, kind, municipality, location: String(b?.location ?? '').slice(0, 200), lat: inArea ? lat : null, lng: inArea ? lng : null,
       description: description.slice(0, 2000), contactName: String(b?.contactName ?? '').slice(0, 120) || null, contactEmail: email || null,
     });
+    for (const p of photos) await this.db.insert('eco_report_photos', { id: id(), reportId: rid, mimeType: p.type, size: p.f.size, data: p.f.buffer }, `"id"`);
     list.push(now); hits.set(ip, list);
-    return { ok: true, code };
+    return { ok: true, code, photos: photos.length };
+  }
+
+  /** Fotografija prijave — javno samo kad je prijava objavljena i fotografije su odobrene. */
+  @Get('eco-reports/:id/photos/:pid')
+  async photo(@Param('id') rid: string, @Param('pid') pid: string, @Res() res: Response) {
+    const p = await this.db.one<any>(`SELECT p."mimeType", p."data" FROM eco_report_photos p JOIN eco_reports r ON r."id"=p."reportId" WHERE p."id"=$1 AND r."id"=$2 AND r."isPublic" AND r."photosPublic"`, [pid, rid]);
+    if (!p) throw new NotFoundException();
+    res.setHeader('Content-Type', p.mimeType);
+    res.setHeader('Cache-Control', 'public, max-age=300');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.end(p.data);
   }
 }
 
@@ -325,7 +353,17 @@ export class AdminRiskController {
   }
 
   @Get('eco-reports')
-  reports() { return this.db.q(`SELECT * FROM eco_reports ORDER BY "createdAt" DESC LIMIT 500`); }
+  reports() { return this.db.q(`SELECT r.*, ${PHOTOS_AGG} FROM eco_reports r ORDER BY r."createdAt" DESC LIMIT 500`); }
+
+  @Get('eco-report-photos/:pid')
+  async photo(@Param('pid') pid: string, @Res() res: Response) {
+    const p = await this.db.one<any>(`SELECT "mimeType","data" FROM eco_report_photos WHERE "id"=$1`, [pid]);
+    if (!p) throw new NotFoundException();
+    res.setHeader('Content-Type', p.mimeType);
+    res.setHeader('Cache-Control', 'private, no-store');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.end(p.data);
+  }
 
   @Patch('eco-reports/:id')
   async updateReport(@Param('id') rid: string, @Body() b: any, @Req() req: any) {
@@ -333,6 +371,19 @@ export class AdminRiskController {
     if (b.status !== undefined) { if (!RP_STATUS.includes(b.status)) throw new BadRequestException('Nepoznat status'); d.status = b.status; }
     if (b.isPublic !== undefined) d.isPublic = !!b.isPublic;
     if (b.note !== undefined) d.note = String(b.note).slice(0, 2000);
+    if (b.publicNote !== undefined) d.publicNote = String(b.publicNote).trim().slice(0, 1000);
+    if (b.photosPublic !== undefined) d.photosPublic = !!b.photosPublic;
+    if (b.lat !== undefined || b.lng !== undefined) {
+      const lat = toFloat(b.lat), lng = toFloat(b.lng);
+      if (lat == null || lng == null || lat < BBOX.s || lat > BBOX.n || lng < BBOX.w || lng > BBOX.e) throw new BadRequestException('Lokacija mora biti na području kantona');
+      d.lat = lat; d.lng = lng;
+    }
+    if (d.isPublic) {
+      const cur = await this.db.one<any>(`SELECT "publicNote","lat" FROM eco_reports WHERE "id"=$1`, [rid]);
+      if (!cur) throw new NotFoundException();
+      if ((d.publicNote ?? cur.publicNote ?? '').length < 10) throw new BadRequestException('Za javnu objavu upišite obrazloženje (najmanje 10 znakova)');
+      if ((d.lat ?? cur.lat) == null) throw new BadRequestException('Za prikaz na karti označite lokaciju prijave');
+    }
     const r = await this.db.update<any>('eco_reports', rid, d, true);
     if (!r) throw new NotFoundException();
     await this.log(req, `Ažurirao/la eko-prijavu (${r.status}${r.isPublic ? ', javno' : ''})`, r.code);

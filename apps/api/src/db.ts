@@ -64,6 +64,13 @@ CREATE TABLE IF NOT EXISTS eco_reports (
   "status" text NOT NULL DEFAULT 'NOVO', "isPublic" boolean NOT NULL DEFAULT false, "note" text NOT NULL DEFAULT '',
   "createdAt" timestamptz NOT NULL DEFAULT now(), "updatedAt" timestamptz NOT NULL DEFAULT now()
 );
+ALTER TABLE eco_reports ADD COLUMN IF NOT EXISTS "publicNote" text NOT NULL DEFAULT '';
+ALTER TABLE eco_reports ADD COLUMN IF NOT EXISTS "photosPublic" boolean NOT NULL DEFAULT true;
+CREATE TABLE IF NOT EXISTS eco_report_photos (
+  "id" text PRIMARY KEY, "reportId" text NOT NULL REFERENCES eco_reports("id") ON DELETE CASCADE,
+  "mimeType" text NOT NULL, "size" integer NOT NULL, "data" bytea NOT NULL, "createdAt" timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS eco_photos_report ON eco_report_photos("reportId");
 CREATE INDEX IF NOT EXISTS posts_pub ON posts("status", "publishedAt" DESC);
 CREATE INDEX IF NOT EXISTS docs_post ON documents("postId");
 CREATE INDEX IF NOT EXISTS docs_permit ON documents("permitId");

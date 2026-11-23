@@ -166,11 +166,13 @@ export default async function EkoRizikPage() {
         {d.reports.length > 0 && (
           <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {d.reports.slice(0, 9).map((r) => (
-              <Card key={r.id} className="flex flex-col p-5">
+              <Card key={r.id} className="flex flex-col overflow-hidden p-5">
+                {r.photos?.[0] && <img src={r.photos[0]} alt={`Fotografija uz prijavu ${r.code}`} loading="lazy" className="-mx-5 -mt-5 mb-4 aspect-[16/9] w-[calc(100%+40px)] max-w-none object-cover" />}
                 <div className="flex items-center justify-between gap-2"><span className="text-[12px] font-medium text-[#737373]">{r.code}</span><Badge tone="brand">{REPORT_STATUS[r.status] ?? r.status}</Badge></div>
                 <p className="mt-3 text-[16px] leading-6 font-semibold text-[#171717]">{r.kindLabel}</p>
                 <p className="text-[14px] text-[#737373]">{r.municipality}{r.location ? ` · ${r.location}` : ''} · {fmtTime(r.createdAt)}</p>
                 <p className="mt-2 text-[14px] leading-5 text-[#525252] line-clamp-3">{r.description}</p>
+                {r.publicNote && <p className="mt-3 rounded-[8px] bg-[var(--br-50)] px-3 py-2 text-[14px] leading-5 text-[var(--br-800)] ring-1 ring-inset ring-[var(--br-100)]"><b className="font-semibold">Ministarstvo: </b>{r.publicNote}</p>}
               </Card>
             ))}
           </div>

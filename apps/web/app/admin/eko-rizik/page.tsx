@@ -5,12 +5,13 @@ import { adminFetch } from '@/lib/adminApi';
 import { Avatar, Badge, Card, CardHeader, EmptyState, Field, MetricCard, PageTitle, Tabs, btnPrimary, btnSecondary, iconBtn, input, useToast } from '@/components/admin/ui';
 import { Activity, AlertTriangle, Edit01, Eye, EyeOff, Globe01, LayersThree01, MarkerPin02, Plus, ReverseLeft, Save01, Trash01 } from '@untitledui/icons';
 import { LS_STATUS, REPORT_STATUS, fmtTime, type Landslide } from '@/lib/risk';
+import { ReportPhotos, ReportPublish } from '@/components/admin/EcoReportReview';
 
 const LocationPicker = dynamic(() => import('@/components/admin/LocationPicker'), { ssr: false, loading: () => <div className="h-[320px] rounded-lg bg-[#f5f5f5] animate-pulse" /> });
 
 const MUNICIPALITIES = ['Čapljina', 'Čitluk', 'Jablanica', 'Konjic', 'Mostar', 'Neum', 'Prozor-Rama', 'Ravno', 'Stolac'];
 const KIND: Record<string, string> = { POZAR: 'Požar ili dim', DEPONIJA: 'Divlja deponija', VODA: 'Zagađenje vode', ZRAK: 'Zrak / mirisi', KLIZISTE: 'Klizište / odron', POPLAVA: 'Poplava / bujica', SJECA: 'Nelegalna sječa', OSTALO: 'Ostalo' };
-type Report = { id: string; code: string; kind: string; municipality: string; location: string; lat: number | null; lng: number | null; description: string; contactName: string | null; contactEmail: string | null; status: string; isPublic: boolean; note: string; createdAt: string };
+type Report = { id: string; code: string; kind: string; municipality: string; location: string; lat: number | null; lng: number | null; description: string; contactName: string | null; contactEmail: string | null; status: string; isPublic: boolean; note: string; publicNote: string; photosPublic: boolean; photos: string[]; createdAt: string };
 const BLANK = { id: '', name: '', municipality: 'Mostar', status: 'AKTIVNO', risk: 2, description: '', source: '', lat: null as number | null, lng: null as number | null };
 
 export default function RiskAdmin() {
@@ -39,8 +40,13 @@ export default function RiskAdmin() {
     if (!confirm(`Ukloniti „${l.name}” iz registra?`)) return;
     try { await adminFetch(`/admin/landslides/${l.id}`, { method: 'DELETE' }); toast.ok('Uklonjeno'); load(); } catch (x: any) { toast.err(x.message); }
   }
-  async function patchReport(r: Report, body: Partial<Report>) {
-    try { await adminFetch(`/admin/eco-reports/${r.id}`, { method: 'PATCH', body: JSON.stringify(body) }); toast.ok('Prijava ažurirana'); load(); } catch (x: any) { toast.err(x.message); }
+  const [open, setOpen] = useState<string | null>(null);
+  async function patchReport(r: Report, body: Record<string, unknown>) {
+    try {
+      await adminFetch(`/admin/eco-reports/${r.id}`, { method: 'PATCH', body: JSON.stringify(body) });
+      toast.ok(body.isPublic === true ? 'Prijava je objavljena na karti' : body.isPublic === false ? 'Prijava je uklonjena s karte' : 'Prijava ažurirana');
+      await load();
+    } catch (x: any) { toast.err(x.message); }
   }
   const fresh = reports.filter((r) => r.status === 'NOVO').length;
 
@@ -78,14 +84,16 @@ export default function RiskAdmin() {
                       <div className="flex flex-wrap items-center gap-2"><span className="text-[14px] font-semibold text-[#171717]">{KIND[r.kind] ?? r.kind}</span><Badge tone={RTONE[r.status] ?? 'gray'} dot>{REPORT_STATUS[r.status] ?? r.status}</Badge><span className="text-[12px] text-[#737373]">{r.code} · {fmtTime(r.createdAt)}</span></div>
                       <p className="mt-0.5 flex items-center gap-1 text-[14px] text-[#525252]"><MarkerPin02 size={14} className="text-[#a3a3a3]" />{r.municipality}{r.location ? ` · ${r.location}` : ''}{r.lat == null ? ' · bez koordinata' : ''}</p>
                       <p className="mt-2 whitespace-pre-line rounded-[8px] bg-[#fafafa] px-3 py-2 text-[14px] leading-5 text-[#404040] ring-1 ring-inset ring-[#e5e5e5]">{r.description}</p>
+                      <ReportPhotos r={r} />
                       <p className="mt-2 text-[12px] text-[#737373]">{r.contactName || r.contactEmail ? `Prijavitelj: ${r.contactName ?? ''} ${r.contactEmail ? `<${r.contactEmail}>` : ''}` : 'Anonimna prijava'}</p>
                     </div>
                   </div>
                   <div className="flex flex-wrap items-start gap-2 lg:col-span-5 lg:justify-end">
                     <select aria-label="Status prijave" className={`${input} !w-auto`} value={r.status} onChange={(e) => patchReport(r, { status: e.target.value })}>{Object.entries(REPORT_STATUS).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
-                    <button type="button" onClick={() => patchReport(r, { isPublic: !r.isPublic })} className={r.isPublic ? btnPrimary : btnSecondary} title="Prikaz na javnoj karti, bez ličnih podataka">{r.isPublic ? <Eye /> : <EyeOff />}{r.isPublic ? 'Javno' : 'Nije javno'}</button>
+                    <button type="button" aria-expanded={open === r.id} onClick={() => setOpen(open === r.id ? null : r.id)} className={r.isPublic ? btnPrimary : btnSecondary} title="Lokacija, obrazloženje i objava na javnoj karti">{r.isPublic ? <Eye /> : <EyeOff />}{r.isPublic ? 'Javno na karti' : 'Pregled i objava'}</button>
                     {r.contactEmail && <a className={btnSecondary} href={`mailto:${r.contactEmail}?subject=${encodeURIComponent(`Vaša eko-prijava ${r.code}`)}`}><ReverseLeft />Odgovori</a>}
                   </div>
+                  {open === r.id && <div className="lg:col-span-12"><ReportPublish key={`${r.id}-${r.isPublic}`} r={r} onSave={(b) => patchReport(r, b)} /></div>}
                 </li>
               ))}
             </ul>

@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { AlertCircle, CheckCircle, PhoneCall01, Send01, Target04 } from '@untitledui/icons';
+import { AlertCircle, Camera01, CheckCircle, ImagePlus, PhoneCall01, Send01, Target04, XClose } from '@untitledui/icons';
 import { KINDS } from '@/lib/reportKinds';
 import type { FC, SVGProps } from 'react';
 
@@ -16,6 +16,72 @@ const btn = 'inline-flex items-center justify-center gap-1.5 rounded-[8px] font-
 const btnP = `${btn} bg-[var(--br-600)] hover:bg-[var(--br-700)] text-white`;
 const btnS = 'inline-flex items-center justify-center gap-1.5 rounded-[8px] font-semibold bg-white text-[#404040] hover:bg-[#fafafa] ring-1 ring-inset ring-[#d4d4d4] shadow-[0_1px_2px_rgba(10,13,18,0.05)]';
 
+const MAX_PHOTOS = 3;
+type Photo = { blob: Blob; url: string; name: string };
+
+/** Smanjuje fotografiju na najviše 1600 px i sprema kao JPEG (uklanja EXIF, uključujući GPS iz fotografije). */
+async function shrink(file: File): Promise<Blob> {
+  let bmp: ImageBitmap;
+  try { bmp = await createImageBitmap(file, { imageOrientation: 'from-image' } as any); }
+  catch { throw new Error(`Format datoteke „${file.name}” nije podržan. Koristite JPG ili PNG fotografiju.`); }
+  const k = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+  const c = document.createElement('canvas');
+  c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+  c.getContext('2d')!.drawImage(bmp, 0, 0, c.width, c.height);
+  bmp.close?.();
+  return new Promise((ok, no) => c.toBlob((b) => (b ? ok(b) : no(new Error('Fotografiju nije moguće obraditi.'))), 'image/jpeg', 0.82));
+}
+
+function PhotoField({ photos, setPhotos, setErr }: { photos: Photo[]; setPhotos: (f: (p: Photo[]) => Photo[]) => void; setErr: (e: string) => void }) {
+  const [busy, setBusy] = useState(false);
+  const [drag, setDrag] = useState(false);
+  const left = MAX_PHOTOS - photos.length;
+  async function add(list: FileList | File[] | null) {
+    const files = Array.from(list ?? []).filter((f) => f.type.startsWith('image/') || /\.(jpe?g|png|webp|heic|heif)$/i.test(f.name));
+    if (!files.length) return;
+    if (files.length > left) setErr(`Možete priložiti najviše ${MAX_PHOTOS} fotografije.`);
+    setBusy(true);
+    try {
+      const out: Photo[] = [];
+      for (const f of files.slice(0, left)) { const blob = await shrink(f); out.push({ blob, url: URL.createObjectURL(blob), name: f.name }); }
+      setPhotos((p) => [...p, ...out].slice(0, MAX_PHOTOS));
+    } catch (x: any) { setErr(x.message); } finally { setBusy(false); }
+  }
+  const pick = `${btnS} relative h-10 px-3.5 text-[14px] cursor-pointer has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-[var(--br-ring)]`;
+  return (
+    <div className="flex flex-col gap-[8px]">
+      <span className={label}>Fotografije <span className="font-normal text-[#737373]">(do {MAX_PHOTOS}, preporučeno)</span></span>
+      <div
+        onDragOver={(e) => { e.preventDefault(); setDrag(true); }} onDragLeave={() => setDrag(false)}
+        onDrop={(e) => { e.preventDefault(); setDrag(false); add(e.dataTransfer.files); }}
+        className={`flex flex-col gap-4 rounded-[12px] border border-dashed p-4 transition-colors ${drag ? 'border-[var(--br-600)] bg-[var(--br-50)]' : 'border-[#d4d4d4] bg-[#fafafa]'}`}
+      >
+        {photos.length > 0 && (
+          <ul className="grid max-w-[480px] grid-cols-3 gap-3">
+            {photos.map((p, i) => (
+              <li key={p.url} className="relative aspect-square overflow-hidden rounded-[8px] ring-1 ring-inset ring-black/10">
+                <img src={p.url} alt={`Fotografija ${i + 1}`} className="size-full object-cover" />
+                <button type="button" aria-label={`Ukloni fotografiju ${i + 1}`} onClick={() => setPhotos((ps) => { URL.revokeObjectURL(p.url); return ps.filter((x) => x !== p); })} className="absolute right-1.5 top-1.5 flex size-7 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"><XClose size={16} /></button>
+              </li>
+            ))}
+          </ul>
+        )}
+        {left > 0 && (
+          <div className="flex flex-wrap items-center gap-3">
+            <label className={`${pick} md:hidden`}><Camera01 size={18} />Uslikaj
+              <input type="file" accept="image/*" capture="environment" className="sr-only" onChange={(e) => { add(e.target.files); e.target.value = ''; }} /></label>
+            <label className={pick}><ImagePlus size={18} /><span className="md:hidden">Iz galerije</span><span className="hidden md:inline">Odaberi fotografije</span>
+              <input type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple className="sr-only" onChange={(e) => { add(e.target.files); e.target.value = ''; }} /></label>
+            <span className="hidden text-[14px] text-[#737373] md:inline">ili ih prevucite ovdje</span>
+            {busy && <span className="text-[14px] text-[#737373]">Obrađujem…</span>}
+          </div>
+        )}
+        <p className="text-[12px] leading-[18px] text-[#737373]">JPG, PNG ili WEBP. Fotografije se smanjuju prije slanja, a podaci o lokaciji iz same fotografije se uklanjaju. Fotografiju vidi inspekcija; javno se prikazuje samo ako je Ministarstvo odobri.</p>
+      </div>
+    </div>
+  );
+}
+
 export default function EcoReportForm() {
   const [kind, setKind] = useState('');
   useEffect(() => { const v = new URLSearchParams(window.location.search).get('vrsta'); if (v && KINDS.some(([k]) => k === v)) setKind(v); }, []);
@@ -24,6 +90,7 @@ export default function EcoReportForm() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const [done, setDone] = useState<string | null>(null);
+  const [photos, setPhotos] = useState<Photo[]>([]);
 
   function locate() {
     if (!navigator.geolocation) return setErr('Vaš preglednik ne podržava određivanje lokacije.');
@@ -41,13 +108,15 @@ export default function EcoReportForm() {
     if (!kind) return setErr('Odaberite vrstu incidenta.');
     setBusy(true);
     try {
-      const r = await fetch('/api/eco-reports', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ kind, municipality: f.get('municipality'), location: f.get('location'), description: f.get('description'), contactName: f.get('contactName'), contactEmail: f.get('contactEmail'), website: f.get('website'), lat: pos.lat, lng: pos.lng }),
-      });
+      const body = new FormData();
+      const fields: Record<string, unknown> = { kind, municipality: f.get('municipality'), location: f.get('location'), description: f.get('description'), contactName: f.get('contactName'), contactEmail: f.get('contactEmail'), website: f.get('website'), lat: pos.lat, lng: pos.lng };
+      for (const [k, v] of Object.entries(fields)) if (v != null && v !== '') body.append(k, String(v));
+      photos.forEach((p, i) => body.append('photos', p.blob, `foto-${i + 1}.jpg`));
+      const r = await fetch('/api/eco-reports', { method: 'POST', body });
       const j = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(Array.isArray(j.message) ? j.message[0] : j.message || 'Prijava nije poslana.');
       setDone(j.code);
+      photos.forEach((p) => URL.revokeObjectURL(p.url)); setPhotos([]);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (x: any) { setErr(x.message); } finally { setBusy(false); }
   }
@@ -95,6 +164,7 @@ export default function EcoReportForm() {
       </div>
       <label className="flex flex-col gap-[4px]"><span className={label}>Opis <span className="text-[var(--br-600)]">*</span></span>
         <textarea required name="description" rows={5} minLength={15} maxLength={2000} placeholder="Šta ste uočili, kada i koliko je izraženo…" className={`${field} h-auto py-[12px] leading-[24px]`} /></label>
+      <PhotoField photos={photos} setPhotos={setPhotos} setErr={setErr} />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
         <label className="flex flex-col gap-[4px]"><span className={label}>Ime i prezime <span className="font-normal text-[#737373]">(opcionalno)</span></span><input name="contactName" autoComplete="name" className={field} /></label>
         <label className="flex flex-col gap-[4px]"><span className={label}>E-pošta za povratnu informaciju <span className="font-normal text-[#737373]">(opcionalno)</span></span><input type="email" name="contactEmail" autoComplete="email" className={field} /></label>

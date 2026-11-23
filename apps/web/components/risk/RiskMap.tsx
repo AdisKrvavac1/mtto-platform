@@ -111,7 +111,7 @@ export default function RiskMap({ data, height = 560, dark = false }: { data: Ri
     for (const r of data.reports) {
       if (r.lat == null || r.lng == null) continue;
       L.circleMarker([r.lat, r.lng], { radius: 7, color: '#fff', weight: 2, fillColor: '#234696', fillOpacity: 0.95 })
-        .bindPopup(pop(`Prijava građana · ${r.code}`, '#234696', r.kindLabel, `${esc(r.municipality)}${r.location ? ` · ${esc(r.location)}` : ''}<br/>${esc(r.description.slice(0, 160))}<br/><span style="color:#737780">${fmtTime(r.createdAt)}</span>`))
+        .bindPopup(pop(`Prijava građana · ${r.code}`, '#234696', r.kindLabel, `${r.photos?.[0] ? `<img src="${esc(r.photos[0])}" alt="" loading="lazy" style="display:block;width:100%;height:120px;object-fit:cover;border-radius:6px;margin:2px 0 8px"/>` : ''}${esc(r.municipality)}${r.location ? ` · ${esc(r.location)}` : ''}<br/>${esc(r.description.slice(0, 160))}${r.publicNote ? `<div style="margin-top:8px;padding:6px 8px;border-radius:6px;background:#eef4ff;color:#1e3a8a"><b>Ministarstvo:</b> ${esc(r.publicNote)}</div>` : ''}<span style="display:block;margin-top:6px;color:#737780">${fmtTime(r.createdAt)}</span>`), { maxWidth: 260 })
         .addTo(rp);
     }
     groups.current.reports = rp;

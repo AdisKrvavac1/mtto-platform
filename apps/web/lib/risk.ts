@@ -3,7 +3,7 @@ export type Fire = { lat: number; lng: number; date: string; time: string; confi
 export type Warning = { region: string; event: string; level: number; color: string; type: string; onset: string; expires: string; headline: string; description: string; instruction: string };
 export type River = { key: string; name: string; lat: number; lng: number; days: string[]; discharge: (number | null)[]; max: (number | null)[]; todayIndex: number; status: 'NORMALNO' | 'POVISENO' | 'VISOKO' | 'NEPOZNATO'; ratio: number | null };
 export type Landslide = { id: string; name: string; municipality: string; lat: number; lng: number; status: 'AKTIVNO' | 'PRACENJE' | 'SANIRANO'; risk: number; description: string; source: string; isDemo: boolean; updatedAt: string };
-export type PublicReport = { id: string; code: string; kind: string; kindLabel: string; municipality: string; location: string; lat: number | null; lng: number | null; description: string; status: string; createdAt: string };
+export type PublicReport = { id: string; code: string; kind: string; kindLabel: string; municipality: string; location: string; lat: number | null; lng: number | null; description: string; status: string; createdAt: string; updatedAt?: string; publicNote?: string; photos?: string[] };
 type Feed<T> = { items: T[]; updatedAt: string; error: string | null };
 export type Air = { key: string; name: string; aqi: number | null; pm25: number | null; pm10: number | null; o3: number | null; time: string | null };
 /** Europski AQI (EEA) razredi */
