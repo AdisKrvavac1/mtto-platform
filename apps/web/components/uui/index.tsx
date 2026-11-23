@@ -417,19 +417,23 @@ export function AuthorRow({ name, date, dark }: { name?: string | null; date: st
   );
 }
 /** Kartica objave (Untitled blog): slika, rubrika, naslov sa strelicom, sažetak, autor i datum. */
-export function NewsCard({ p, label, badges }: { p: PostLike; label?: string; badges?: ReactNode }) {
+export function NewsCard({ p, label, badges, rowOnMobile }: { p: PostLike; label?: string; badges?: ReactNode; rowOnMobile?: boolean }) {
+  const r = rowOnMobile;
   return (
-    <article className="group flex flex-col">
-      <Link href={`/vijesti/${p.slug}`} className="block overflow-hidden rounded-[12px] bg-[#f5f5f5] aspect-[3/2]" tabIndex={-1} aria-hidden>
+    <article className={cx('group flex', r ? 'flex-row items-start gap-4 sm:flex-col sm:gap-0' : 'flex-col')}>
+      <Link href={`/vijesti/${p.slug}`} className={cx('block shrink-0 overflow-hidden rounded-[12px] bg-[#f5f5f5]', r ? 'aspect-square w-[112px] sm:aspect-[3/2] sm:w-auto' : 'aspect-[3/2]')} tabIndex={-1} aria-hidden>
         {p.coverImage ? <img src={p.coverImage} alt="" loading="lazy" className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" /> : <Cover />}
       </Link>
-      <div className="mt-5 flex flex-wrap items-center gap-2"><p className="text-[14px] leading-5 font-semibold text-[var(--br-700)]">{label || p.category}</p>{badges}</div>
-      <Link href={`/vijesti/${p.slug}`} className="mt-2 flex items-start justify-between gap-4">
-        <h3 className="text-[18px] leading-7 font-semibold text-[#181d27] group-hover:text-[var(--br-700)] line-clamp-2">{p.title}</h3>
-        <ArrowUpRight size={24} className="mt-0.5 shrink-0 text-[#a4a7ae] group-hover:text-[var(--br-700)]" />
-      </Link>
-      {p.excerpt && <p className="mt-2 text-[16px] leading-6 text-[#535862] line-clamp-2">{p.excerpt}</p>}
-      <div className="mt-6"><AuthorRow name={p.authorName} date={p.publishedAt} /></div>
+      <div className="min-w-0 flex-1 sm:flex-none">
+        <div className={cx('flex flex-wrap items-center gap-2', r ? 'mt-0 sm:mt-5' : 'mt-5')}><p className={cx('font-semibold text-[var(--br-700)]', r ? 'text-[12px] leading-[18px] sm:text-[14px] sm:leading-5' : 'text-[14px] leading-5')}>{label || p.category}</p>{badges}</div>
+        <Link href={`/vijesti/${p.slug}`} className={cx('flex items-start justify-between gap-4', r ? 'mt-1 sm:mt-2' : 'mt-2')}>
+          <h3 className={cx('font-semibold text-[#181d27] group-hover:text-[var(--br-700)] line-clamp-2', r ? 'text-[15px] leading-[21px] line-clamp-3 sm:text-[18px] sm:leading-7 sm:line-clamp-2' : 'text-[18px] leading-7')}>{p.title}</h3>
+          <ArrowUpRight size={24} className={cx('mt-0.5 shrink-0 text-[#a4a7ae] group-hover:text-[var(--br-700)]', r && 'hidden sm:block')} />
+        </Link>
+        {p.excerpt && <p className={cx('mt-2 text-[16px] leading-6 text-[#535862] line-clamp-2', r && 'hidden sm:block')}>{p.excerpt}</p>}
+        {r && <time dateTime={p.publishedAt} className="mt-1.5 block text-[13px] text-[#717680] sm:hidden">{fmtDate(p.publishedAt)}</time>}
+        <div className={cx('mt-6', r && 'hidden sm:block')}><AuthorRow name={p.authorName} date={p.publishedAt} /></div>
+      </div>
     </article>
   );
 }

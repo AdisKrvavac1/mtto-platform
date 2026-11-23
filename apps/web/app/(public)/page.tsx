@@ -158,8 +158,8 @@ export default async function Home() {
           <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_400px]">
             <div className="min-w-0">
               {featured && <FeaturedOverlay compact p={featured} tags={[featured.category, POST_TYPE[featured.type] ?? 'Vijest'].filter(Boolean) as string[]} badges={featured.isDemo ? <Badge tone="warning">Demo</Badge> : undefined} />}
-              <div className="mt-12 grid gap-x-8 gap-y-12 sm:grid-cols-2">
-                {rest.map((p) => <NewsCard key={p.id} p={p} label={p.category || POST_TYPE[p.type]} badges={p.isDemo ? <Badge tone="warning">Demo</Badge> : undefined} />)}
+              <div className="mt-6 grid gap-x-8 gap-y-5 divide-y divide-[#e9eaeb] sm:mt-12 sm:gap-y-12 sm:divide-y-0 sm:grid-cols-2 [&>*]:pt-5 [&>*:first-child]:pt-0 sm:[&>*]:pt-0">
+                {rest.map((p) => <NewsCard key={p.id} rowOnMobile p={p} label={p.category || POST_TYPE[p.type]} badges={p.isDemo ? <Badge tone="warning">Demo</Badge> : undefined} />)}
               </div>
               {posts.length === 0 && <p className="mt-8 text-[16px] text-[#525252]">Još nema objavljenih vijesti.</p>}
             </div>
