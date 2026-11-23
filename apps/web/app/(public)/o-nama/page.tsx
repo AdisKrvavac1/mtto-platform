@@ -61,9 +61,9 @@ export default function ONamaPage() {
           <Head k="Izvršno vodstvo" t="Kabinet ministra i upravljanje" action={<p className="max-w-[420px] text-[14px] text-[#525252]">Strateške smjernice usmjerene su ka otvorenoj upravi, digitalizaciji postupaka i strogoj zaštiti javnog interesa.</p>} />
           <div className="mt-10 grid gap-6 lg:grid-cols-[1.5fr_1fr]">
             <Card className="flex flex-col gap-6 p-6 sm:flex-row md:p-8">
-              <span className="flex aspect-[4/5] w-full max-w-[200px] shrink-0 flex-col items-center justify-center rounded-[16px] bg-[var(--br-50)] text-[48px] font-semibold text-[var(--br-600)] ring-1 ring-inset ring-[var(--br-100)]">EB<span className="mt-2 text-[12px] font-semibold text-[var(--br-700)]">Ministar</span></span>
+              <img src="/ministar-balavac.webp" alt="Emil Balavac, ministar trgovine, turizma i zaštite okoliša" width={800} height={1024} loading="lazy" className="aspect-[4/5] w-full max-w-[220px] shrink-0 rounded-[16px] object-cover object-top ring-1 ring-inset ring-black/5 sm:w-[200px]" />
               <div className="flex flex-col">
-                <Badge tone="brand">Ministar</Badge>
+                <span className="self-start"><Badge tone="brand">Ministar</Badge></span>
                 <h3 className="mt-3 text-[24px] font-semibold text-[#171717]">Emil Balavac</h3>
                 <p className="text-[16px] font-medium text-[var(--gr-700)]">Ministar trgovine, turizma i zaštite okoliša</p>
                 <p className="mt-4 text-[16px] leading-6 text-[#525252]">Rukovodi radom Ministarstva, predlaže propise iz nadležnosti resora i odgovoran je Vladi Hercegovačko-neretvanskog kantona.</p>
