@@ -65,3 +65,6 @@
 .prose-figma table { width: 100%; font-size: 14px; border-collapse: collapse; display: block; overflow-x: auto; }
 .prose-figma th, .prose-figma td { border-bottom: 1px solid #e5eeff; padding: 8px; text-align: left; }
 @media (max-width: 767px) { .prose-figma h2 { font-size: 20px; line-height: 26px; } }
+
+/* Leaflet panei imaju z-index 400–1000; zatvori ih u vlastiti sloj da ne prelaze preko menija i headera. */
+.leaflet-container { isolation: isolate; z-index: 0; }
