@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Badge, Card, Container, CountUp, Faq, FeaturedIcon, GRAD, HB1, HB2, Head, HeroInfo, PageHero } from '@/components/uui';
+import { Badge, Card, Container, CountUp, Faq, FeaturedIcon, GRAD, HB1, HB2, Head, PageHero } from '@/components/uui';
 import {
   AlertTriangle, Bell01, Building07, Calendar, CheckCircle, Clock, File06, FileCheck02, LineChartUp01,
   Mail01, Map01, MarkerPin02, Package, Phone, Receipt, Scales02, ShieldTick, ShoppingBag01, ShoppingCart01, Sun, Tag01, Users01,
@@ -100,7 +100,6 @@ export default function TrgovinaPage() {
         eyebrow="Sektor za trgovinu"
         title="Trgovina i zaštita potrošača"
         actions={<><Link href="#radno-vrijeme" className={HB1}><Calendar size={20} />Rade li trgovine u nedjelju?</Link><Link href="#potrosaci" className={HB2}><AlertTriangle size={20} />Prijavi nepravilnost</Link></>}
-        aside={<HeroInfo icon={Calendar} label="Sljedeća nedjelja" value={`${next.getDate()}. ${next.getMonth() + 1}. · neradna`}>Prodajni objekti u FBiH nedjeljom su zatvoreni, uz izuzetke propisane zakonom.</HeroInfo>}
         stats={[
           { label: 'Neradnih nedjelja do kraja godine', value: String(left), icon: Calendar },
           { label: 'Proizvoda u potrošačkoj korpi', value: String(BASKET.length), sub: 'Demo podaci', icon: ShoppingCart01 },
@@ -122,27 +121,28 @@ export default function TrgovinaPage() {
 
       {/* 1 RADNO VRIJEME */}
       <section id="radno-vrijeme" className="scroll-mt-28 bg-white py-16 md:py-24">
-        <Container className="grid gap-8 lg:grid-cols-[1fr_480px]">
-          <div>
-            <Head k="Radno vrijeme i neradni dani" t="Rade li trgovine u nedjelju?" />
-            <div className={`mt-8 rounded-[20px] p-6 text-white md:p-8 ${GRAD}`}>
+        <Container>
+          <Head k="Radno vrijeme i neradni dani" t="Rade li trgovine u nedjelju?" />
+          <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-stretch">
+          <div className="flex flex-col gap-6">
+            <div className={`flex flex-1 flex-col justify-center rounded-[20px] p-6 text-white md:p-8 ${GRAD}`}>
               <p className="text-[40px] leading-[48px] md:text-[56px] md:leading-[64px] font-semibold tracking-[-0.02em]">Ne, uz izuzetke.</p>
               <p className="mt-4 max-w-[640px] text-[18px] leading-7 text-[var(--br-100)]">Prema Zakonu o unutrašnjoj trgovini Federacije BiH („Službene novine FBiH”, br. 87/2024) prodajni objekti su nedjeljom zatvoreni, uz izuzetke propisane zakonom. Prva neradna nedjelja bila je 17. 11. 2024.</p>
               <div className="mt-6 flex flex-wrap gap-2"><Badge tone="success">Federalni propis</Badge><Badge tone="gray">Izuzeci i rad za praznike: provjeriti s Ministarstvom</Badge></div>
             </div>
-            <div className="mt-6 grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-3">
               {([[ShoppingCart01, 'Prodajni objekti', 'Nedjeljom zatvoreni'], [CheckCircle, 'Zakonski izuzeci', 'Popis u zakonu, objavljuje Ministarstvo'], [AlertTriangle, 'Rad protivno propisu', 'Prijava tržišnoj inspekciji']] as const).map(([I, t, s]) => (
                 <Card key={t} className="uui-lift p-5"><FeaturedIcon icon={I} tone="brand" size="md" ripple={false} /><p className="mt-4 text-[16px] font-semibold text-[#171717]">{t}</p><p className="mt-1 text-[14px] text-[#525252]">{s}</p></Card>
               ))}
             </div>
           </div>
-          <Card className="self-start p-6">
+          <Card className="flex flex-col p-6">
             <div className="flex items-center justify-between gap-2"><h3 className="text-[18px] font-semibold text-[#171717]">Kalendar neradnih dana</h3><Badge tone="warning">Demo</Badge></div>
             <p className="mt-1 text-[14px] text-[#525252]">Naredne nedjelje i državni praznici.</p>
-            <ul className="mt-5 flex flex-col divide-y divide-[#e5e5e5]">
+            <ul className="mt-4 flex flex-1 flex-col justify-between divide-y divide-[#e5e5e5]">
               {[...sundays.map((s) => [s, 'Neradna nedjelja', false] as const), ...holidays.map(([h, n]) => [h, n, true] as const)]
-                .sort((a, b) => a[0].getTime() - b[0].getTime()).slice(0, 8).map(([dt, n, hol]) => (
-                  <li key={dt.toISOString() + n} className="flex items-center gap-4 py-3">
+                .sort((a, b) => a[0].getTime() - b[0].getTime()).slice(0, 6).map(([dt, n, hol]) => (
+                  <li key={dt.toISOString() + n} className="flex items-center gap-4 py-2.5">
                     <span className={`flex size-12 shrink-0 flex-col items-center justify-center rounded-[10px] ring-1 ring-inset ${hol ? 'bg-[var(--gr-50)] text-[var(--gr-700)] ring-[var(--gr-200)]' : 'bg-[var(--br-50)] text-[var(--br-700)] ring-[var(--br-200)]'}`}><b className="text-[18px] leading-5">{dt.getDate()}</b><span className="text-[11px] leading-3 font-semibold">{dt.getMonth() + 1}.</span></span>
                     <span className="min-w-0"><b className="block text-[14px] font-semibold text-[#171717]">{n}</b><span className="text-[14px] capitalize text-[#525252]">{DAYS[dt.getDay()]}, {fmt(dt)}</span></span>
                   </li>
@@ -150,6 +150,7 @@ export default function TrgovinaPage() {
             </ul>
             <p className="mt-4 text-[12px] text-[#737373]">Kalendar praznika i radno vrijeme za praznike potvrđuje Ministarstvo.</p>
           </Card>
+          </div>
         </Container>
       </section>
 

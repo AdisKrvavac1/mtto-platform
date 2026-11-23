@@ -28,7 +28,7 @@ function popupHtml(p: MapPoint) {
   </div>`;
 }
 
-export default function MapView({ points, height = 520, compact = false }: { points: MapPoint[]; height?: number; compact?: boolean }) {
+export default function MapView({ points, height = 520, compact = false, fill = false }: { points: MapPoint[]; height?: number; compact?: boolean; fill?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState<Record<string, boolean>>({ TURIZAM: true, ZASTICENO: true, DOZVOLA: true, PROJEKT: true });
   const [selected, setSelected] = useState<MapPoint | null>(null);
@@ -46,7 +46,7 @@ export default function MapView({ points, height = 520, compact = false }: { poi
     if (engine === 'google') {
       // Rezerva: ako Google ključ ne prođe (ograničenja, naplata) ili skripta ne stigne, prelazi se na OpenStreetMap.
       const fallback = () => { if (cancelled) return; cancelled = true; mapRef.current = null; markersRef.current = []; if (ref.current) ref.current.innerHTML = ''; setEngine('leaflet'); };
-      const timer = window.setTimeout(() => { if (!mapRef.current) fallback(); }, 8000);
+      const timer = window.setTimeout(() => { if (!mapRef.current) fallback(); }, 15000);
       const init = () => {
         window.clearTimeout(timer);
         if (cancelled || !ref.current) return;
@@ -107,7 +107,7 @@ export default function MapView({ points, height = 520, compact = false }: { poi
   }, [points]);
 
   return (
-    <div className="bg-surface-container-lowest rounded-xl shadow-md overflow-hidden border border-slate-border">
+    <div className={`bg-surface-container-lowest rounded-xl shadow-md overflow-hidden border border-slate-border ${fill ? 'flex h-full flex-col' : ''}`}>
       <div className="flex flex-wrap items-center gap-space-xs p-space-md border-b border-slate-border">
         {(Object.keys(LAYERS) as MapPoint['layer'][]).map((k) => (
           <button
@@ -124,8 +124,8 @@ export default function MapView({ points, height = 520, compact = false }: { poi
         ))}
         <span className="ml-auto font-label-badge text-label-badge text-on-surface-variant uppercase">{engine === 'google' ? 'Google Maps' : 'OpenStreetMap'} · {shown.length} lokacija</span>
       </div>
-      <div className={compact ? '' : 'grid grid-cols-1 lg:grid-cols-12'}>
-        <div ref={ref} style={{ height }} className={compact ? 'w-full' : 'lg:col-span-8 w-full z-0'} />
+      <div className={`${compact ? '' : 'grid grid-cols-1 lg:grid-cols-12'} ${fill ? 'flex-1 min-h-[420px] flex flex-col' : ''}`}>
+        <div ref={ref} style={fill ? undefined : { height }} className={`${compact ? 'w-full' : 'lg:col-span-8 w-full z-0'} ${fill ? 'flex-1 min-h-[420px]' : ''}`} />
         {!compact && (
           <aside className="lg:col-span-4 border-t lg:border-t-0 lg:border-l border-slate-border p-space-md overflow-y-auto" style={{ maxHeight: height }}>
             {selected ? (

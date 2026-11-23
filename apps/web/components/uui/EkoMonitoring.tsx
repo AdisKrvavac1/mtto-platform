@@ -43,14 +43,32 @@ export default function EkoMonitoring({ risk, title = 'Eko-monitoring uživo', i
           <div className="flex flex-col rounded-[16px] bg-white p-5 shadow-[0_24px_48px_-12px_rgba(10,13,18,0.25)] md:p-6">
             <div className="flex items-center justify-between gap-3"><span className="flex items-center gap-3"><FeaturedIcon icon={Bell01} tone="success" size="md" /><span className="text-[18px] font-semibold text-[#171717]">Građanski eko-alarm</span></span><Badge tone="success">Prijava 24/7</Badge></div>
             <p className="mt-4 text-[14px] leading-5 text-[#525252]">Uočili ste divlju deponiju, požar, zagađenje vode ili klizište? Odaberite vrstu incidenta i prijavite ga direktno Ministarstvu, s lokacijom i fotografijom.</p>
-            <div className="mt-5 grid flex-1 grid-cols-2 content-start gap-2">
+            <div className="mt-5 grid grid-cols-2 gap-2">
               {KINDS.map(([k, l, I]) => (
                 <Link key={k} href={`/eko-rizik/prijava?vrsta=${k}`} className="group flex items-center gap-2 rounded-[8px] px-3 py-2.5 text-[14px] font-medium text-[#404040] ring-1 ring-inset ring-[#e5e5e5] transition-colors hover:bg-[var(--br-25)] hover:ring-[var(--br-300)]">
                   <I size={18} className="shrink-0 text-[var(--br-600)] transition-transform group-hover:scale-110" /><span className="truncate">{l}</span>
                 </Link>
               ))}
             </div>
-            <Link href="/eko-rizik/prijava" className={`${green} mt-5 h-11 w-full text-[16px]`}><Send01 size={20} />Prijavi incident</Link>
+            <div className="mt-5 rounded-[12px] bg-[#fafafa] p-4 ring-1 ring-inset ring-[#e9eaeb]">
+              <div className="flex items-center justify-between"><p className="text-[14px] font-semibold text-[#181d27]">Nedavne prijave građana</p><Link href="/eko-rizik#prijave" className="text-[12px] font-semibold text-[var(--br-700)] hover:text-[var(--br-800)]">Sve prijave</Link></div>
+              <ul className="mt-3 flex flex-col gap-2.5">
+                {risk.reports.slice(0, 3).map((r) => (
+                  <li key={r.id} className="flex items-start gap-3">
+                    <span className="mt-1.5 size-2 shrink-0 rounded-full bg-[var(--br-500)] ring-[3px] ring-[var(--br-100)]" />
+                    <span className="min-w-0 text-[14px] leading-5"><b className="block truncate font-semibold text-[#414651]">{r.kindLabel} · {r.municipality}</b><span className="text-[12px] text-[#717680]">{r.code} · {new Intl.DateTimeFormat('bs-BA', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Sarajevo' }).format(new Date(r.createdAt))}</span></span>
+                  </li>
+                ))}
+                {risk.reports.length === 0 && <li className="text-[14px] text-[#535862]">Još nema javno objavljenih prijava.</li>}
+              </ul>
+            </div>
+            <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+              {([['Prijava', String(risk.reports.length)], ['Klizišta', String(risk.landslides.length)], ['Žarišta 24 h', String(risk.fires.last24h ?? 0)]] as const).map(([l, v]) => (
+                <div key={l} className="rounded-[8px] px-2 py-2 ring-1 ring-inset ring-[#e9eaeb]"><p className="text-[18px] font-semibold text-[#181d27]"><CountUp value={v} /></p><p className="text-[12px] text-[#717680]">{l}</p></div>
+              ))}
+            </div>
+            <div className="min-h-5 flex-1" />
+            <Link href="/eko-rizik/prijava" className={`${green} h-11 w-full text-[16px]`}><Send01 size={20} />Prijavi incident</Link>
             <p className="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[12px] text-[#737373]"><span>Hitno:</span>{[['123', 'vatrogasci'], ['121', 'civilna zaštita'], ['124', 'hitna']].map(([n, l]) => <a key={n} href={`tel:${n}`} className="font-semibold text-[#404040] hover:text-[var(--br-700)]">{n} <span className="font-normal text-[#737373]">{l}</span></a>)}</p>
           </div>
           </div>

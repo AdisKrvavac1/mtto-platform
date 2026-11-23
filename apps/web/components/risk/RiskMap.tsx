@@ -40,11 +40,14 @@ export default function RiskMap({ data, height = 560, dark = false }: { data: Ri
       const osm = () => L.tileLayer(dark ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: dark ? '© OpenStreetMap © CARTO' : '© OpenStreetMap', maxZoom: 18,
       });
-      let base: any = null;
-      const useOsm = () => { if (cancelled) return; if (base) m.removeLayer(base); base = osm().addTo(m); base.bringToBack(); setEngine('osm'); };
+      // Odmah OpenStreetMap, a kad Google stigne (i ako ključ radi) podloga se zamijeni Google kartom.
+      let base: any = osm().addTo(m);
+      base.bringToBack();
+      setEngine('osm');
+      const useOsm = () => { if (cancelled) return; if (base?._isGoogle) { m.removeLayer(base); base = osm().addTo(m); base.bringToBack(); } setEngine('osm'); };
       if (GOOGLE_MAPS_KEY) {
         unsubAuth = onGoogleAuthFailure(useOsm);
-        // Plugin očekuje globalni L (window.L); bez njega import pada i karta ostaje na OpenStreetMapu.
+        // Plugin očekuje globalni L (window.L); bez njega import pada.
         (window as any).L = (window as any).L || L;
         Promise.all([loadGoogleMaps(), import('leaflet.gridlayer.googlemutant')])
           .then(([, mod]) => {
@@ -54,12 +57,17 @@ export default function RiskMap({ data, height = 560, dark = false }: { data: Ri
             // Dev build koristi ES modul (default export), produkcijski build dist verziju koja klasu stavlja na exports.L.GridLayer.
             const GoogleMutant = [md?.default, md?.default?.GoogleMutant, md?.L?.GridLayer?.GoogleMutant, md?.default?.L?.GridLayer?.GoogleMutant, (L as any).GridLayer?.GoogleMutant, w.L?.GridLayer?.GoogleMutant].find((c) => typeof c === 'function');
             if (!GoogleMutant) throw new Error('GoogleMutant nije učitan');
-            base = new GoogleMutant({ type: 'roadmap', maxZoom: 18, styles: dark ? GOOGLE_DARK_STYLE : [] }).addTo(m);
-            base.bringToBack();
+            const g = new GoogleMutant({ type: 'roadmap', maxZoom: 18, styles: dark ? GOOGLE_DARK_STYLE : [] });
+            g._isGoogle = true;
+            g.addTo(m); g.bringToBack();
+            const old = base; base = g;
+            // stara podloga se skida tek kad Google iscrta prve pločice, da karta nikad ne ostane prazna
+            g.once?.('load', () => { if (old && m.hasLayer(old)) m.removeLayer(old); });
+            window.setTimeout(() => { if (old && m.hasLayer(old)) m.removeLayer(old); }, 2500);
             setEngine('google');
           })
           .catch((e) => { console.warn('[karta] Google podloga nije dostupna, koristi se OpenStreetMap:', e?.message || e); useOsm(); });
-      } else useOsm();
+      }
       (m as any).__L = L;
       map.current = m;
       setReady(true);

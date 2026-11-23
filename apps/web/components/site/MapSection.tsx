@@ -7,9 +7,9 @@ const MapView = dynamic(() => import('./MapView'), {
   loading: () => <div className="h-[520px] rounded-xl bg-surface-container-low animate-pulse" />,
 });
 
-export default function MapSection({ points, height = 520, compact = false, title = true }: { points: MapPoint[]; height?: number; compact?: boolean; title?: boolean }) {
+export default function MapSection({ points, height = 520, compact = false, title = true, fill = false }: { points: MapPoint[]; height?: number; compact?: boolean; title?: boolean; fill?: boolean }) {
   return (
-    <div className="space-y-space-md">
+    <div className={fill ? 'flex h-full flex-col' : 'space-y-space-md'}>
       {title && (
         <div className="flex flex-wrap items-center justify-between gap-space-sm">
           <div className="flex items-center gap-space-sm">
@@ -21,7 +21,7 @@ export default function MapSection({ points, height = 520, compact = false, titl
           </div>
         </div>
       )}
-      <MapView points={points} height={height} compact={compact} />
+      <MapView points={points} height={height} compact={compact} fill={fill} />
     </div>
   );
 }

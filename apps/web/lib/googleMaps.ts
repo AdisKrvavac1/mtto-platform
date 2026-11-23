@@ -1,4 +1,4 @@
-/** Učitava Google Maps JavaScript API jednom po stranici. Odbija ako ključa nema, skripta ne stigne ili Google odbije ključ. */
+/** Učitava Google Maps JavaScript API jednom po stranici (bez vremenskog ograničenja; komponente same drže rezervnu kartu dok se Google ne učita). */
 export const GOOGLE_MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY || '';
 
 let pending: Promise<void> | null = null;
@@ -7,19 +7,18 @@ const authListeners = new Set<() => void>();
 /** Poziva se kad Google naknadno odbije ključ (npr. pogrešna ograničenja domene). */
 export function onGoogleAuthFailure(fn: () => void) { authListeners.add(fn); return () => { authListeners.delete(fn); }; }
 
-export function loadGoogleMaps(timeoutMs = 8000): Promise<void> {
+export function loadGoogleMaps(): Promise<void> {
   if (typeof window === 'undefined' || !GOOGLE_MAPS_KEY) return Promise.reject(new Error('no-key'));
   const w = window as any;
   if (w.google?.maps?.Map) return Promise.resolve();
   if (pending) return pending;
   w.gm_authFailure = () => authListeners.forEach((f) => f());
   pending = new Promise<void>((resolve, reject) => {
-    const timer = window.setTimeout(() => { pending = null; reject(new Error('timeout')); }, timeoutMs);
     const s = document.createElement('script');
     s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(GOOGLE_MAPS_KEY)}&language=bs&region=BA`;
     s.async = true;
-    s.onload = () => { window.clearTimeout(timer); w.google?.maps?.Map ? resolve() : reject(new Error('no-maps')); };
-    s.onerror = () => { window.clearTimeout(timer); pending = null; reject(new Error('load-failed')); };
+    s.onload = () => { w.google?.maps?.Map ? resolve() : reject(new Error('no-maps')); };
+    s.onerror = () => { pending = null; reject(new Error('load-failed')); };
     document.head.appendChild(s);
   });
   return pending;

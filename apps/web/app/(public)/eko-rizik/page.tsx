@@ -161,7 +161,7 @@ export default async function EkoRizikPage() {
       </Section>
 
       {/* Prijave građana */}
-      <Section tone="gray">
+      <Section id="prijave" tone="gray">
         <SectionHeader eyebrow="Građani kao senzori" title="Potvrđene prijave građana" actions={<Button href="/eko-rizik/prijava" size="lg" icon={MarkerPin04}>Nova prijava</Button>}>Prijave se prikazuju nakon što ih službenik Ministarstva provjeri, bez ličnih podataka prijavitelja.</SectionHeader>
         {d.reports.length > 0 && (
           <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">

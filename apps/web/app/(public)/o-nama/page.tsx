@@ -113,10 +113,10 @@ export default function ONamaPage() {
         <Container className="grid gap-8 lg:grid-cols-[1fr_1.3fr]">
           <div className="flex flex-col gap-6">
             <Head k="Sjedište i rad sa strankama" t="Središnji ured i pisarnica" s="Svi podnesci, žalbe, prijave i zahtjevi za izdavanje dozvola predaju se u pisarnici ministarstva ili elektroničkim putem." />
-            <Card className="p-5">
-              <div className="flex gap-4"><FeaturedIcon icon={MarkerPin02} size="md" /><div><p className="text-[12px] font-semibold text-[#737373]">Službena adresa</p><p className="text-[18px] font-semibold text-[#171717]">Braće Fejića bb</p><p className="text-[14px] text-[#525252]">88000 Mostar, Bosna i Hercegovina</p></div></div>
-              <div className="mt-4 flex gap-3 rounded-[12px] bg-[var(--gr-50)] p-4 ring-1 ring-inset ring-[var(--gr-200)]"><Clock size={20} className="shrink-0 text-[var(--gr-700)]" /><div><p className="text-[12px] font-semibold text-[var(--gr-700)]">Radno vrijeme pisarnice</p><p className="text-[18px] font-semibold text-[var(--gr-900)]">08:00 – 16:00</p><p className="text-[14px] text-[var(--gr-800)]">Svaki radni dan, ponedjeljak – petak</p></div></div>
-            </Card>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Card className="p-5"><div className="flex gap-4"><FeaturedIcon icon={MarkerPin02} size="md" /><div><p className="text-[12px] font-semibold text-[#737373]">Službena adresa</p><p className="text-[18px] font-semibold text-[#171717]">Braće Fejića bb</p><p className="text-[14px] text-[#525252]">88000 Mostar, Bosna i Hercegovina</p></div></div></Card>
+              <div className="flex h-full gap-3 rounded-[16px] bg-[var(--gr-50)] p-4 ring-1 ring-inset ring-[var(--gr-200)]"><Clock size={20} className="shrink-0 text-[var(--gr-700)]" /><div><p className="text-[12px] font-semibold text-[var(--gr-700)]">Radno vrijeme pisarnice</p><p className="text-[18px] font-semibold text-[var(--gr-900)]">08:00 – 16:00</p><p className="text-[14px] text-[var(--gr-800)]">Svaki radni dan, ponedjeljak – petak</p></div></div>
+            </div>
             <Card className="overflow-hidden">
               <div className="flex items-center gap-2 border-b border-[#e5e5e5] px-5 py-4"><Phone01 size={20} className="text-[var(--br-600)]" /><h3 className="text-[16px] font-semibold text-[#171717]">Telefonski imenik odjela</h3></div>
               <ul className="divide-y divide-[#e5e5e5]">
@@ -128,7 +128,7 @@ export default function ONamaPage() {
           </div>
           <Card className="flex flex-col overflow-hidden">
             <div className="flex items-center justify-between gap-3 border-b border-[#e5e5e5] px-5 py-4"><div><p className="flex items-center gap-2 text-[16px] font-semibold text-[#171717]"><MarkerPin02 size={20} className="text-[var(--br-600)]" />Lokacija u Mostaru</p><p className="text-[14px] text-[#525252]">Braće Fejića bb, 88000 Mostar</p></div><a href="https://www.google.com/maps/search/?api=1&query=Bra%C4%87e+Fej%C4%87a+bb%2C+Mostar" target="_blank" rel="noopener" className="inline-flex h-10 items-center gap-1.5 rounded-[8px] px-3.5 text-[14px] font-semibold text-[#404040] ring-1 ring-inset ring-[#d4d4d4] hover:bg-[#fafafa]">Google karta</a></div>
-            <div className="flex-1 p-2"><div className="h-full overflow-hidden rounded-[8px]"><MapSection points={[HQ]} compact title={false} height={560} /></div></div>
+            <div className="flex-1 p-2"><div className="h-full min-h-[420px] overflow-hidden rounded-[8px]"><MapSection points={[HQ]} compact title={false} fill /></div></div>
           </Card>
         </Container>
       </section>
