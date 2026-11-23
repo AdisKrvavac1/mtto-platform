@@ -154,3 +154,10 @@
   .wx-row:hover .wx * { animation-play-state: running; }
 }
 @media (hover: none) { .wx-row .wx * { animation: none; } }
+
+/* Protok rijeka: strujnice (brzina iz inline animation-duration) i iscrtavanje krive */
+.flow-line { stroke-dasharray: 10 26; animation: flow-run 4s linear infinite; }
+@keyframes flow-run { to { stroke-dashoffset: -72; } }
+.draw-line { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw-line 1.8s cubic-bezier(.2,.7,.2,1) .2s forwards; }
+@keyframes draw-line { to { stroke-dashoffset: 0; } }
+@media (prefers-reduced-motion: reduce) { .flow-line { animation: none; } .draw-line { animation: none; stroke-dashoffset: 0; } }

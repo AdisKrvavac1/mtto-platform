@@ -401,3 +401,58 @@ export function FileTypeIcon({ ext, size = 40 }: { ext: string; size?: number })
     </svg>
   );
 }
+
+/* ── Untitled "Blog post card" i istaknuta objava s prekrivenim tekstom ───────────── */
+type PostLike = { slug: string; title: string; excerpt?: string | null; coverImage?: string | null; category?: string | null; authorName?: string | null; publishedAt: string; type?: string };
+const fmtDate = (iso: string) => new Intl.DateTimeFormat('bs-BA', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Sarajevo' }).format(new Date(iso));
+function Cover({ logo = 'h-14' }: { logo?: string }) {
+  return <span className="flex size-full items-center justify-center bg-gradient-to-br from-[var(--br-50)] to-[var(--br-100)]"><img src="/mtto-logo.svg" alt="" className={`${logo} opacity-60`} /></span>;
+}
+export function AuthorRow({ name, date, dark }: { name?: string | null; date: string; dark?: boolean }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className={cx('flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full ring-1 ring-inset', dark ? 'bg-white/90 ring-white/40' : 'bg-white ring-black/10')}><img src="/mtto-grb.svg" alt="" className="h-6" /></span>
+      <span className="min-w-0"><b className={cx('block truncate text-[14px] leading-5 font-semibold', dark ? 'text-white' : 'text-[#181d27]')}>{name || 'MTTO HNK'}</b><span className={cx('text-[14px] leading-5', dark ? 'text-white/80' : 'text-[#535862]')}>{fmtDate(date)}</span></span>
+    </div>
+  );
+}
+/** Kartica objave (Untitled blog): slika, rubrika, naslov sa strelicom, sažetak, autor i datum. */
+export function NewsCard({ p, label, badges }: { p: PostLike; label?: string; badges?: ReactNode }) {
+  return (
+    <article className="group flex flex-col">
+      <Link href={`/vijesti/${p.slug}`} className="block overflow-hidden rounded-[12px] bg-[#f5f5f5] aspect-[3/2]" tabIndex={-1} aria-hidden>
+        {p.coverImage ? <img src={p.coverImage} alt="" loading="lazy" className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" /> : <Cover />}
+      </Link>
+      <div className="mt-5 flex flex-wrap items-center gap-2"><p className="text-[14px] leading-5 font-semibold text-[var(--br-700)]">{label || p.category}</p>{badges}</div>
+      <Link href={`/vijesti/${p.slug}`} className="mt-2 flex items-start justify-between gap-4">
+        <h3 className="text-[18px] leading-7 font-semibold text-[#181d27] group-hover:text-[var(--br-700)] line-clamp-2">{p.title}</h3>
+        <ArrowUpRight size={24} className="mt-0.5 shrink-0 text-[#a4a7ae] group-hover:text-[var(--br-700)]" />
+      </Link>
+      {p.excerpt && <p className="mt-2 text-[16px] leading-6 text-[#535862] line-clamp-2">{p.excerpt}</p>}
+      <div className="mt-6"><AuthorRow name={p.authorName} date={p.publishedAt} /></div>
+    </article>
+  );
+}
+/** Istaknuta objava s tekstom preko slike (Untitled "Blog section – featured"). */
+export function FeaturedOverlay({ p, tags = [], badges, compact }: { p: PostLike; tags?: string[]; badges?: ReactNode; compact?: boolean }) {
+  return (
+    <article className={cx('group relative isolate overflow-hidden rounded-[16px] bg-[#0a0d12]', compact ? 'aspect-[4/3] sm:aspect-[16/9]' : 'aspect-[4/5] sm:aspect-[16/9] lg:aspect-[2.2/1]')}>
+      {p.coverImage ? <img src={p.coverImage} alt="" className="absolute inset-0 -z-10 size-full object-cover transition-transform duration-700 group-hover:scale-[1.03]" /> : <span className="absolute inset-0 -z-10"><Cover logo="h-24" /></span>}
+      <span aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
+      <div className={cx('absolute inset-x-0 bottom-0 text-white', compact ? 'p-5 md:p-6' : 'p-5 md:p-8')}>
+        {badges && <div className="mb-3 flex flex-wrap gap-2">{badges}</div>}
+        <Link href={`/vijesti/${p.slug}`} className="flex items-start justify-between gap-4">
+          <h2 className={cx('font-semibold', compact ? 'text-[20px] leading-[30px] md:text-[24px] md:leading-8' : 'text-[24px] leading-8 md:text-[30px] md:leading-[38px]')}>{p.title}</h2>
+          <ArrowUpRight size={24} className="mt-1 shrink-0 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+        </Link>
+        {p.excerpt && <p className={cx('mt-2 max-w-[880px] text-white/85 line-clamp-2', compact ? 'text-[14px] leading-5 md:text-[16px] md:leading-6' : 'text-[16px] leading-6')}>{p.excerpt}</p>}
+        <div className="mt-5 flex flex-wrap items-end justify-between gap-4">
+          <div className="flex flex-wrap gap-8">
+            <div><p className="mb-2 text-[12px] font-semibold text-white/80">Objavio</p><AuthorRow name={p.authorName} date={p.publishedAt} dark /></div>
+          </div>
+          {tags.length > 0 && <div><p className="mb-2 text-[12px] font-semibold text-white/80 sm:text-right">Rubrika</p><div className="flex flex-wrap gap-2">{tags.map((t) => <span key={t} className="rounded-full px-2.5 py-0.5 text-[14px] font-medium text-white ring-1 ring-inset ring-white/50 backdrop-blur-md">{t}</span>)}</div></div>}
+        </div>
+      </div>
+    </article>
+  );
+}

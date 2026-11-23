@@ -4,6 +4,7 @@ import { apiSafe } from '@/lib/api';
 import { EMPTY, LEVEL, LS_STATUS, REPORT_STATUS, WARN_COLOR, fireConfidence, fireTime, fmtTime, peakForecast, type RiskSummary } from '@/lib/risk';
 import RiverChart from '@/components/risk/RiverChart';
 import RiskStatus from '@/components/risk/RiskStatus';
+import RiverFlow from '@/components/risk/RiverFlow';
 import RiskMap from '@/components/risk/RiskMapLazy';
 import { GRAD, HB1, HB2, Badge, BadgeGroup, Button, Card, Container, FeaturedIcon, Section, SectionHeader } from '@/components/uui';
 import { Activity, AlertTriangle, CheckCircle, CloudOff, CloudRaining01, ThermometerWarm, MarkerPin04, LayersThree01, Phone01, RefreshCw01, Waves } from '@untitledui/icons';
@@ -115,7 +116,7 @@ export default async function EkoRizikPage() {
           <div className="lg:col-span-7">
             <SectionHeader eyebrow="Copernicus GloFAS · Open-Meteo" title="Protok Neretve i Bune" />
             <div className="mt-8 grid gap-4 md:grid-cols-2">
-              {d.rivers.items.map((r) => <RiverChart key={r.key} r={r} />)}
+              {d.rivers.items.map((r) => <RiverFlow key={r.key} r={r} dark={false} />)}
               {d.rivers.items.length === 0 && <p className="text-[14px] text-[#525252]">Model protoka trenutno nije dostupan.</p>}
             </div>
             <p className="mt-4 text-[14px] leading-5 text-[#737373]">Vrijednosti su procjena hidrološkog modela GloFAS (rezolucija ~5 km), a ne mjerenja vodomjernih stanica. Status se računa u odnosu na protok iz zadnjih 60 dana. Službene informacije o vodostajima daju FHMZ i Agencija za vodno područje Jadranskog mora.</p>
