@@ -62,7 +62,7 @@ export default async function PropisiPage({ searchParams }: { searchParams: Prom
               <span className="flex size-12 items-center justify-center rounded-[10px] bg-white/10 ring-1 ring-inset ring-white/20"><Mail01 size={24} /></span>
               <h3 className="mt-5 text-[20px] leading-[30px] font-semibold">Trebate obrazac ili taksu koja nije navedena?</h3>
               <p className="mt-2 text-[14px] text-[var(--br-100)]">Ukoliko traženi upravni akt nije u pregledu, pogledajte cijelu pravnu bazu ili kontaktirajte pisarnicu.</p>
-              <Link href="#tablica" className="mt-6 inline-flex h-11 items-center justify-center gap-1.5 rounded-[8px] border-2 border-white/10 bg-[var(--gr-600)] px-4 text-[16px] font-semibold text-white hover:bg-[var(--gr-700)] lg:mt-auto">Kompletna pravna baza</Link>
+              <Link href="#tablica" className="mt-6 inline-flex h-11 items-center justify-center gap-1.5 rounded-[8px] border-2 border-white/10 bg-[var(--br-600)] px-4 text-[16px] font-semibold text-white hover:bg-[var(--br-700)] lg:mt-auto">Kompletna pravna baza</Link>
             </div>
           </div>
           {forms.length === 0 && <p className="mt-6 text-[16px] text-[#525252]">Obrasci još nisu objavljeni.</p>}
@@ -147,7 +147,7 @@ export default async function PropisiPage({ searchParams }: { searchParams: Prom
             <div className="mt-6 space-y-3">
               <label className="block space-y-1.5"><span className="text-[14px] font-medium text-[var(--br-100)]">Broj predmeta</span><input disabled placeholder="UP/1-07-128/26" className="h-11 w-full rounded-[8px] border-0 bg-white/10 px-3.5 text-[16px] text-white ring-1 ring-inset ring-white/20 placeholder:text-white/50" /></label>
               <label className="block space-y-1.5"><span className="text-[14px] font-medium text-[var(--br-100)]">JIB podnosioca ili firme</span><input disabled placeholder="13-cifreni identifikator" className="h-11 w-full rounded-[8px] border-0 bg-white/10 px-3.5 text-[16px] text-white ring-1 ring-inset ring-white/20 placeholder:text-white/50" /></label>
-              <button disabled className="flex h-11 w-full items-center justify-center gap-1.5 rounded-[8px] bg-[var(--gr-600)] text-[16px] font-semibold text-white opacity-70"><Send01 size={20} />Provjeri status u pisarnici</button>
+              <button disabled className="flex h-11 w-full items-center justify-center gap-1.5 rounded-[8px] bg-[var(--br-600)] text-[16px] font-semibold text-white opacity-70"><Send01 size={20} />Provjeri status u pisarnici</button>
             </div>
             <p className="mt-4 text-[12px] text-[var(--br-200)]">Usluga se uključuje uvođenjem e-pisarnice.</p>
           </div>

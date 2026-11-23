@@ -7,7 +7,7 @@ import { ArrowRight, Bell01, Send01, Waves, Wind01 } from '@untitledui/icons';
 import { Badge, Container, CountUp, FeaturedIcon, GRAD, Head } from './index';
 
 const btn = 'inline-flex items-center justify-center gap-1.5 rounded-[8px] font-semibold whitespace-nowrap transition-colors';
-const green = `${btn} border-2 border-white/10 shadow-[0_1px_2px_rgba(10,13,18,0.05),inset_0_-2px_0_rgba(10,13,18,0.05),inset_0_0_0_1px_rgba(10,13,18,0.18)] bg-[var(--gr-600)] text-white hover:bg-[var(--gr-700)]`;
+const green = `${btn} border-2 border-white/10 shadow-[0_1px_2px_rgba(10,13,18,0.05),inset_0_-2px_0_rgba(10,13,18,0.05),inset_0_0_0_1px_rgba(10,13,18,0.18)] bg-[var(--br-600)] text-white hover:bg-[var(--br-700)]`;
 const glass = `${btn} bg-white/10 text-white ring-1 ring-inset ring-white/25 backdrop-blur-md hover:bg-white/15`;
 
 export default function EkoMonitoring({ risk, title = 'Eko-monitoring uživo', intro }: { risk: RiskSummary; title?: string; intro?: ReactNode }) {

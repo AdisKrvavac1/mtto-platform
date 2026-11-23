@@ -39,7 +39,7 @@ export default async function TurizamPage({ searchParams }: { searchParams: Prom
               <h1 className="mt-4 text-[36px] leading-[44px] md:text-[56px] md:leading-[64px] font-semibold tracking-[-0.02em]">Održivi turizam i baština: <span className="text-[var(--gr-300)]">od Makljena do Jadranskog mora</span></h1>
               <p className="mt-4 max-w-[680px] text-[18px] leading-7 text-[var(--br-100)]">Službeni informacijski sustav za turističku privredu: kategorizacija objekata, licenciranje vodiča i poticaji za razvoj turističke ponude kantona.</p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                <Link href="/registri/ugostiteljski-objekti" className="inline-flex h-11 items-center justify-center gap-1.5 rounded-[8px] border-2 border-white/10 bg-[var(--gr-600)] px-4 text-[16px] font-semibold text-white hover:bg-[var(--gr-700)]"><Building07 size={20} />Istraži kategorizirane objekte</Link>
+                <Link href="/registri/ugostiteljski-objekti" className="inline-flex h-11 items-center justify-center gap-1.5 rounded-[8px] border-2 border-white/10 bg-[var(--br-600)] px-4 text-[16px] font-semibold text-white hover:bg-[var(--br-700)]"><Building07 size={20} />Istraži kategorizirane objekte</Link>
                 <Link href="/turisticki-vodici" className="inline-flex h-11 items-center justify-center gap-1.5 rounded-[8px] bg-white/10 px-4 text-[16px] font-semibold ring-1 ring-inset ring-white/25 backdrop-blur-md hover:bg-white/15"><Users01 size={20} />Ispit za vodiče</Link>
                 <Link href="/vijesti?type=JAVNI_POZIV" className="inline-flex h-11 items-center justify-center gap-1.5 rounded-[8px] bg-white/10 px-4 text-[16px] font-semibold ring-1 ring-inset ring-white/25 backdrop-blur-md hover:bg-white/15"><Ticket01 size={20} />Sufinanciranje i grantovi</Link>
               </div>
@@ -175,7 +175,7 @@ export default async function TurizamPage({ searchParams }: { searchParams: Prom
           </div>
           <div className={`mt-8 flex flex-col gap-4 rounded-[16px] p-6 text-white md:flex-row md:items-center md:justify-between ${GRAD}`}>
             <div className="flex gap-4"><span className="flex size-12 shrink-0 items-center justify-center rounded-[10px] bg-white/10 ring-1 ring-inset ring-white/20"><Route size={24} /></span><div><p className="text-[18px] font-semibold">Digitalni vodiči i GPX staze destinacije</p><p className="text-[14px] text-[var(--br-100)]">Besplatne interaktivne GPX rute (Ćiro staza, Via Dinarica, kanjon Neretve) za planinare i bicikliste.</p></div></div>
-            <div className="flex shrink-0 gap-3"><Link href="/mapa" className="inline-flex h-11 items-center gap-1.5 rounded-[8px] border-2 border-white/10 bg-[var(--gr-600)] px-4 text-[16px] font-semibold hover:bg-[var(--gr-700)]"><Map01 size={20} />Otvori kartu</Link><Badge tone="gray" className="self-center">GPX · Faza 2</Badge></div>
+            <div className="flex shrink-0 gap-3"><Link href="/mapa" className="inline-flex h-11 items-center gap-1.5 rounded-[8px] border-2 border-white/10 bg-[var(--br-600)] px-4 text-[16px] font-semibold hover:bg-[var(--br-700)]"><Map01 size={20} />Otvori kartu</Link><Badge tone="gray" className="self-center">GPX · Faza 2</Badge></div>
           </div>
         </Container>
       </section>

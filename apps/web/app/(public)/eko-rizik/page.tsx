@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { apiSafe } from '@/lib/api';
 import { EMPTY, LEVEL, LS_STATUS, REPORT_STATUS, WARN_COLOR, fireConfidence, fireTime, fmtTime, peakForecast, type RiskSummary } from '@/lib/risk';
 import RiverChart from '@/components/risk/RiverChart';
+import RiskStatus from '@/components/risk/RiskStatus';
 import RiskMap from '@/components/risk/RiskMapLazy';
 import { GRAD, HB1, HB2, Badge, BadgeGroup, Button, Card, Container, FeaturedIcon, Section, SectionHeader } from '@/components/uui';
 import { Activity, AlertTriangle, CheckCircle, CloudOff, CloudRaining01, ThermometerWarm, MarkerPin04, LayersThree01, Phone01, RefreshCw01, Waves } from '@untitledui/icons';
@@ -68,10 +69,7 @@ export default async function EkoRizikPage() {
                 <Link href="/eko-rizik/prijava" className={HB1}><MarkerPin04 size={20} />Prijavi incident</Link>
               </div>
             </div>
-            <div role="status" aria-live="polite" className="flex items-center gap-4 self-start rounded-[16px] bg-white p-5 pr-8 shadow-[0_20px_24px_-4px_rgba(0,0,0,0.25)] lg:self-auto">
-              <FeaturedIcon icon={lvKey === 1 ? CheckCircle : AlertTriangle} tone={LV_TONE[lvKey]} size="xl" />
-              <div><p className="text-[14px] font-medium text-[#525252]">Procjena stanja</p><p className={`text-[24px] leading-8 font-semibold ${lvKey === 1 ? 'text-[#079455]' : lvKey === 2 ? 'text-[#dc6803]' : 'text-[#d92d20]'}`}>{lv.label}</p></div>
-            </div>
+            <RiskStatus d={d} />
           </div>
         </Container>
       </section>

@@ -137,7 +137,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
             <div className={`mt-10 flex flex-col gap-4 rounded-[16px] p-5 text-white md:flex-row md:items-center md:justify-between ${GRAD}`}>
               <div className="flex items-center gap-3"><span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20"><Phone size={20} /></span><div><p className="text-[16px] font-semibold">Trebate dodatna pojašnjenja?</p><p className="text-[14px] text-[var(--br-100)]">{sector} · radnim danima 08:00–16:00</p></div></div>
-              <div className="flex flex-wrap gap-2"><a href="tel:+38736551823" className="inline-flex h-10 items-center gap-1.5 rounded-[8px] bg-white/10 px-3.5 text-[14px] font-semibold ring-1 ring-inset ring-white/25 hover:bg-white/15"><Phone size={16} />036 551 823</a><a href="mailto:info@mtto.gov.ba" className="inline-flex h-10 items-center gap-1.5 rounded-[8px] bg-[var(--gr-600)] px-3.5 text-[14px] font-semibold hover:bg-[var(--gr-700)]"><Mail01 size={16} />info@mtto.gov.ba</a></div>
+              <div className="flex flex-wrap gap-2"><a href="tel:+38736551823" className="inline-flex h-10 items-center gap-1.5 rounded-[8px] bg-white/10 px-3.5 text-[14px] font-semibold ring-1 ring-inset ring-white/25 hover:bg-white/15"><Phone size={16} />036 551 823</a><a href="mailto:info@mtto.gov.ba" className="inline-flex h-10 items-center gap-1.5 rounded-[8px] bg-[var(--br-600)] px-3.5 text-[14px] font-semibold hover:bg-[var(--br-700)]"><Mail01 size={16} />info@mtto.gov.ba</a></div>
             </div>
 
             <div className="mt-8 flex flex-wrap items-center gap-2 border-t border-[#e5e5e5] pt-6 text-[14px]">

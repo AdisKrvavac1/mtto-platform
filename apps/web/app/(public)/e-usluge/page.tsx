@@ -42,7 +42,7 @@ export default async function EUslugePage() {
         crumbs={[{ label: 'Naslovna', href: '/' }, { label: 'E-usluge i registri' }]}
         eyebrow="Regulatorni centar · Hercegovačko-neretvanski kanton"
         title="Digitalni centar e-usluga i javnih registara"
-        actions={<><Button href="/registri/okolisne-dozvole" size="lg" icon={CheckVerified01} className="!bg-[var(--gr-600)] hover:!bg-[var(--gr-700)]">Provjeri dozvolu</Button><Button href="/o-nama#upit" size="lg" variant="secondary" icon={Edit05}>Upiti i pitanja</Button></>}
+        actions={<><Button href="/registri/okolisne-dozvole" size="lg" icon={CheckVerified01} className="!bg-[var(--br-600)] hover:!bg-[var(--br-700)]">Provjeri dozvolu</Button><Button href="/o-nama#upit" size="lg" variant="secondary" icon={Edit05}>Upiti i pitanja</Button></>}
         stats={[
           { label: 'Okolišnih dozvola', value: stats.permits, sub: 'U javnom registru', icon: FileSearch02 },
           { label: 'Obrazaca', value: forms.length || docs.length, sub: 'Spremni za preuzimanje', icon: File06 },

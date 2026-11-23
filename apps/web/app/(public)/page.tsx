@@ -3,9 +3,9 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { apiSafe, type MapPoint, type PostListItem } from '@/lib/api';
 import { EMPTY, aqiClass, type RiskSummary } from '@/lib/risk';
-import { dateLong, dateShort } from '@/lib/format';
+import { POST_TYPE, dateLong, dateShort } from '@/lib/format';
 import MapSection from '@/components/site/MapSection';
-import { Badge, Card, Container, CountUp, FeaturedIcon, GRAD } from '@/components/uui';
+import { Badge, Card, CategoryBadge, Container, CountUp, FeaturedIcon, GRAD, HB1 } from '@/components/uui';
 import EkoMonitoring from '@/components/uui/EkoMonitoring';
 import ProtectedAreas from '@/components/uui/ProtectedAreas';
 import {
@@ -20,7 +20,7 @@ type Call = { href: string; kind: string; tone: 'success' | 'warning' | 'brand';
 
 const btn = 'inline-flex items-center justify-center gap-1.5 rounded-[8px] font-semibold whitespace-nowrap transition-colors';
 const skeu = 'border-2 border-white/10 shadow-[0_1px_2px_rgba(10,13,18,0.05),inset_0_-2px_0_rgba(10,13,18,0.05),inset_0_0_0_1px_rgba(10,13,18,0.18)]';
-const green = `${btn} ${skeu} bg-[var(--gr-600)] text-white hover:bg-[var(--gr-700)]`;
+const green = `${btn} ${skeu} bg-[var(--br-600)] text-white hover:bg-[var(--br-700)]`;
 const glass = `${btn} bg-white/10 text-white ring-1 ring-inset ring-white/25 backdrop-blur-md hover:bg-white/15`;
 
 function Head({ k, t, s, dark, action }: { k: string; t: string; s?: string; dark?: boolean; action?: ReactNode }) {
@@ -151,28 +151,55 @@ export default async function Home() {
         </div>
       </Container>
 
-      {/* AKTUALNOSTI + NATJEČAJI (verzija 2) */}
+      {/* AKTUALNOSTI (Untitled "Blog section": istaknuta objava + 3 u redu) + NATJEČAJI */}
       <section className="pb-16 pt-16 md:pb-24 md:pt-20">
-        <Container className="grid gap-8 lg:grid-cols-[1fr_400px]">
-          <div>
-            <Head k="Informativni bilten" t="Aktualnosti i vijesti resora" action={<More href="/vijesti">Sve vijesti</More>} />
-            {featured && <div className="mt-8"><Featured p={featured} /></div>}
-            <div className="mt-6 grid gap-5 sm:grid-cols-2 md:grid-cols-3">{rest.map((p) => <PostSmall key={p.id} p={p} />)}</div>
-            {posts.length === 0 && <p className="mt-8 text-[16px] text-[#525252]">Još nema objavljenih vijesti.</p>}
+        <Container>
+          <Head k="Informativni bilten" t="Aktualnosti i vijesti resora" s="Najnovije vijesti, saopćenja i javni pozivi Ministarstva." action={<Link href="/vijesti" className={`${HB1} shadow-[0_1px_2px_rgba(10,13,18,0.05),inset_0_-2px_0_rgba(10,13,18,0.05),inset_0_0_0_1px_rgba(10,13,18,0.18)]`}>Sve objave<ArrowRight size={20} /></Link>} />
+          {featured && (
+            <article className="group mt-10">
+              <Link href={`/vijesti/${featured.slug}`} className="block overflow-hidden rounded-[16px] bg-[#f5f5f5] aspect-[16/9] md:aspect-[21/8]" aria-hidden tabIndex={-1}>
+                {featured.coverImage ? <img src={featured.coverImage} alt="" className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.02]" /> : <span className="flex size-full items-center justify-center bg-gradient-to-br from-[var(--br-50)] to-[var(--br-100)]"><img src="/mtto-logo.svg" alt="" className="h-20 opacity-60" /></span>}
+              </Link>
+              <p className="mt-6 text-[14px] leading-5 font-semibold text-[var(--br-700)]">{featured.authorName} · {dateLong(featured.publishedAt)}</p>
+              <Link href={`/vijesti/${featured.slug}`} className="mt-2 flex items-start justify-between gap-4">
+                <h3 className="text-[20px] leading-[30px] md:text-[24px] md:leading-8 font-semibold text-[#181d27] group-hover:text-[var(--br-700)]">{featured.title}</h3>
+                <ArrowUpRight size={24} className="mt-1 shrink-0 text-[#a4a7ae] group-hover:text-[var(--br-700)]" />
+              </Link>
+              {featured.excerpt && <p className="mt-2 max-w-[880px] text-[16px] leading-6 text-[#535862] line-clamp-2">{featured.excerpt}</p>}
+              <div className="mt-4 flex flex-wrap gap-2">{featured.category && <CategoryBadge name={featured.category} />}<CategoryBadge name={POST_TYPE[featured.type] ?? 'Vijest'} />{featured.isDemo && <Badge tone="warning">Demo</Badge>}</div>
+            </article>
+          )}
+          <div className="mt-12 grid gap-x-8 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
+            {rest.map((p) => (
+              <article key={p.id} className="group flex flex-col">
+                <Link href={`/vijesti/${p.slug}`} className="block overflow-hidden rounded-[16px] bg-[#f5f5f5] aspect-[16/10]" tabIndex={-1} aria-hidden>
+                  {p.coverImage ? <img src={p.coverImage} alt="" loading="lazy" className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" /> : <span className="flex size-full items-center justify-center bg-gradient-to-br from-[var(--br-50)] to-[var(--br-100)]"><img src="/mtto-logo.svg" alt="" className="h-14 opacity-60" /></span>}
+                </Link>
+                <p className="mt-5 text-[14px] leading-5 font-semibold text-[var(--br-700)]">{p.authorName} · {dateLong(p.publishedAt)}</p>
+                <Link href={`/vijesti/${p.slug}`} className="mt-2 flex items-start justify-between gap-4">
+                  <h3 className="text-[18px] leading-7 font-semibold text-[#181d27] group-hover:text-[var(--br-700)] line-clamp-2">{p.title}</h3>
+                  <ArrowUpRight size={24} className="mt-0.5 shrink-0 text-[#a4a7ae] group-hover:text-[var(--br-700)]" />
+                </Link>
+                {p.excerpt && <p className="mt-2 text-[16px] leading-6 text-[#535862] line-clamp-2">{p.excerpt}</p>}
+                <div className="mt-5 flex flex-wrap gap-2">{p.category && <CategoryBadge name={p.category} />}<CategoryBadge name={POST_TYPE[p.type] ?? 'Vijest'} />{p.isDemo && <Badge tone="warning">Demo</Badge>}</div>
+              </article>
+            ))}
           </div>
-          <aside className="flex flex-col gap-6 lg:pt-[86px]">
+          {posts.length === 0 && <p className="mt-8 text-[16px] text-[#525252]">Još nema objavljenih vijesti.</p>}
+
+          <div className="mt-16 grid gap-6 lg:grid-cols-[1fr_400px]">
             <Card className="overflow-hidden">
               <div className="flex items-center justify-between border-b border-[#e5e5e5] px-5 py-4"><h3 className="text-[18px] font-semibold text-[#171717]">Natječaji i javni uvidi</h3><Badge tone="success" dot>Aktivno</Badge></div>
               <ul className="divide-y divide-[#e5e5e5]">{calls.map((c) => <CallItem key={c.title} c={c} />)}</ul>
               <div className="p-4"><Link href="/vijesti?type=JAVNI_POZIV" className="flex h-10 items-center justify-center rounded-[8px] bg-[var(--br-50)] text-[14px] font-semibold text-[var(--br-700)] hover:bg-[var(--br-100)]">Arhiva natječaja i odluka</Link></div>
             </Card>
-            <div className={`rounded-[16px] p-6 text-white ${GRAD}`}>
-              <p className="flex items-center gap-2 text-[18px] font-semibold"><Phone01 size={20} className="text-[var(--gr-300)]" />Info-desk Ministarstva</p>
+            <div className={`self-start rounded-[16px] p-6 text-white ${GRAD}`}>
+              <p className="flex items-center gap-2 text-[18px] font-semibold"><Phone01 size={20} className="text-[var(--br-300)]" />Info-desk Ministarstva</p>
               <p className="mt-2 text-[14px] text-[var(--br-100)]">Rad sa strankama radnim danom 08:30–12:00, Braće Fejića bb, Mostar.</p>
-              <a href="tel:+38736551823" className="mt-4 block text-[20px] font-semibold hover:text-[var(--gr-200)]">+387 36 551 823</a>
+              <a href="tel:+38736551823" className="mt-4 block text-[20px] font-semibold hover:text-[var(--br-200)]">+387 36 551 823</a>
               <a href="mailto:info@mtto.gov.ba" className="flex items-center gap-1.5 text-[14px] text-[var(--br-200)] hover:text-white"><Mail01 size={16} />info@mtto.gov.ba</a>
             </div>
-          </aside>
+          </div>
         </Container>
       </section>
 
