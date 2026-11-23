@@ -436,21 +436,19 @@ export function NewsCard({ p, label, badges }: { p: PostLike; label?: string; ba
 /** Istaknuta objava s tekstom preko slike (Untitled "Blog section – featured"). */
 export function FeaturedOverlay({ p, tags = [], badges, compact }: { p: PostLike; tags?: string[]; badges?: ReactNode; compact?: boolean }) {
   return (
-    <article className={cx('group relative isolate overflow-hidden rounded-[16px] bg-[#0a0d12]', compact ? 'aspect-[4/3] sm:aspect-[16/9]' : 'aspect-[4/5] sm:aspect-[16/9] lg:aspect-[2.2/1]')}>
-      {p.coverImage ? <img src={p.coverImage} alt="" className="absolute inset-0 -z-10 size-full object-cover transition-transform duration-700 group-hover:scale-[1.03]" /> : <span className="absolute inset-0 -z-10"><Cover logo="h-24" /></span>}
-      <span aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
-      <div className={cx('absolute inset-x-0 bottom-0 text-white', compact ? 'p-5 md:p-6' : 'p-5 md:p-8')}>
-        {badges && <div className="mb-3 flex flex-wrap gap-2">{badges}</div>}
-        <Link href={`/vijesti/${p.slug}`} className="flex items-start justify-between gap-4">
-          <h2 className={cx('font-semibold', compact ? 'text-[20px] leading-[30px] md:text-[24px] md:leading-8' : 'text-[24px] leading-8 md:text-[30px] md:leading-[38px]')}>{p.title}</h2>
-          <ArrowUpRight size={24} className="mt-1 shrink-0 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+    <article className={cx('group relative isolate overflow-hidden rounded-[16px] bg-[#0a0d12]', compact ? 'aspect-[4/3] sm:aspect-[16/9]' : 'aspect-square sm:aspect-[16/9] lg:aspect-[2.2/1]')}>
+      {p.coverImage ? <img src={p.coverImage} alt="" className="absolute inset-0 -z-10 size-full object-cover object-top transition-transform duration-700 group-hover:scale-[1.03]" /> : <span className="absolute inset-0 -z-10"><Cover logo="h-24" /></span>}
+      <span aria-hidden className="absolute inset-x-0 bottom-0 -z-10 h-2/3 bg-gradient-to-t from-black/85 via-black/45 to-transparent sm:h-full sm:from-black/75 sm:via-black/25" />
+      <div className={cx('absolute inset-x-0 bottom-0 text-white', compact ? 'p-4 md:p-6' : 'p-4 sm:p-5 md:p-8')}>
+        {badges && <div className="mb-2 flex flex-wrap gap-2">{badges}</div>}
+        <Link href={`/vijesti/${p.slug}`} className="flex items-start justify-between gap-3">
+          <h2 className={cx('font-semibold line-clamp-3 sm:line-clamp-none', compact ? 'text-[16px] leading-6 md:text-[24px] md:leading-8' : 'text-[17px] leading-6 sm:text-[24px] sm:leading-8 md:text-[30px] md:leading-[38px]')}>{p.title}</h2>
+          <ArrowUpRight size={20} className="mt-0.5 shrink-0 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
         </Link>
-        {p.excerpt && <p className={cx('mt-2 max-w-[880px] text-white/85 line-clamp-2', compact ? 'text-[14px] leading-5 md:text-[16px] md:leading-6' : 'text-[16px] leading-6')}>{p.excerpt}</p>}
-        <div className="mt-5 flex flex-wrap items-end justify-between gap-4">
-          <div className="flex flex-wrap gap-8">
-            <div><p className="mb-2 text-[12px] font-semibold text-white/80">Objavio</p><AuthorRow name={p.authorName} date={p.publishedAt} dark /></div>
-          </div>
-          {tags.length > 0 && <div><p className="mb-2 text-[12px] font-semibold text-white/80 sm:text-right">Rubrika</p><div className="flex flex-wrap gap-2">{tags.map((t) => <span key={t} className="rounded-full px-2.5 py-0.5 text-[14px] font-medium text-white ring-1 ring-inset ring-white/50 backdrop-blur-md">{t}</span>)}</div></div>}
+        {p.excerpt && <p className={cx('mt-2 hidden max-w-[880px] text-white/85 line-clamp-2 sm:block', compact ? 'text-[14px] leading-5 md:text-[16px] md:leading-6' : 'text-[16px] leading-6')}>{p.excerpt}</p>}
+        <div className="mt-3 flex items-center gap-2 overflow-hidden whitespace-nowrap sm:mt-5">
+          <time dateTime={p.publishedAt} className="shrink-0 text-[13px] font-medium text-white/80 sm:text-[14px]">{fmtDate(p.publishedAt)}</time>
+          {tags.map((t) => <span key={t} className="shrink-0 rounded-full px-2 py-0.5 text-[12px] font-medium text-white ring-1 ring-inset ring-white/50 backdrop-blur-md sm:px-2.5 sm:text-[14px]">{t}</span>)}
         </div>
       </div>
     </article>
