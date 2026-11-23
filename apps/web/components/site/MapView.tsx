@@ -9,7 +9,7 @@ export const LAYERS: Record<MapPoint['layer'], { label: string; color: string; i
   PROJEKT: { label: 'Projekti Ministarstva', color: '#eb851c', icon: 'flag' },
 };
 
-const GOOGLE_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY;
+const GOOGLE_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY;
 const CENTER = { lat: 43.33, lng: 17.8 };
 
 function pinSvg(color: string) {
@@ -34,7 +34,7 @@ export default function MapView({ points, height = 520, compact = false }: { poi
   const shown = useMemo(() => points.filter((p) => active[p.layer]), [points, active]);
   const mapRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
-  const engine = GOOGLE_KEY ? 'google' : 'leaflet';
+  const [engine, setEngine] = useState<'google' | 'leaflet'>(GOOGLE_KEY ? 'google' : 'leaflet');
   const [tick, setTick] = useState(0);
 
   // inicijalizacija
@@ -42,7 +42,12 @@ export default function MapView({ points, height = 520, compact = false }: { poi
     let cancelled = false;
     if (!ref.current || mapRef.current) return;
     if (engine === 'google') {
+      // Rezerva: ako Google ključ ne prođe (ograničenja, naplata) ili skripta ne stigne, prelazi se na OpenStreetMap.
+      const fallback = () => { if (cancelled) return; cancelled = true; mapRef.current = null; markersRef.current = []; if (ref.current) ref.current.innerHTML = ''; setEngine('leaflet'); };
+      (window as any).gm_authFailure = fallback;
+      const timer = window.setTimeout(() => { if (!mapRef.current) fallback(); }, 8000);
       const init = () => {
+        window.clearTimeout(timer);
         if (cancelled || !ref.current) return;
         const g = (window as any).google;
         mapRef.current = new g.maps.Map(ref.current, { center: CENTER, zoom: 9, mapTypeControl: false, streetViewControl: false, fullscreenControl: true });
@@ -55,6 +60,7 @@ export default function MapView({ points, height = 520, compact = false }: { poi
         s.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_KEY}&language=bs&region=BA`;
         s.async = true;
         s.onload = init;
+        s.onerror = fallback;
         document.head.appendChild(s);
       }
     } else {
