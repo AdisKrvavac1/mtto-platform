@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { api, apiSafe, type Doc, type PostListItem } from '@/lib/api';
 import { renderMarkdown } from '@/lib/markdown';
 import { dateLong, dateShort, dateTime, daysUntil, fileExt, fileSize, POST_TYPE, DOC_TYPE } from '@/lib/format';
-import { Badge, Button, Card, Container, FeaturedIcon, GRAD, Head, PostCard, Section } from '@/components/uui';
+import { Badge, Button, CATEGORY_TONE, Card, CategoryBadge, Container, FeaturedIcon, FileTypeIcon, GRAD, Head, PostCard, Section, Tag } from '@/components/uui';
 import { AlertTriangle, Bell01, Building07, Calendar, Clock, Download01, Edit05, Eye, Mail01, Phone, RefreshCw01, ShieldTick } from '@untitledui/icons';
 import ShareButtons from '@/components/uui/ShareButtons';
 
@@ -79,8 +79,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         <Container className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_360px]">
           <article className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge tone="brand" size="md">{typeLabel}</Badge>
-              {post.category && <Badge tone="success" size="md">{post.category}</Badge>}
+              <CategoryBadge name={typeLabel} size="md" />
+              {post.category && <CategoryBadge name={post.category} size="md" />}
               {isCall && <Badge tone={open ? 'success' : 'gray'} size="md" dot>{open ? (left !== null ? `Otvoren · još ${left} dana` : 'Otvoren') : 'Zatvoren'}</Badge>}
               {post.isDemo && <Badge tone="warning" size="md">Demo</Badge>}
             </div>
@@ -125,7 +125,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                   {post.documents.map((d) => (
                     <li key={d.id} className="uui-lift flex flex-col gap-3 rounded-[12px] bg-white p-4 ring-1 ring-inset ring-[#e5e5e5] sm:flex-row sm:items-center">
                       <span className="flex min-w-0 flex-1 items-center gap-3">
-                        <span className="relative flex h-10 w-8 shrink-0 items-end justify-center rounded-[4px] ring-1 ring-inset ring-[#d4d4d4] bg-white"><span className="absolute -left-1.5 bottom-1.5 rounded-[2px] bg-[#d92d20] px-1 text-[10px] leading-[14px] font-bold text-white">{fileExt(d.fileName).slice(0, 4)}</span></span>
+                        <FileTypeIcon ext={fileExt(d.fileName)} />
                         <span className="min-w-0"><span className="block truncate text-[16px] font-semibold text-[#171717]">{d.title}{d.isDemo && <Badge tone="warning" className="ml-2">Demo</Badge>}</span><span className="text-[14px] text-[#525252]">{DOC_TYPE[d.docType] ?? d.docType} · {fileSize(d.size)}{d.number ? ` · ${d.number}` : ''}</span></span>
                       </span>
                       <Button href={`/api/documents/${d.id}/file`} variant="secondary" size="sm" icon={Download01} external>Preuzmi {fileExt(d.fileName)}</Button>
@@ -142,7 +142,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
             <div className="mt-8 flex flex-wrap items-center gap-2 border-t border-[#e5e5e5] pt-6 text-[14px]">
               <span className="font-semibold text-[#525252]">Oznake:</span>
-              {[post.category, typeLabel, 'HNK', 'MTTO'].filter(Boolean).map((t) => <Link key={t} href={`/vijesti?q=${encodeURIComponent(t)}`} className="rounded-[6px] bg-[#fafafa] px-2 py-0.5 font-medium text-[#404040] ring-1 ring-inset ring-[#e5e5e5] hover:bg-[var(--br-50)]">#{t.replace(/\s+/g, '')}</Link>)}
+              {[post.category, typeLabel, 'HNK', 'MTTO'].filter(Boolean).map((t) => <Tag key={t} href={`/vijesti?q=${encodeURIComponent(t)}`} dot={CATEGORY_TONE[t]?.dot}>{t}</Tag>)}
             </div>
             <div className="mt-6 flex flex-col gap-4 rounded-[12px] bg-[#fafafa] p-4 ring-1 ring-inset ring-[#e5e5e5] sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3"><img src="/mtto-logo.svg" alt="" className="h-8" /><p className="text-[14px] text-[#404040]">Objavio: <b>{sector}</b></p></div>
@@ -169,7 +169,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
               <p className="mt-3 text-[18px] font-semibold">Pretplatite se na e-bilten MTTO</p>
               <p className="mt-1 text-[14px] text-[var(--br-100)]">Obavijesti o novim pozivima, rokovima i javnim uvidima na vaš e-mail.</p>
               <input disabled placeholder="Vaša e-mail adresa" aria-label="E-mail (Faza 2)" className="mt-4 h-10 w-full rounded-[8px] border-0 bg-white/10 px-3 text-[14px] text-white placeholder:text-white/50 ring-1 ring-inset ring-white/20" />
-              <button disabled className="mt-2 h-10 w-full cursor-not-allowed rounded-[8px] bg-[var(--gr-600)] text-[14px] font-semibold opacity-70">Prijavi se na bilten</button>
+              <button disabled className="mt-2 h-10 w-full cursor-not-allowed rounded-[8px] bg-[var(--br-600)] text-[14px] font-semibold opacity-80">Prijavi se na bilten</button>
             </div>
             <Card className="p-5">
               <div className="flex items-center gap-3"><FeaturedIcon icon={AlertTriangle} size="md" tone="error" /><div><p className="text-[16px] font-semibold text-[#171717]">Prijavi ekološki incident</p><p className="text-[12px] text-[#737373]">Građanski eko-alarm, i anonimno</p></div></div>

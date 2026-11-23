@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { apiSafe, type Doc, type Facility, type Permit, type PostListItem } from '@/lib/api';
 import { dateLong, daysUntil, fileExt, fileSize } from '@/lib/format';
-import { Badge, Button, Card, Container, FeaturedIcon, GRAD, Head, PageHero } from '@/components/uui';
+import { Badge, Button, Card, Container, FeaturedIcon, GRAD, Head, PageHero, FileTypeIcon } from '@/components/uui';
 import {
   ArrowRight, Building07, Calendar, CheckVerified01, Clock, Download01, Edit05, File06, FileSearch02, FilterLines, MarkerPin02, Phone01, SearchLg, ShieldTick, Trash03, UploadCloud02, Users01,
 } from '@untitledui/icons';
@@ -139,7 +139,7 @@ export default async function EUslugePage() {
               <ul className="divide-y divide-[#e5e5e5]">
                 {forms.map((d) => (
                   <li key={d.id}><a href={`/api/documents/${d.id}/file`} target="_blank" rel="noopener" className="group flex items-start gap-3 px-5 py-3.5 hover:bg-[#fafafa]">
-                    <span className="mt-0.5 rounded-[4px] bg-[#d92d20] px-1 text-[10px] font-bold leading-4 text-white">{fileExt(d.fileName)}</span>
+                    <FileTypeIcon ext={fileExt(d.fileName)} size={32} />
                     <span className="min-w-0 flex-1"><span className="block line-clamp-2 text-[14px] font-semibold text-[#171717] group-hover:text-[var(--br-700)]">{d.title}</span><span className="text-[12px] text-[#737373]">{d.sector} · {fileSize(d.size)}</span></span>
                     <Download01 size={18} className="mt-0.5 shrink-0 text-[#a3a3a3] group-hover:text-[var(--br-600)]" />
                   </a></li>

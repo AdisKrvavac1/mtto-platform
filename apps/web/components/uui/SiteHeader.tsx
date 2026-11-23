@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import {
-  AlertTriangle, Bell01, Building07, CheckVerified01, ChevronDown, Clock, FileSearch02, Globe02, Image01, Map01, MarkerPin04, Menu02, Phone01,
+  AlertTriangle, Building07, CheckVerified01, ChevronDown, Clock, FileSearch02, Globe02, Image01, Map01, MarkerPin04, Menu02, Phone01,
   Scales02, SearchLg, ShoppingCart01, Calendar, LineChartUp01, Sun, Ticket01, Trash03, User01, Users01, Waves, Wind01, XClose, Building02, Mail01,
 } from '@untitledui/icons';
 import type { Icon } from './index';
@@ -15,14 +15,7 @@ type Nav = { label: string; href?: string; items?: Item[]; match?: string[] };
 export const NAV: Nav[] = [
   { label: 'Naslovna', href: '/', match: [] },
   { label: 'Vijesti', href: '/vijesti', match: ['/vijesti'] },
-  {
-    label: 'O nama', match: ['/o-nama'], items: [
-      { href: '/o-nama', label: 'O Ministarstvu', desc: 'Nadležnosti, misija i organizacija.', icon: Building02 },
-      { href: '/o-nama#kabinet', label: 'Kabinet ministra', desc: 'Ministar i tajništvo.', icon: Users01 },
-      { href: '/o-nama#sektori', label: 'Sektori', desc: 'Trgovina, turizam i zaštita okoliša.', icon: Building07 },
-      { href: '/o-nama#upit', label: 'Pristup informacijama', desc: 'Zahtjev po Zakonu o slobodi pristupa informacijama.', icon: Mail01 },
-    ],
-  },
+  { label: 'O nama', href: '/o-nama', match: ['/o-nama'] },
   {
     label: 'E-usluge i registri', match: ['/e-usluge', '/registri'], items: [
       { href: '/e-usluge', label: 'Centar e-usluga', desc: 'Registri, obrasci i javni uvidi na jednom mjestu.', icon: Globe02 },
@@ -34,15 +27,7 @@ export const NAV: Nav[] = [
   },
   { label: 'Natječaji', href: '/vijesti?type=JAVNI_POZIV', match: [] },
   { label: 'Propisi i obrasci', href: '/propisi', match: ['/propisi'] },
-  {
-    label: 'Trgovina', match: ['/trgovina'], items: [
-      { href: '/trgovina', label: 'Trgovina i potrošači', desc: 'Radno vrijeme, cijene, prava potrošača.', icon: ShoppingCart01 },
-      { href: '/trgovina#radno-vrijeme', label: 'Neradni dani', desc: 'Neradne nedjelje i praznici.', icon: Calendar },
-      { href: '/trgovina#cijene', label: 'Potrošačka korpa', desc: 'Kretanje cijena osnovnih proizvoda.', icon: LineChartUp01 },
-      { href: '/trgovina#otvaram-trgovinu', label: 'Otvaram trgovinu', desc: 'Vodič korak po korak za trgovce.', icon: Building07 },
-      { href: '/trgovina#potrosaci', label: 'Prava potrošača', desc: 'Reklamacije i prijava nepravilnosti.', icon: Scales02 },
-    ],
-  },
+  { label: 'Trgovina', href: '/trgovina', match: ['/trgovina'] },
   {
     label: 'Turizam i baština', match: ['/turizam-i-bastina', '/turisticki-vodici', '/foto-albumi'], items: [
       { href: '/turizam-i-bastina', label: 'Turizam i baština', desc: 'Destinacija HNK, UNESCO baština i poticaji.', icon: Sun },
@@ -123,7 +108,7 @@ export default function SiteHeader({ info }: { info?: TopInfo }) {
   useEffect(() => { document.body.style.overflow = open ? 'hidden' : ''; }, [open]);
   const isActive = (n: Nav) => (n.href === '/' ? path === '/' : (n.match ?? []).some((m) => path.startsWith(m)));
   const lv = LVL[info?.level ?? 1];
-  const green = `border-2 border-white/10 bg-[var(--gr-600)] text-white hover:bg-[var(--gr-700)] shadow-[0_1px_2px_rgba(10,13,18,0.05),inset_0_-2px_0_rgba(10,13,18,0.05),inset_0_0_0_1px_rgba(10,13,18,0.18)]`;
+  const alarm = 'bg-white text-[#414651] ring-1 ring-inset ring-[#d5d7da] shadow-[0_1px_2px_rgba(10,13,18,0.05),inset_0_-2px_0_rgba(10,13,18,0.05)] hover:bg-[#fafafa] hover:text-[#252b37] transition-colors';
 
   return (
     <>
@@ -151,7 +136,7 @@ export default function SiteHeader({ info }: { info?: TopInfo }) {
               <SearchLg size={20} className="text-[#a3a3a3]" />
               <input name="q" aria-label="Pretraga portala" placeholder="Pretraga vijesti, natječaja, propisa" className="min-w-0 flex-1 border-0 bg-transparent p-0 text-[16px] text-[#171717] placeholder:text-[#737373] !shadow-none focus:outline-none focus:ring-0" />
             </form>
-            <Link href="/eko-rizik/prijava" className={`hidden h-11 items-center gap-1.5 rounded-[8px] px-4 text-[16px] font-semibold sm:inline-flex ${green}`}><Bell01 size={20} />Eko-alarm</Link>
+            <Link href="/eko-rizik/prijava" className={`hidden h-11 items-center gap-2 rounded-[8px] px-4 text-[16px] font-semibold sm:inline-flex ${alarm}`}><span aria-hidden className="relative flex size-2.5"><span className="absolute inline-flex size-full animate-ping rounded-full bg-[#f04438] opacity-60" /><span className="relative inline-flex size-2.5 rounded-full bg-[#f04438]" /></span>Eko-alarm</Link>
             <Link href="/admin/prijava" className="hidden size-11 items-center justify-center rounded-[8px] text-[#525252] ring-1 ring-inset ring-[#d4d4d4] shadow-[0_1px_2px_rgba(10,13,18,0.05)] hover:bg-[#fafafa] sm:flex" title="Prijava za službenike" aria-label="Prijava za službenike"><User01 size={20} /></Link>
             <button type="button" className="flex size-11 items-center justify-center rounded-[8px] text-[#404040] hover:bg-[#fafafa] xl:hidden" onClick={() => setOpen(true)} aria-label="Otvori meni" aria-expanded={open}><Menu02 size={24} /></button>
           </div>
@@ -201,7 +186,7 @@ export default function SiteHeader({ info }: { info?: TopInfo }) {
             </ul>
           </div>
           <div className="grid grid-cols-2 gap-3 border-t border-[#e5e5e5] p-4">
-            <Link href="/eko-rizik/prijava" className={`flex h-11 items-center justify-center gap-1.5 rounded-[8px] text-[16px] font-semibold ${green}`}><Bell01 size={20} />Eko-alarm</Link>
+            <Link href="/eko-rizik/prijava" className={`flex h-11 items-center justify-center gap-2 rounded-[8px] text-[16px] font-semibold ${alarm}`}><span aria-hidden className="relative flex size-2.5"><span className="absolute inline-flex size-full animate-ping rounded-full bg-[#f04438] opacity-60" /><span className="relative inline-flex size-2.5 rounded-full bg-[#f04438]" /></span>Eko-alarm</Link>
             <Link href="/admin/prijava" className="flex h-11 items-center justify-center gap-1.5 rounded-[8px] text-[16px] font-semibold text-[#404040] ring-1 ring-inset ring-[#d4d4d4]"><User01 size={20} />Prijava</Link>
             <a href="tel:+38736551823" className="col-span-2 flex items-center justify-center gap-2 text-[14px] font-medium text-[#525252]"><Phone01 size={16} />+387 36 551 823 · info@mtto.gov.ba</a>
           </div>

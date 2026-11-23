@@ -348,3 +348,56 @@ export function Head({ k, t, s, dark, action }: { k?: string; t: ReactNode; s?: 
 /** Gumbi za tamni (GRAD) hero: primarni zeleni i staklasti sekundarni */
 export const HB1 = 'inline-flex h-11 items-center justify-center gap-1.5 rounded-[8px] border-2 border-white/10 bg-[var(--gr-600)] px-4 text-[16px] font-semibold text-white transition-colors hover:bg-[var(--gr-700)]';
 export const HB2 = 'inline-flex h-11 items-center justify-center gap-1.5 rounded-[8px] bg-white/10 px-4 text-[16px] font-semibold text-white ring-1 ring-inset ring-white/25 backdrop-blur-md transition-colors hover:bg-white/15';
+
+/* ── Untitled UI: Tag, kategorija i ikona tipa datoteke ───────────── */
+/** Tag (Untitled "Tags"): bijela podloga, sivi obrub, opcionalna tačka i broj. */
+export function Tag({ children, dot, count, href, size = 'md' }: { children: ReactNode; dot?: string; count?: number; href?: string; size?: 'sm' | 'md' }) {
+  const body = (
+    <span className={cx('inline-flex items-center gap-1.5 rounded-[6px] bg-white font-medium text-[#414651] ring-1 ring-inset ring-[#d5d7da] whitespace-nowrap', size === 'sm' ? 'px-2 py-0.5 text-[12px] leading-[18px]' : 'px-2.5 py-1 text-[14px] leading-5', href && 'hover:bg-[#fafafa]')}>
+      {dot && <span className="size-1.5 rounded-full" style={{ background: dot }} />}
+      {children}
+      {count != null && <span className="rounded-[3px] bg-[#f5f5f5] px-1 text-[12px] leading-[18px] text-[#414651] ring-1 ring-inset ring-[#e9eaeb]">{count}</span>}
+    </span>
+  );
+  return href ? <Link href={href}>{body}</Link> : body;
+}
+
+/** Boje rubrika (Untitled badge paleta) – ista boja za istu rubriku na cijelom portalu. */
+export const CATEGORY_TONE: Record<string, { bg: string; text: string; ring: string; dot: string }> = {
+  'Turizam': { bg: '#eff8ff', text: '#175cd3', ring: '#b2ddff', dot: '#2e90fa' },
+  'Zaštita okoliša': { bg: '#ecfdf3', text: '#067647', ring: '#abefc6', dot: '#17b26a' },
+  'Trgovina': { bg: '#fef6ee', text: '#b93815', ring: '#f9dbaf', dot: '#ef6820' },
+  'Javni poziv': { bg: '#f4f3ff', text: '#5925dc', ring: '#d9d6fe', dot: '#7a5af8' },
+  'Saopćenje': { bg: '#fdf2fa', text: '#c11574', ring: '#fcceee', dot: '#ee46bc' },
+  'Vijest': { bg: '#eef4ff', text: '#3538cd', ring: '#c7d7fe', dot: '#6172f3' },
+  'Opće': { bg: '#fafafa', text: '#414651', ring: '#e9eaeb', dot: '#a4a7ae' },
+};
+export function CategoryBadge({ name, size = 'sm' }: { name: string; size?: 'sm' | 'md' }) {
+  const t = CATEGORY_TONE[name] ?? CATEGORY_TONE['Opće'];
+  return <span className={cx('inline-flex items-center rounded-full font-medium whitespace-nowrap ring-1 ring-inset', size === 'sm' ? 'px-2 py-0.5 text-[12px] leading-[18px]' : 'px-2.5 py-0.5 text-[14px] leading-5')} style={{ background: t.bg, color: t.text, boxShadow: `inset 0 0 0 1px ${t.ring}` }}>{name}</span>;
+}
+/** "Badge group" iz Untitled blog kartice: [● Rubrika] + tekst. */
+export function MetaGroup({ label, children }: { label: string; children?: ReactNode }) {
+  const t = CATEGORY_TONE[label] ?? CATEGORY_TONE['Opće'];
+  return (
+    <span className="inline-flex items-center gap-2 rounded-[10px] bg-white py-1 pl-1 pr-2.5 text-[14px] leading-5 font-medium text-[#414651] ring-1 ring-inset ring-[#d5d7da]">
+      <span className="inline-flex items-center gap-1.5 rounded-[6px] bg-white px-2 py-0.5 ring-1 ring-inset ring-[#d5d7da] shadow-[0_1px_2px_rgba(10,13,18,0.05)]"><span className="size-2 rounded-full" style={{ background: t.dot }} />{label}</span>
+      {children}
+    </span>
+  );
+}
+
+const FILE_COLOR: Record<string, string> = { PDF: '#d92d20', DOC: '#155eef', DOCX: '#155eef', XLS: '#079455', XLSX: '#079455', CSV: '#079455', PPT: '#e62e05', PPTX: '#e62e05', ZIP: '#344054', JPG: '#7a5af8', JPEG: '#7a5af8', PNG: '#7a5af8', TXT: '#535862', KML: '#0e9384', GEOJSON: '#0e9384' };
+/** Ikona tipa datoteke (Untitled "File type icon", default stil): list s preklopljenim uglom i obojenom oznakom. */
+export function FileTypeIcon({ ext, size = 40 }: { ext: string; size?: number }) {
+  const e = (ext || 'FILE').toUpperCase().slice(0, 4);
+  const c = FILE_COLOR[e] ?? '#535862';
+  return (
+    <svg width={size} height={size} viewBox="0 0 40 40" fill="none" aria-label={`Datoteka ${e}`} role="img" className="shrink-0">
+      <path d="M8.75 4A3.25 3.25 0 0 1 12 .75h12.69L35.25 11.31V36A3.25 3.25 0 0 1 32 39.25H12A3.25 3.25 0 0 1 8.75 36V4Z" fill="#fff" stroke="#d5d7da" strokeWidth="1.5" />
+      <path d="M24.5 .5V8A3.5 3.5 0 0 0 28 11.5h7.5" stroke="#d5d7da" strokeWidth="1.5" />
+      <rect x="2" y="18" width={e.length > 3 ? 30 : 26} height="16" rx="2" fill={c} />
+      <text x={e.length > 3 ? 17 : 15} y="29.5" textAnchor="middle" fontFamily="Inter, system-ui, sans-serif" fontSize="9" fontWeight="700" fill="#fff">{e}</text>
+    </svg>
+  );
+}
