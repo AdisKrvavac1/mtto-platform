@@ -124,17 +124,16 @@ export default function TrgovinaPage() {
         <Container>
           <Head k="Radno vrijeme i neradni dani" t="Rade li trgovine u nedjelju?" />
           <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-stretch">
-          <div className="flex flex-col gap-6">
-            <div className={`flex flex-1 flex-col justify-center rounded-[20px] p-6 text-white md:p-8 ${GRAD}`}>
-              <p className="text-[40px] leading-[48px] md:text-[56px] md:leading-[64px] font-semibold tracking-[-0.02em]">Ne, uz izuzetke.</p>
-              <p className="mt-4 max-w-[640px] text-[18px] leading-7 text-[var(--br-100)]">Prema Zakonu o unutrašnjoj trgovini Federacije BiH („Službene novine FBiH”, br. 87/2024) prodajni objekti su nedjeljom zatvoreni, uz izuzetke propisane zakonom. Prva neradna nedjelja bila je 17. 11. 2024.</p>
-              <div className="mt-6 flex flex-wrap gap-2"><Badge tone="success">Federalni propis</Badge><Badge tone="gray">Izuzeci i rad za praznike: provjeriti s Ministarstvom</Badge></div>
+          <div className="grid auto-rows-fr gap-4 sm:grid-cols-2">
+            <div className={`flex flex-col rounded-[16px] p-6 text-white ${GRAD}`}>
+              <span className="flex size-12 items-center justify-center rounded-[10px] bg-white/10 ring-1 ring-inset ring-white/20"><Calendar size={24} /></span>
+              <p className="mt-5 text-[28px] leading-9 font-semibold tracking-[-0.02em]">Ne, uz izuzetke.</p>
+              <p className="mt-2 text-[14px] leading-5 text-[var(--br-100)]">Zakon o unutrašnjoj trgovini FBiH („Sl. novine FBiH”, br. 87/2024): prodajni objekti nedjeljom su zatvoreni, uz zakonom propisane izuzetke. Primjena od 17. 11. 2024.</p>
+              <div className="mt-auto flex flex-wrap gap-2 pt-4"><Badge tone="success">Federalni propis</Badge></div>
             </div>
-            <div className="grid gap-4 sm:grid-cols-3">
-              {([[ShoppingCart01, 'Prodajni objekti', 'Nedjeljom zatvoreni'], [CheckCircle, 'Zakonski izuzeci', 'Popis u zakonu, objavljuje Ministarstvo'], [AlertTriangle, 'Rad protivno propisu', 'Prijava tržišnoj inspekciji']] as const).map(([I, t, s]) => (
-                <Card key={t} className="uui-lift p-5"><FeaturedIcon icon={I} tone="brand" size="md" ripple={false} /><p className="mt-4 text-[16px] font-semibold text-[#171717]">{t}</p><p className="mt-1 text-[14px] text-[#525252]">{s}</p></Card>
-              ))}
-            </div>
+            {([[ShoppingCart01, 'Prodajni objekti', 'Nedjeljom zatvoreni, osim izuzetaka propisanih zakonom.', null], [CheckCircle, 'Zakonski izuzeci', 'Popis izuzetaka i rad za praznike objavljuje Ministarstvo.', 'Provjeriti s Ministarstvom'], [AlertTriangle, 'Rad protivno propisu', 'Otvoren objekt nedjeljom prijavite tržišnoj inspekciji.', null]] as const).map(([I, t, s, note]) => (
+              <Card key={t} className="uui-lift flex flex-col p-6"><FeaturedIcon icon={I} tone="brand" size="lg" ripple={false} /><p className="mt-5 text-[18px] font-semibold text-[#171717]">{t}</p><p className="mt-2 text-[14px] leading-5 text-[#525252]">{s}</p>{note && <div className="mt-auto pt-4"><Badge tone="gray">{note}</Badge></div>}</Card>
+            ))}
           </div>
           <Card className="flex flex-col p-6">
             <div className="flex items-center justify-between gap-2"><h3 className="text-[18px] font-semibold text-[#171717]">Kalendar neradnih dana</h3><Badge tone="warning">Demo</Badge></div>
