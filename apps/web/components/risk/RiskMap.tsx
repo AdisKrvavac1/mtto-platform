@@ -44,15 +44,19 @@ export default function RiskMap({ data, height = 560, dark = false }: { data: Ri
       const useOsm = () => { if (cancelled) return; if (base) m.removeLayer(base); base = osm().addTo(m); base.bringToBack(); setEngine('osm'); };
       if (GOOGLE_MAPS_KEY) {
         unsubAuth = onGoogleAuthFailure(useOsm);
+        // Plugin očekuje globalni L (window.L); bez njega import pada i karta ostaje na OpenStreetMapu.
+        (window as any).L = (window as any).L || L;
         Promise.all([loadGoogleMaps(), import('leaflet.gridlayer.googlemutant')])
           .then(([, mod]) => {
             if (cancelled) return;
-            const GoogleMutant = (mod as any).default;
+            const w = window as any;
+            const GoogleMutant = [(mod as any)?.default, (mod as any)?.default?.GoogleMutant, (L as any).GridLayer?.GoogleMutant, w.L?.GridLayer?.GoogleMutant].find((c) => typeof c === 'function');
+            if (!GoogleMutant) throw new Error('GoogleMutant nije učitan');
             base = new GoogleMutant({ type: 'roadmap', maxZoom: 18, styles: dark ? GOOGLE_DARK_STYLE : [] }).addTo(m);
             base.bringToBack();
             setEngine('google');
           })
-          .catch(useOsm);
+          .catch((e) => { console.warn('[karta] Google podloga nije dostupna, koristi se OpenStreetMap:', e?.message || e); useOsm(); });
       } else useOsm();
       (m as any).__L = L;
       map.current = m;
