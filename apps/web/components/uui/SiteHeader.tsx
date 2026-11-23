@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import {
   AlertTriangle, Bell01, Building07, CheckVerified01, ChevronDown, Clock, FileSearch02, Globe02, Image01, Map01, MarkerPin04, Menu02, Phone01,
-  Scales02, SearchLg, Sun, Ticket01, Trash03, User01, Users01, Waves, Wind01, XClose, Building02, Mail01,
+  Scales02, SearchLg, ShoppingCart01, Calendar, LineChartUp01, Sun, Ticket01, Trash03, User01, Users01, Waves, Wind01, XClose, Building02, Mail01,
 } from '@untitledui/icons';
 import type { Icon } from './index';
 
@@ -32,8 +32,17 @@ export const NAV: Nav[] = [
       { href: '/registri/upravljanje-otpadom', label: 'Upravljanje otpadom', desc: 'Registar operatera (Faza 2).', icon: Trash03 },
     ],
   },
-  { label: 'Natječaji i javne nabavke', href: '/vijesti?type=JAVNI_POZIV', match: [] },
+  { label: 'Natječaji', href: '/vijesti?type=JAVNI_POZIV', match: [] },
   { label: 'Propisi i obrasci', href: '/propisi', match: ['/propisi'] },
+  {
+    label: 'Trgovina', match: ['/trgovina'], items: [
+      { href: '/trgovina', label: 'Trgovina i potrošači', desc: 'Radno vrijeme, cijene, prava potrošača.', icon: ShoppingCart01 },
+      { href: '/trgovina#radno-vrijeme', label: 'Neradni dani', desc: 'Neradne nedjelje i praznici.', icon: Calendar },
+      { href: '/trgovina#cijene', label: 'Potrošačka korpa', desc: 'Kretanje cijena osnovnih proizvoda.', icon: LineChartUp01 },
+      { href: '/trgovina#otvaram-trgovinu', label: 'Otvaram trgovinu', desc: 'Vodič korak po korak za trgovce.', icon: Building07 },
+      { href: '/trgovina#potrosaci', label: 'Prava potrošača', desc: 'Reklamacije i prijava nepravilnosti.', icon: Scales02 },
+    ],
+  },
   {
     label: 'Turizam i baština', match: ['/turizam-i-bastina', '/turisticki-vodici', '/foto-albumi'], items: [
       { href: '/turizam-i-bastina', label: 'Turizam i baština', desc: 'Destinacija HNK, UNESCO baština i poticaji.', icon: Sun },
