@@ -1,7 +1,7 @@
 'use client';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
-import { adminFetch } from '@/lib/adminApi';
+import { adminFetch, useCan } from '@/lib/adminApi';
 import { Avatar, Badge, Card, CardHeader, EmptyState, F2Badge, Field, MetricCard, PageTitle, ProgressBar, StatusChip, btnPrimary, btnSecondary, iconBtn, input, td, th, tr, useToast } from '@/components/admin/ui';
 import { ClipboardCheck, Download01, Edit01, File06, LinkExternal01, Map01, MarkerPin02, Plus, SearchLg, Trash01, XClose } from '@untitledui/icons';
 import type { MapPoint } from '@/lib/api';
@@ -16,6 +16,7 @@ const ACTIVITIES = ['Industrija', 'Energetika', 'Otpad', 'Turizam', 'Ostalo'];
 const EMPTY = { id: '', registerNumber: '', operator: '', facility: '', activity: 'Industrija', municipality: 'Mostar', address: '', issuedAt: '', validUntil: '', status: 'VAZECA', description: '', lat: null as number | null, lng: null as number | null };
 
 export default function RegistryAdmin() {
+  const canEdit = useCan('registri', 'write');
   const [rows, setRows] = useState<Permit[]>([]);
   const [form, setForm] = useState<typeof EMPTY | null>(null);
   const [busy, setBusy] = useState(false);
@@ -78,7 +79,7 @@ export default function RegistryAdmin() {
     <>
       <PageTitle kicker="Unos, izmjena i objava dozvola. Svaki zapis odmah se prikazuje u javnom registru i na karti." crumbs={['Okolišne dozvole']} title="Registar okolišnih dozvola">
         <a href="/registri/okolisne-dozvole/izvoz?format=csv" className={btnSecondary}><Download01 />Izvoz CSV</a>
-        <button type="button" onClick={() => setForm({ ...EMPTY })} className={btnPrimary}><Plus />Nova dozvola</button>
+        {canEdit && <button type="button" onClick={() => setForm({ ...EMPTY })} className={btnPrimary}><Plus />Nova dozvola</button>}
       </PageTitle>
 
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
@@ -114,7 +115,7 @@ export default function RegistryAdmin() {
           <table className="w-full min-w-[1000px]">
             <thead><tr><th className={th}>Operater</th><th className={th}>Lokacija</th><th className={th}>Postrojenje</th><th className={th}>Status</th><th className={th}>Važi do</th><th className={th}>Prilozi</th><th className={th}><span className="sr-only">Radnje</span></th></tr></thead>
             <tbody>
-              {shown.length === 0 && <tr><td colSpan={7}><EmptyState icon={ClipboardCheck} title="Nema dozvola" action={<button type="button" onClick={() => setForm({ ...EMPTY })} className={btnPrimary}><Plus />Nova dozvola</button>}>Nijedan zapis ne odgovara filterima.</EmptyState></td></tr>}
+              {shown.length === 0 && <tr><td colSpan={7}><EmptyState icon={ClipboardCheck} title="Nema dozvola" action={canEdit ? <button type="button" onClick={() => setForm({ ...EMPTY })} className={btnPrimary}><Plus />Nova dozvola</button> : undefined}>Nijedan zapis ne odgovara filterima.</EmptyState></td></tr>}
               {shown.map((p) => {
                 const d = daysUntil(p.validUntil)!;
                 const soon = d >= 0 && d <= 90;

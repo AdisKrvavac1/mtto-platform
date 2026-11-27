@@ -1,7 +1,7 @@
 'use client';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
-import { adminFetch } from '@/lib/adminApi';
+import { adminFetch, useCan } from '@/lib/adminApi';
 import { Badge, Card, CardHeader, EmptyState, Field, PageTitle, btnPrimary, btnSecondary, iconBtn, input, useToast } from '@/components/admin/ui';
 import { Globe01, Map01, MarkerPin02, Plus, Trash01 } from '@untitledui/icons';
 import { LAYERS } from '@/components/site/MapView';
@@ -13,6 +13,7 @@ type Loc = { id: string; name: string; layer: MapPoint['layer']; description: st
 const EMPTY = { name: '', layer: 'TURIZAM' as MapPoint['layer'], description: '', lat: null as number | null, lng: null as number | null, link: '' };
 
 export default function MapAdmin() {
+  const canEdit = useCan('registri', 'write');
   const [rows, setRows] = useState<Loc[]>([]);
   const [f, setF] = useState(EMPTY);
   const [busy, setBusy] = useState(false);
@@ -57,7 +58,7 @@ export default function MapAdmin() {
             <Field label="Link na detalje" hint="Opcionalno"><input className={input} value={f.link} onChange={(e) => setF({ ...f, link: e.target.value })} placeholder="/vijesti/… ili https://…" /></Field>
             <div className="flex flex-col-reverse gap-3 border-t border-[#e5e5e5] pt-5 sm:flex-row sm:items-center sm:justify-between">
               <span className="flex items-center gap-1.5 text-[14px] text-[#525252]"><MarkerPin02 size={16} className={f.lat !== null ? 'text-[#7f56d9]' : 'text-[#d4d4d4]'} />{f.lat !== null ? `${f.lat}° N, ${f.lng}° E` : 'Lokacija nije postavljena'}</span>
-              <button className={btnPrimary} disabled={busy}><Plus />Objavi na karti</button>
+              <button className={btnPrimary} disabled={busy || !canEdit} title={canEdit ? undefined : 'Vaša uloga ne može dodavati lokacije'}><Plus />Objavi na karti</button>
             </div>
             <p className="text-[14px] text-[#737373]">Okolišne dozvole i ugostiteljski objekti pojavljuju se na karti automatski, iz svojih registara.</p>
           </form>

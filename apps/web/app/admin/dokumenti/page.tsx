@@ -1,6 +1,6 @@
 'use client';
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
-import { adminFetch } from '@/lib/adminApi';
+import { adminFetch, useCan } from '@/lib/adminApi';
 import { Badge, Card, CardHeader, EmptyState, F2Badge, Field, MetricCard, PageTitle, ProgressBar, StatusChip, btnPrimary, btnSecondary, iconBtn, input, td, th, tr, useToast } from '@/components/admin/ui';
 import { Archive, Clock, Download01, Edit01, Folder, FolderClosed, Globe01, SearchLg, ShieldTick, Trash01, UploadCloud02, XClose } from '@untitledui/icons';
 import { DOC_TYPE, dateShort, dateTime, fileExt, fileSize } from '@/lib/format';
@@ -12,6 +12,7 @@ const FOLDERS: [string, string][] = [['ZAKON', '01_Zakoni'], ['PRAVILNIK', '02_P
 const EXT_BG: Record<string, string> = { PDF: 'bg-[#d92d20]', DOC: 'bg-[#155eef]', DOCX: 'bg-[#155eef]', XLS: 'bg-[#079455]', XLSX: 'bg-[#079455]' };
 
 export default function DocumentsAdmin() {
+  const canEdit = useCan('dokumenti', 'write');
   const [all, setAll] = useState<Doc[] | null>(null);
   const [folder, setFolder] = useState('');
   const [quick, setQuick] = useState('');
@@ -72,7 +73,7 @@ export default function DocumentsAdmin() {
     <>
       <PageTitle kicker="Zakoni, pravilnici, obrasci i prilozi objava na jednom mjestu." crumbs={['Dokumenti i propisi']} title="Dokumenti i propisi">
         <a href="/admin/korisnici#audit" className={btnSecondary}><ShieldTick />Dnevnik</a>
-        <button type="button" onClick={() => fileInput.current?.click()} className={btnPrimary}><UploadCloud02 />Učitaj dokument</button>
+        {canEdit && <button type="button" onClick={() => fileInput.current?.click()} className={btnPrimary}><UploadCloud02 />Učitaj dokument</button>}
       </PageTitle>
 
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">

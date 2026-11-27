@@ -1,9 +1,17 @@
 'use client';
+import { useEffect, useState } from 'react';
 // Klijentski pozivi prema /api/admin/*. Sesija je u httpOnly kolačiću (F1-03): JavaScript je ne vidi.
 // U sessionStorage je samo ime i uloga korisnika za prikaz, bez ikakvog tajnog podatka.
 const USER = 'mtto_cms_user';
 
-export type CmsUser = { id: string; name: string; email: string; role: string; mfaEnabled?: boolean };
+export type Module = 'kontrolna' | 'objave' | 'dokumenti' | 'mediji' | 'registri' | 'eko' | 'uvoz' | 'korisnici' | 'dnevnik';
+export type Action = 'read' | 'write' | 'delete' | 'publish';
+export type CmsUser = { id: string; name: string; email: string; role: string; roleLabel?: string; permissions?: Partial<Record<Module, Action[]>>; mfaEnabled?: boolean };
+
+/** Prikaz u sučelju (meni, dugmad). Server svejedno provjerava svako pravo. */
+export function can(u: CmsUser | null, module: Module, action: Action = 'read') {
+  return !!u?.permissions?.[module]?.includes(action);
+}
 
 /** Da li je korisnik prijavljen (prema podacima za prikaz; server svejedno provjerava kolačić). */
 export function isSignedIn() {
@@ -64,8 +72,27 @@ export async function verifyMfa(mfaToken: string, code: string) {
 }
 
 /** Osvježava podatke za prikaz nakon promjene (npr. uključivanja MFA); server je već postavio novi kolačić. */
+/** Svježa uloga i prava sa servera (npr. nakon što administrator promijeni ulogu). */
+export async function refreshUser() {
+  const me = await adminFetch<CmsUser>('/auth/me');
+  updateUser({ id: me.id, name: me.name, email: me.email, role: me.role, roleLabel: me.roleLabel, permissions: me.permissions, mfaEnabled: me.mfaEnabled });
+  return getUser();
+}
+
 export function updateUser(patch: Partial<CmsUser> = {}) {
   const u = getUser();
   if (u) setSession({ ...u, ...patch });
   if (typeof window !== 'undefined') window.dispatchEvent(new Event('mtto-user'));
+}
+
+/** Da li prijavljeni korisnik ima pravo (za skrivanje dugmadi). Do učitavanja prava vraća true, server svejedno provjerava. */
+export function useCan(module: Module, action: Action = 'write') {
+  const [ok, setOk] = useState(true);
+  useEffect(() => {
+    const f = () => { const u = getUser(); setOk(!u?.permissions || can(u, module, action)); };
+    f();
+    window.addEventListener('mtto-user', f);
+    return () => window.removeEventListener('mtto-user', f);
+  }, [module, action]);
+  return ok;
 }

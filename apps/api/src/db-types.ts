@@ -27,9 +27,18 @@ export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
 export interface AuditLog {
   action: string;
+  changes: Json | null;
   createdAt: Generated<Timestamp>;
+  entity: string | null;
+  entityId: string | null;
+  hash: string | null;
   id: string;
+  ip: string | null;
+  prevHash: string | null;
+  requestId: string | null;
+  seq: Generated<Int8>;
   target: string;
+  userId: string | null;
   userName: string;
 }
 
@@ -195,10 +204,15 @@ export interface SchemaMigrations {
 }
 
 export interface Users {
+  active: Generated<boolean>;
   createdAt: Generated<Timestamp>;
+  createdBy: string | null;
   email: string;
   failedLogins: Generated<number>;
   id: string;
+  inviteExpires: Timestamp | null;
+  inviteHash: string | null;
+  lastLoginAt: Timestamp | null;
   lockedUntil: Timestamp | null;
   mfaEnabled: Generated<boolean>;
   mfaLastStep: Generated<Int8>;
@@ -208,6 +222,7 @@ export interface Users {
   name: string;
   passwordHash: string;
   role: Generated<string>;
+  sessionVersion: Generated<number>;
 }
 
 export interface DB {

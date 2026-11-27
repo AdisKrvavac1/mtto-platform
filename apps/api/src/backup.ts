@@ -99,6 +99,12 @@ export async function restoreBackup(file: Buffer, privateKeyPem: string, target:
       }
       counts[t] = byTable.get(t)!.length;
     }
+    // brojači (serial) nastavljaju od najvećeg vraćenog broja, inače bi novi zapisi dobili postojeće brojeve
+    const seqs = await c.query(`SELECT s.oid::regclass::text s, t.relname t, a.attname col FROM pg_class s
+      JOIN pg_depend d ON d.objid=s.oid AND d.deptype='a' JOIN pg_class t ON t.oid=d.refobjid
+      JOIN pg_attribute a ON a.attrelid=t.oid AND a.attnum=d.refobjsubid
+      JOIN pg_namespace n ON n.oid=t.relnamespace WHERE s.relkind='S' AND n.nspname='public'`);
+    for (const r of seqs.rows) if (r.s) await c.query(`SELECT setval($1, GREATEST((SELECT max("${r.col}") FROM "${r.t}"), 1))`, [r.s]);
     await c.query('COMMIT');
   } catch (e) {
     await c.query('ROLLBACK');

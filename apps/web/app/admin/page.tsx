@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { adminFetch } from '@/lib/adminApi';
+import { adminFetch, useCan } from '@/lib/adminApi';
 import { dateShort, dateTime } from '@/lib/format';
 import { AlertTriangle, Announcement01, ArrowRight, CheckCircle, LinkExternal01, Plus, XClose } from '@untitledui/icons';
 import { Avatar, Badge, BarChart, ButtonGroup, Card, CardHeader, EmptyState, MetricCard, ProgressBar, StatusChip, WelcomeHeader, btnPrimary, btnSecondary, btnTertiary, td, th, tr } from '@/components/admin/ui';
@@ -22,6 +22,7 @@ const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt
 type Range = '12' | '6' | '3';
 
 export default function Dashboard() {
+  const canPost = useCan('objave', 'write');
   const [d, setD] = useState<Dash | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [range, setRange] = useState<Range>('12');
@@ -56,7 +57,7 @@ export default function Dashboard() {
       <WelcomeHeader
         title={`Dobro došli, ${first}`}
         sub="Pregled sadržaja portala, registara i prijava građana."
-        actions={<><a href="/" target="_blank" rel="noopener" className={btnSecondary}><LinkExternal01 />Javni portal</a><Link href="/admin/objave/nova" className={btnPrimary}><Plus />Nova objava</Link></>}
+        actions={<><a href="/" target="_blank" rel="noopener" className={btnSecondary}><LinkExternal01 />Javni portal</a>{canPost && <Link href="/admin/objave/nova" className={btnPrimary}><Plus />Nova objava</Link>}</>}
       />
 
       {d.expiring.length > 0 && !hideAlert && (
@@ -101,7 +102,7 @@ export default function Dashboard() {
       <div className="mt-6 grid gap-6 xl:grid-cols-[1fr_400px]">
         <Card className="overflow-hidden">
           <CardHeader title="Nedavne izmjene" badge={<Badge tone="brand">{d.recentPosts.length} objava</Badge>} actions={<Link href="/admin/objave" className={btnSecondary}>Sve objave</Link>} />
-          {d.recentPosts.length === 0 ? <EmptyState icon={Announcement01} title="Još nema objava" action={<Link href="/admin/objave/nova" className={btnPrimary}><Plus />Nova objava</Link>}>Prva objava pojavit će se ovdje.</EmptyState> : (
+          {d.recentPosts.length === 0 ? <EmptyState icon={Announcement01} title="Još nema objava" action={canPost ? <Link href="/admin/objave/nova" className={btnPrimary}><Plus />Nova objava</Link> : undefined}>Prva objava pojavit će se ovdje.</EmptyState> : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[640px]">
                 <thead><tr><th className={th}>Naslov</th><th className={th}>Vrsta</th><th className={th}>Status</th><th className={th}>Izmijenjeno</th></tr></thead>

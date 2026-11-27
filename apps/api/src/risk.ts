@@ -3,6 +3,8 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
 import { Db, id } from './db';
 import { FileStore } from './storage';
+import { AuditService } from './audit';
+import { Can } from './rbac';
 import { AuthGuard } from './auth';
 import { toFloat } from './util';
 import { Throttle } from '@nestjs/throttler';
@@ -327,43 +329,48 @@ function landslideData(b: any) {
 @Controller('admin')
 @UseGuards(AuthGuard)
 export class AdminRiskController {
-  constructor(private db: Db, private files: FileStore) {}
-  private log(req: any, action: string, target: string) {
-    return this.db.insert('audit_log', { id: id(), userName: req.user?.name ?? 'Nepoznat', action, target });
-  }
+  constructor(private db: Db, private files: FileStore, private audit: AuditService) {}
 
   @Get('landslides')
+  @Can('eko', 'read')
   list() { return this.db.q(`SELECT * FROM landslides ORDER BY "updatedAt" DESC`); }
 
   @Post('landslides')
+  @Can('eko', 'write')
   async create(@Body() b: any, @Req() req: any) {
     const d = landslideData(b);
     if (!d.name || !d.municipality || d.lat == null || d.lng == null) throw new BadRequestException('Naziv, općina i lokacija su obavezni');
     const l = await this.db.insert('landslides', { id: id(), ...d });
-    await this.log(req, 'Dodao/la klizište u registar', l.name);
+    await this.audit.log(req, { action: 'Dodao/la klizište u registar', entity: 'klizište', entityId: l.id, target: l.name, after: l });
     return l;
   }
 
   @Patch('landslides/:id')
+  @Can('eko', 'write')
   async update(@Param('id') lid: string, @Body() b: any, @Req() req: any) {
+    const before = await this.db.one<any>(`SELECT * FROM landslides WHERE "id"=$1`, [lid]);
+    if (!before) throw new NotFoundException();
     const l = await this.db.update<any>('landslides', lid, landslideData(b), true);
     if (!l) throw new NotFoundException();
-    await this.log(req, 'Ažurirao/la klizište', l.name);
+    await this.audit.log(req, { action: 'Ažurirao/la klizište', entity: 'klizište', entityId: lid, target: l.name, before, after: l });
     return l;
   }
 
   @Delete('landslides/:id')
+  @Can('eko', 'delete')
   async remove(@Param('id') lid: string, @Req() req: any) {
-    const l = await this.db.one<any>(`DELETE FROM landslides WHERE "id"=$1 RETURNING "name"`, [lid]);
+    const l = await this.db.one<any>(`DELETE FROM landslides WHERE "id"=$1 RETURNING *`, [lid]);
     if (!l) throw new NotFoundException();
-    await this.log(req, 'Uklonio/la klizište iz registra', l.name);
+    await this.audit.log(req, { action: 'Uklonio/la klizište iz registra', entity: 'klizište', entityId: lid, target: l.name, before: l, after: null });
     return { ok: true };
   }
 
   @Get('eco-reports')
+  @Can('eko', 'read')
   reports() { return this.db.q(`SELECT r.*, ${PHOTOS_AGG} FROM eco_reports r ORDER BY r."createdAt" DESC LIMIT 500`); }
 
   @Get('eco-report-photos/:pid')
+  @Can('eko', 'read')
   async photo(@Param('pid') pid: string, @Res() res: Response) {
     const p = await this.db.one<any>(`SELECT "mimeType","data","storageKey" FROM eco_report_photos WHERE "id"=$1`, [pid]);
     if (!p) throw new NotFoundException();
@@ -374,7 +381,10 @@ export class AdminRiskController {
   }
 
   @Patch('eco-reports/:id')
+  @Can('eko', 'write')
   async updateReport(@Param('id') rid: string, @Body() b: any, @Req() req: any) {
+    const before = await this.db.one<any>(`SELECT "status","isPublic","note","publicNote","photosPublic","lat","lng" FROM eco_reports WHERE "id"=$1`, [rid]);
+    if (!before) throw new NotFoundException();
     const d: any = {};
     if (b.status !== undefined) { if (!RP_STATUS.includes(b.status)) throw new BadRequestException('Nepoznat status'); d.status = b.status; }
     if (b.isPublic !== undefined) d.isPublic = !!b.isPublic;
@@ -394,7 +404,8 @@ export class AdminRiskController {
     }
     const r = await this.db.update<any>('eco_reports', rid, d, true);
     if (!r) throw new NotFoundException();
-    await this.log(req, `Ažurirao/la eko-prijavu (${r.status}${r.isPublic ? ', javno' : ''})`, r.code);
+    const after = { status: r.status, isPublic: r.isPublic, note: r.note, publicNote: r.publicNote, photosPublic: r.photosPublic, lat: r.lat, lng: r.lng };
+    await this.audit.log(req, { action: `Ažurirao/la eko-prijavu (${r.status}${r.isPublic ? ', javno' : ''})`, entity: 'eko-prijava', entityId: rid, target: r.code, before, after });
     return r;
   }
 }

@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { adminFetch } from '@/lib/adminApi';
+import { adminFetch, useCan } from '@/lib/adminApi';
 import { dateShort, POST_TYPE } from '@/lib/format';
 import { Announcement01, ArrowLeft, ArrowRight, Download01, Edit01, Eye, LinkExternal01, Plus, SearchLg, Trash01, UploadCloud02, Archive } from '@untitledui/icons';
 import { Badge, Card, CardHeader, EmptyState, MetricCard, PageTitle, StatusChip, Tabs, btnPrimary, btnSecondary, iconBtn, input, td, th, tr, useToast } from '@/components/admin/ui';
@@ -12,6 +12,7 @@ const PAGE = 10;
 type St = '' | 'OBJAVLJENO' | 'NACRT' | 'ZAKAZANO';
 
 export default function PostsAdmin() {
+  const canPost = useCan('objave', 'write');
   const [all, setAll] = useState<Row[] | null>(null);
   const [status, setStatus] = useState<St>('');
   const [type, setType] = useState('');
@@ -63,7 +64,7 @@ export default function PostsAdmin() {
     <>
       <PageTitle kicker="Vijesti, javni pozivi i saopćenja objavljeni na portalu." crumbs={['Objave i vijesti']} title="Objave i vijesti">
         <button type="button" onClick={exportCsv} className={btnSecondary}><Download01 />Izvoz CSV</button>
-        <Link href="/admin/objave/nova" className={btnPrimary}><Plus />Nova objava</Link>
+        {canPost && <Link href="/admin/objave/nova" className={btnPrimary}><Plus />Nova objava</Link>}
       </PageTitle>
 
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
@@ -105,7 +106,7 @@ export default function PostsAdmin() {
             </tr></thead>
             <tbody>
               {all === null && <tr><td colSpan={7} className={td}><div className="h-24 animate-pulse rounded-[8px] bg-[#f5f5f5]" /></td></tr>}
-              {all && rows.length === 0 && <tr><td colSpan={7}><EmptyState icon={Announcement01} title="Nema objava" action={<Link href="/admin/objave/nova" className={btnPrimary}><Plus />Nova objava</Link>}>Nijedna objava ne odgovara filterima.</EmptyState></td></tr>}
+              {all && rows.length === 0 && <tr><td colSpan={7}><EmptyState icon={Announcement01} title="Nema objava" action={canPost ? <Link href="/admin/objave/nova" className={btnPrimary}><Plus />Nova objava</Link> : undefined}>Nijedna objava ne odgovara filterima.</EmptyState></td></tr>}
               {shown.map((r) => (
                 <tr key={r.id} className={tr}>
                   <td className={`${td} !pr-0`}><input type="checkbox" className={check} checked={picked.has(r.id)} onChange={() => toggle(r.id)} aria-label={`Označi ${r.title}`} /></td>

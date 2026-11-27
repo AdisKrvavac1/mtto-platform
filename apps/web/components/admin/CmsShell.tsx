@@ -2,30 +2,30 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import { getUser, isSignedIn, logout, type CmsUser } from '@/lib/adminApi';
+import { can, getUser, isSignedIn, logout, refreshUser, type CmsUser, type Module } from '@/lib/adminApi';
 import { AlertTriangle, Announcement01, BarChartSquare02, Building07, ClockRewind, Folder, Image01, Inbox01, LinkExternal01, LogOut01, Map01, Menu02, SearchLg, ClipboardCheck, ShieldTick, Users01, XClose } from '@untitledui/icons';
 
 type Icon = React.FC<React.SVGProps<SVGSVGElement> & { size?: number }>;
-type Item = { href: string; label: string; icon: Icon; f2?: boolean };
+type Item = { href: string; label: string; icon: Icon; f2?: boolean; perm?: Module };
 
 const NAV: { group?: string; items: Item[] }[] = [
-  { items: [{ href: '/admin', label: 'Kontrolna ploča', icon: BarChartSquare02 }] },
+  { items: [{ href: '/admin', label: 'Kontrolna ploča', icon: BarChartSquare02, perm: 'kontrolna' }] },
   {
     group: 'Sadržaj portala',
     items: [
-      { href: '/admin/objave', label: 'Objave i vijesti', icon: Announcement01 },
-      { href: '/admin/dokumenti', label: 'Dokumenti i propisi', icon: Folder },
-      { href: '/admin/multimedija', label: 'Multimedija', icon: Image01, f2: true },
-      { href: '/admin/mapa', label: 'Lokacije na karti', icon: Map01 },
-      { href: '/admin/eko-rizik', label: 'Eko-rizik i prijave', icon: AlertTriangle },
+      { href: '/admin/objave', label: 'Objave i vijesti', icon: Announcement01, perm: 'objave' },
+      { href: '/admin/dokumenti', label: 'Dokumenti i propisi', icon: Folder, perm: 'dokumenti' },
+      { href: '/admin/multimedija', label: 'Multimedija', icon: Image01, perm: 'mediji', f2: true },
+      { href: '/admin/mapa', label: 'Lokacije na karti', icon: Map01, perm: 'registri' },
+      { href: '/admin/eko-rizik', label: 'Eko-rizik i prijave', icon: AlertTriangle, perm: 'eko' },
     ],
   },
   {
     group: 'Registri i administracija',
     items: [
-      { href: '/admin/registri', label: 'Okolišne dozvole', icon: ClipboardCheck },
+      { href: '/admin/registri', label: 'Okolišne dozvole', icon: ClipboardCheck, perm: 'registri' },
       { href: '/admin/resorni-odjeli', label: 'Resorni odjeli', icon: Building07, f2: true },
-      { href: '/admin/korisnici', label: 'Korisnici i dnevnik', icon: Users01, f2: true },
+      { href: '/admin/korisnici', label: 'Korisnici i dnevnik', icon: Users01, perm: 'korisnici' },
       { href: '/admin/predmeti', label: 'E-pisarnica', icon: Inbox01, f2: true },
     ],
   },
@@ -38,7 +38,7 @@ export default function CmsShell({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
   const [open, setOpen] = useState(false);
   const search = useRef<HTMLInputElement>(null);
-  const isLogin = path === '/admin/prijava';
+  const isLogin = path === '/admin/prijava' || path === '/admin/aktivacija';
 
   useEffect(() => {
     if (isLogin) { setReady(true); return; }
@@ -46,6 +46,9 @@ export default function CmsShell({ children }: { children: React.ReactNode }) {
     setUser(getUser());
     setReady(true);
   }, [isLogin, router, path]);
+
+  // uloga i prava sa servera pri otvaranju CMS-a (promjena uloge vrijedi bez ponovne prijave u drugom tabu)
+  useEffect(() => { if (!isLogin && isSignedIn()) refreshUser().then(setUser).catch(() => {}); }, [isLogin]);
 
   useEffect(() => {
     const u = () => setUser(getUser());
@@ -83,7 +86,7 @@ export default function CmsShell({ children }: { children: React.ReactNode }) {
           </form>
         </div>
         <nav className="mt-5 flex-1 overflow-y-auto px-4">
-          {NAV.map((g, gi) => (
+          {NAV.map((g) => ({ ...g, items: g.items.filter((i) => !i.perm || !user?.permissions || can(user, i.perm)) })).filter((g) => g.items.length).map((g, gi) => (
             <div key={gi} className={gi ? 'mt-4' : ''}>
               {g.group && <p className="px-3 pb-1 text-[12px] leading-[18px] font-semibold text-[#737373]">{g.group}</p>}
               <ul className="flex flex-col gap-0.5">
@@ -106,12 +109,12 @@ export default function CmsShell({ children }: { children: React.ReactNode }) {
         <div className="flex flex-col gap-4 px-4 pb-6 pt-4">
           <ul className="flex flex-col gap-0.5">
             <li><a href="/" target="_blank" rel="noopener" className={item(false)}><LinkExternal01 size={20} className="text-[#a3a3a3]" /><span className="flex-1">Javni portal</span></a></li>
-            <li><Link href="/admin/korisnici#audit" className={item(false)}><ClockRewind size={20} className="text-[#a3a3a3]" /><span className="flex-1">Dnevnik aktivnosti</span></Link></li>
+            {can(user, 'dnevnik') && <li><Link href="/admin/korisnici#dnevnik" className={item(false)}><ClockRewind size={20} className="text-[#a3a3a3]" /><span className="flex-1">Dnevnik aktivnosti</span></Link></li>}
             <li><Link href="/admin/sigurnost" aria-current={path.startsWith('/admin/sigurnost') ? 'page' : undefined} className={item(path.startsWith('/admin/sigurnost'))}><ShieldTick size={20} className="text-[#a3a3a3]" /><span className="flex-1">Sigurnost naloga</span>{user && !user.mfaEnabled && <span className="size-2 rounded-full bg-[#f79009]" aria-label="MFA nije uključen" />}</Link></li>
           </ul>
           <div className="relative flex items-center gap-3 rounded-[12px] p-3 ring-1 ring-inset ring-[#e5e5e5]">
             <span className="relative flex size-10 shrink-0 items-center justify-center rounded-full bg-[#f9f5ff] text-[14px] font-semibold text-[#7f56d9] ring-1 ring-inset ring-black/10">{ini}<span className="absolute bottom-0 right-0 size-2.5 rounded-full bg-[#17b26a] ring-[1.5px] ring-white" /></span>
-            <span className="flex min-w-0 flex-1 flex-col"><span className="truncate text-[14px] leading-5 font-semibold text-[#171717]">{name}</span><span className="truncate text-[14px] leading-5 text-[#525252]">{user?.email ?? (user?.role === 'ADMIN' ? 'Administrator' : 'Urednik')}</span></span>
+            <span className="flex min-w-0 flex-1 flex-col"><span className="truncate text-[14px] leading-5 font-semibold text-[#171717]">{name}</span><span className="truncate text-[14px] leading-5 text-[#525252]" title={user?.email}>{user?.roleLabel ?? user?.email ?? 'Urednik'}</span></span>
             <button type="button" onClick={async () => { await logout(); router.replace('/admin/prijava'); }} className="rounded-[6px] p-1.5 text-[#a3a3a3] hover:bg-[#fafafa] hover:text-[#d92d20]" title="Odjava" aria-label="Odjava"><LogOut01 size={20} /></button>
           </div>
         </div>
