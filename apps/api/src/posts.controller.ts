@@ -9,7 +9,10 @@
  * Saradnik piše i šalje na odobrenje; urednik i administrator objavljuju. Uz tenants.settings.fourEyes
  * urednik ne može sam odobriti objavu koju je napisao ili poslao na odobrenje (administrator može, uz upis u dnevnik).
  */
-import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, Injectable, NotFoundException, OnModuleInit, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, Injectable, NotFoundException, OnModuleInit, Param, Patch, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { Throttle } from '@nestjs/throttler';
+import type { Response } from 'express';
 import { Db, Where, currentTenant, id } from './db';
 import { AuthGuard } from './auth';
 import { AuditService } from './audit';
@@ -50,7 +53,7 @@ type Action = 'submit' | 'return' | 'publish' | 'schedule' | 'withdraw' | 'draft
 @Controller('admin/posts')
 @UseGuards(AuthGuard)
 export class PostsController {
-  constructor(private db: Db, private audit: AuditService) {}
+  constructor(private db: Db, private audit: AuditService, private jwt: JwtService) {}
 
   private async fourEyes(): Promise<boolean> {
     const t = await this.db.one<{ settings: any }>(`SELECT "settings" FROM tenants WHERE "id"=$1`, [currentTenant()]);
@@ -210,6 +213,22 @@ export class PostsController {
     return r;
   }
 
+  /**
+   * F2-02: link za pregled prije objave. Važi 72 sata, prikazuje trenutni sadržaj bez obzira na status,
+   * stranica ima noindex. Može se proslijediti nekome bez naloga (npr. šefu sektora) na provjeru.
+   */
+  @Post(':id/preview-link')
+  @Can('objave', 'read')
+  async previewLink(@Param('id') postId: string, @Req() req: any) {
+    const p = await this.db.one<any>(`SELECT "id","title" FROM posts WHERE "id"=$1`, [postId]);
+    if (!p) throw new NotFoundException();
+    const hours = 72;
+    const token = await this.jwt.signAsync({ purpose: 'preview', pid: p.id, tid: currentTenant() }, { expiresIn: `${hours}h` });
+    await this.audit.log(req, { action: 'Napravio/la link za pregled prije objave', entity: 'objava', entityId: p.id, target: p.title });
+    const base = (process.env.PUBLIC_URL || '').replace(/\/$/, '');
+    return { url: `${base}/pregled/${token}`, expiresAt: new Date(Date.now() + hours * 3600_000).toISOString() };
+  }
+
   @Delete(':id')
   @Can('objave', 'delete')
   async remove(@Param('id') postId: string, @Req() req: any) {
@@ -240,5 +259,26 @@ export class PostScheduler implements OnModuleInit {
         for (const r of rows) await this.audit.log(null, { action, entity: 'objava', entityId: r.id, target: r.title, tenantId: r.tenantId }, { name: 'Sistem (raspored)' });
       }
     }));
+  }
+}
+
+/** Javni pregled objave preko potpisanog linka (bez prijave). */
+@Controller('preview')
+export class PreviewController {
+  constructor(private db: Db, private jwt: JwtService) {}
+
+  @Get(':token')
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
+  async preview(@Param('token') token: string, @Res({ passthrough: true }) res: Response) {
+    let t: { purpose?: string; pid?: string; tid?: string; exp?: number };
+    try { t = await this.jwt.verifyAsync(token); } catch { throw new NotFoundException('Link za pregled nije ispravan ili je istekao.'); }
+    if (t.purpose !== 'preview' || !t.pid || t.tid !== currentTenant()) throw new NotFoundException('Link za pregled nije ispravan ili je istekao.');
+    const post = await this.db.one<any>(`SELECT * FROM posts WHERE "id"=$1`, [t.pid]);
+    if (!post) throw new NotFoundException('Objava više ne postoji.');
+    post.documents = await this.db.q(`SELECT "id","title","docType","sector","number","issuedAt","status","description","fileName","mimeType","size","downloads","isDemo","postId","permitId","createdAt" FROM documents WHERE "postId"=$1 ORDER BY "createdAt"`, [post.id]);
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+    for (const k of ['createdBy', 'submittedBy', 'approvedBy', 'reviewNote']) delete post[k];
+    return { ...post, previewExpiresAt: t.exp ? new Date(t.exp * 1000).toISOString() : null };
   }
 }

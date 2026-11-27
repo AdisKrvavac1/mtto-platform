@@ -1,12 +1,13 @@
 'use client';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { marked } from 'marked';
+import dynamic from 'next/dynamic';
 import { adminFetch, getUser, useCan } from '@/lib/adminApi';
 import { dateTime } from '@/lib/format';
 import { Badge, Card, CardHeader, F2Badge, Field, PageTitle, StatusChip, btnPrimary, btnSecondary, btnTertiary, iconBtn, input, useToast } from '@/components/admin/ui';
 import { AlertTriangle, Archive, ClockRewind, FlipBackward, Send01, Bold01, Calendar, CheckCircle, Clock, Download01, Edit01, Eye, Globe01, Heading01, Heading02, Image01, Italic01, LinkExternal01, Link01, Lock01, Paperclip, Dotpoints01, List, MessageTextSquare01, Save01, ShieldTick, Strikethrough01, Table, Trash01, UploadCloud02, XClose, File06 } from '@untitledui/icons';
 import { fileSize } from '@/lib/format';
+const RichEditor = dynamic(() => import('./RichEditor'), { ssr: false, loading: () => <div className="h-[440px] animate-pulse bg-[#fafafa]" /> });
 
 type Post = {
   id?: string; slug?: string; type: string; category: string; title: string; excerpt: string; body: string; coverImage: string | null;
@@ -52,9 +53,7 @@ export default function PostEditor({ id }: { id?: string }) {
   const [p, setP] = useState<Post>(EMPTY);
   const [loaded, setLoaded] = useState(!id);
   const [busy, setBusy] = useState(false);
-  const [preview, setPreview] = useState(false);
   const [savedAt, setSavedAt] = useState<string | null>(null);
-  const ta = useRef<HTMLTextAreaElement>(null);
   const toast = useToast();
   const publisher = useCan('objave', 'publish');
   const canDelete = useCan('objave', 'delete');
@@ -76,25 +75,6 @@ export default function PostEditor({ id }: { id?: string }) {
   const locked = (p.status === 'NA_ODOBRENJU' || LIVE.includes(p.status) || p.status === 'POVUCENO') && !publisher;
   const ownWork = !!me && (p.createdBy === me || p.submittedBy === me);
   const needsSecondPair = !!p.fourEyes && ownWork && getUser()?.role !== 'ADMIN';
-  const html = useMemo(() => marked.parse(p.body || '', { async: false, breaks: true }) as string, [p.body]);
-
-  function wrap(before: string, after = before, placeholder = 'tekst') {
-    const el = ta.current;
-    if (!el) return;
-    const { selectionStart: s, selectionEnd: e, value } = el;
-    const sel = value.slice(s, e) || placeholder;
-    const next = value.slice(0, s) + before + sel + after + value.slice(e);
-    set('body', next);
-    requestAnimationFrame(() => { el.focus(); el.setSelectionRange(s + before.length, s + before.length + sel.length); });
-  }
-  function linePrefix(prefix: string) {
-    const el = ta.current;
-    if (!el) return;
-    const { selectionStart: s, value } = el;
-    const ls = value.lastIndexOf('\n', s - 1) + 1;
-    set('body', value.slice(0, ls) + prefix + value.slice(ls));
-    requestAnimationFrame(() => el.focus());
-  }
 
   /** Sprema sadržaj (svaka izmjena postaje nova verzija). Vraća id objave ili null. */
   async function save(quiet = false): Promise<string | null> {
@@ -163,6 +143,23 @@ export default function PostEditor({ id }: { id?: string }) {
     } catch (e: any) { toast.err(e.message); }
   }
 
+  async function uploadImage(f: File): Promise<string | null> {
+    const fd = new FormData();
+    fd.append('file', f);
+    try { return (await adminFetch<{ url: string }>('/admin/media', { method: 'POST', body: fd })).url; } catch (e: any) { toast.err(e.message); return null; }
+  }
+
+  /** Link za pregled prije objave (72 h), otvara se u novom tabu. */
+  async function openPreview() {
+    const pid = !p.id || (dirty && !locked) ? await save(true) : p.id;
+    if (!pid) return;
+    const w = window.open('about:blank', '_blank');
+    try {
+      const r = await adminFetch<{ url: string }>(`/admin/posts/${pid}/preview-link`, { method: 'POST' });
+      if (w) w.location.href = r.url; else window.location.href = r.url;
+    } catch (e: any) { w?.close(); toast.err(e.message); }
+  }
+
   async function uploadCover(f: File) {
     const fd = new FormData();
     fd.append('file', f);
@@ -202,8 +199,6 @@ export default function PostEditor({ id }: { id?: string }) {
   }
 
   if (!loaded) return <div className="h-64 animate-pulse rounded-[12px] bg-[#f5f5f5]" />;
-  const words = (p.body.match(/\S+/g) ?? []).length;
-  const tb = iconBtn + ' !size-8';
   const fileTone = (n: string) => /\.pdf$/i.test(n) ? ['PDF', 'bg-[#d92d20]'] : /\.xlsx?$/i.test(n) ? ['XLS', 'bg-[#079455]'] : ['DOC', 'bg-[#155eef]'];
   const toggleRow = (label: string, Ico: any) => (
     <label className="flex items-center justify-between gap-3 text-[14px] text-[#737373]"><span className="flex items-center gap-2"><Ico size={16} className="text-[#a3a3a3]" />{label}</span><span className="relative inline-flex h-5 w-9 shrink-0 rounded-full bg-[#f5f5f5] ring-1 ring-inset ring-[#e5e5e5]"><span className="absolute left-0.5 top-0.5 size-4 rounded-full bg-white shadow-sm" /></span></label>
@@ -214,7 +209,7 @@ export default function PostEditor({ id }: { id?: string }) {
     <>
       <PageTitle kicker={p.id ? 'Uređivanje postojeće objave' : 'Nova vijest, javni poziv ili saopćenje'} crumbs={['Objave i vijesti', p.id ? 'Uredi objavu' : 'Nova objava']} title={p.id ? 'Uredi objavu' : 'Nova objava'} badge={<StatusChip status={p.status} />}>
         {p.id && p.status === 'OBJAVLJENO' && <a className={btnTertiary} href={`/vijesti/${p.slug}`} target="_blank" rel="noopener"><LinkExternal01 />Na portalu</a>}
-        <button className={btnSecondary} type="button" onClick={() => setPreview(!preview)}>{preview ? <Edit01 /> : <Eye />}{preview ? 'Uređivanje' : 'Pretpregled'}</button>
+        <button className={btnSecondary} type="button" disabled={busy} onClick={openPreview} title="Otvara stranicu kako će izgledati na portalu (link važi 72 sata i može se poslati na provjeru)"><Eye />Pregled</button>
         {!locked && <button className={btnSecondary} type="button" disabled={busy || (!!p.id && !dirty)} onClick={() => save()}><Save01 />{LIVE.includes(p.status) ? 'Spremi izmjene' : 'Spremi'}</button>}
         {/* autor (ili urednik kad važi pravilo četiri oka) šalje na odobrenje */}
         {['NACRT', 'VRACENO'].includes(p.status) && (!publisher || needsSecondPair) && (
@@ -265,28 +260,7 @@ export default function PostEditor({ id }: { id?: string }) {
           </Card>
 
           <Card className="overflow-hidden">
-            <div className="flex flex-wrap items-center gap-1 border-b border-[#e5e5e5] px-3 py-2">
-              <button className={tb} title="Podebljano" type="button" onClick={() => wrap('**')}><Bold01 /></button>
-              <button className={tb} title="Kurziv" type="button" onClick={() => wrap('*')}><Italic01 /></button>
-              <button className={tb} title="Precrtano" type="button" onClick={() => wrap('~~')}><Strikethrough01 /></button>
-              <span className="mx-1 h-5 w-px bg-[#e5e5e5]" />
-              <button className={tb} title="Naslov H2" type="button" onClick={() => linePrefix('## ')}><Heading01 /></button>
-              <button className={tb} title="Naslov H3" type="button" onClick={() => linePrefix('### ')}><Heading02 /></button>
-              <button className={tb} title="Citat" type="button" onClick={() => linePrefix('> ')}><MessageTextSquare01 /></button>
-              <span className="mx-1 h-5 w-px bg-[#e5e5e5]" />
-              <button className={tb} title="Lista" type="button" onClick={() => linePrefix('- ')}><Dotpoints01 /></button>
-              <button className={tb} title="Brojčana lista" type="button" onClick={() => linePrefix('1. ')}><List /></button>
-              <button className={tb} title="Poveznica" type="button" onClick={() => wrap('[', '](https://)', 'tekst linka')}><Link01 /></button>
-              <button className={tb} title="Tablica" type="button" onClick={() => wrap('\n| Stavka | Vrijednost |\n|---|---|\n| ', ' |  |\n', 'tekst')}><Table /></button>
-              <button className={`${tb} ml-auto`} title={preview ? 'Uređivanje' : 'Pregled'} type="button" onClick={() => setPreview(!preview)}>{preview ? <Edit01 /> : <Eye />}</button>
-            </div>
-            {preview
-              ? <div className="prose-uui min-h-[380px] p-6" dangerouslySetInnerHTML={{ __html: html }} />
-              : <textarea ref={ta} className="min-h-[380px] w-full resize-y border-0 bg-transparent p-6 text-[16px] leading-7 text-[#171717] placeholder:text-[#737373] focus:outline-none focus:ring-0" value={p.body} onChange={(e) => set('body', e.target.value)} placeholder="Tekst objave. Alatna traka dodaje podnaslove, liste, tablice i poveznice." />}
-            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[#e5e5e5] bg-[#fafafa] px-6 py-3 text-[14px] text-[#525252]">
-              <span>{words} riječi · {Math.max(1, Math.round(words / 200))} min čitanja</span>
-              <span className="flex items-center gap-1.5"><ShieldTick size={16} className="text-[#079455]" />Sadržaj se čisti pri prikazu</span>
-            </div>
+            <RichEditor value={p.body} onChange={(html) => set('body', html)} docs={p.documents ?? []} onUpload={uploadImage} onError={(m) => toast.err(m)} disabled={locked} />
           </Card>
 
           <Card>

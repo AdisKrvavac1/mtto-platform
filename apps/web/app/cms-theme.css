@@ -147,3 +147,20 @@
 .draw-line { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw-line 1.8s cubic-bezier(.2,.7,.2,1) .2s forwards; }
 @keyframes draw-line { to { stroke-dashoffset: 0; } }
 @media (prefers-reduced-motion: reduce) { .flow-line { animation: none; } .draw-line { animation: none; stroke-dashoffset: 0; } }
+
+/* ───── F2-02: blokovi u tekstu objave (portal i editor) ───── */
+.prose-uui aside[data-tone] { margin: 1.5em 0; padding: 16px 20px; border-radius: 12px; border: 1px solid #b2ddff; background: #eff8ff; color: #194185; }
+.prose-uui aside[data-tone="warning"] { border-color: #fedf89; background: #fffaeb; color: #7a2e0e; }
+.prose-uui aside[data-tone="success"] { border-color: #abefc6; background: #ecfdf3; color: #054f31; }
+.prose-uui aside[data-tone] > :first-child { margin-top: 0; } .prose-uui aside[data-tone] > :last-child { margin-bottom: 0; }
+.prose-uui a.doc-card, .prose-uui a[data-doc-id] { display: flex; align-items: center; gap: 12px; margin: 1em 0; padding: 14px 16px; border-radius: 12px; border: 1px solid #e5e5e5; background: #fff; color: #262626; font-weight: 600; text-decoration: none; box-shadow: 0 1px 2px rgba(10,13,18,.05); }
+.prose-uui a.doc-card::before, .prose-uui a[data-doc-id]::before { content: 'PDF'; flex: none; display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 8px; background: #fef3f2; color: #b42318; font-size: 11px; font-weight: 700; }
+.prose-uui a.doc-card:hover, .prose-uui a[data-doc-id]:hover { border-color: #d4d4d4; background: #fafafa; }
+.prose-uui img { max-width: 100%; height: auto; border-radius: 12px; }
+.prose-uui hr { margin: 2em 0; border-color: #e5e5e5; }
+/* editor */
+.rich-editor .ProseMirror p.is-editor-empty:first-child::before { content: attr(data-placeholder); float: left; height: 0; color: #737373; pointer-events: none; }
+.rich-editor .ProseMirror .selectedCell { background: #f4ebff; }
+.rich-editor .ProseMirror-selectednode { outline: 2px solid #9e77ed; outline-offset: 2px; border-radius: 8px; }
+.rich-editor .ProseMirror table td, .rich-editor .ProseMirror table th { position: relative; min-width: 80px; }
+.rich-editor .ProseMirror td > p, .rich-editor .ProseMirror th > p { margin: 0; }

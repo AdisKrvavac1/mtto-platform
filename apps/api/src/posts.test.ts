@@ -8,7 +8,9 @@ test('objave: saradnik šalje, urednik vraća/objavljuje/povlači, četiri oka, 
   const { AuditService } = await import('./audit');
   const { PostsController } = await import('./posts.controller');
   const db = new Db();
-  const ctl = new PostsController(db, new AuditService(db));
+  const { JwtService } = await import('@nestjs/jwt');
+  const jwt = new JwtService({ secret: 'test-secret-test-secret-test-secret' });
+  const ctl = new PostsController(db, new AuditService(db), jwt);
   const autor = { user: { sub: `t-autor-${id()}`, name: 'Test Autor', role: 'SARADNIK' } };
   const urednik = { user: { sub: `t-ured-${id()}`, name: 'Test Urednik', role: 'UREDNIK' } };
   const admin = { user: { sub: `t-adm-${id()}`, name: 'Test Admin', role: 'ADMIN' } };
@@ -50,6 +52,21 @@ test('objave: saradnik šalje, urednik vraća/objavljuje/povlači, četiri oka, 
       } finally {
         await db.q(`UPDATE tenants SET "settings" = $1::jsonb WHERE "id"='mtto'`, [JSON.stringify(prev?.settings ?? {})]);
       }
+
+      // link za pregled: radi za nacrt, ne radi s tuđim ili lažnim tokenom
+      const { PreviewController } = await import('./posts.controller');
+      const pv = new PreviewController(db, jwt);
+      const fakeRes: any = { setHeader() {} };
+      const draft = await ctl.create({ title: 'Pregled (automatski test)' }, autor);
+      ids.push(draft.id);
+      const link = await ctl.previewLink(draft.id, autor);
+      const token = link.url.split('/pregled/')[1];
+      assert.equal((await pv.preview(token, fakeRes)).title, 'Pregled (automatski test)');
+      await assert.rejects(pv.preview(token.slice(0, -2) + 'xx', fakeRes), /nije ispravan/);
+      const foreign = await jwt.signAsync({ purpose: 'preview', pid: draft.id, tid: 'drugi' });
+      await assert.rejects(pv.preview(foreign, fakeRes), /nije ispravan/);
+      const session = await jwt.signAsync({ sub: 'x', name: 'x', role: 'ADMIN' });
+      await assert.rejects(pv.preview(session, fakeRes), /nije ispravan/);
 
       // zakazivanje traži budući datum
       const s = await ctl.create({ title: 'Zakazano (automatski test)' }, urednik);
