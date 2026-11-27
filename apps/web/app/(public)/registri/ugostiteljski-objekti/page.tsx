@@ -9,7 +9,8 @@ export const metadata = { title: 'Registar kategoriziranih ugostiteljskih objeka
 
 const KINDS = ['Hotel', 'Motel', 'Pansion', 'Apartmani', 'Kamp'];
 const MUNICIPALITIES = ['Čapljina', 'Čitluk', 'Jablanica', 'Konjic', 'Mostar', 'Neum', 'Prozor-Rama', 'Ravno', 'Stolac'];
-const LABELS: Record<string, string> = { q: 'Pojam', kind: 'Vrsta', municipality: 'Općina', stars: 'Zvjezdice' };
+const LABELS: Record<string, string> = { q: 'Pojam', kind: 'Vrsta', municipality: 'Općina', stars: 'Zvjezdice', status: 'Status' };
+const STATUS_TONE: Record<string, 'success' | 'warning' | 'error'> = { 'Važeća': 'success', Istekla: 'warning', Ukinuta: 'error' };
 const fmt = (n: number) => n.toLocaleString('bs-BA');
 
 function Stars({ n }: { n: number | null }) {
@@ -23,7 +24,7 @@ function Stars({ n }: { n: number | null }) {
 export default async function FacilitiesPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const sp = await searchParams;
   const qs = new URLSearchParams();
-  for (const k of ['q', 'kind', 'municipality', 'stars']) if (sp[k]) qs.set(k, sp[k]!);
+  for (const k of ['q', 'kind', 'municipality', 'stars', 'status']) if (sp[k]) qs.set(k, sp[k]!);
   const [rows, all] = await Promise.all([apiSafe<Facility[]>(`/facilities?${qs}`, []), apiSafe<Facility[]>('/facilities', [])]);
   const beds = all.reduce((s, f) => s + (f.beds || 0), 0);
   const hotels = all.filter((f) => f.kind === 'Hotel' && (f.stars ?? 0) >= 4).length;
@@ -78,20 +79,20 @@ export default async function FacilitiesPage({ searchParams }: { searchParams: P
           )}
 
           <div className="mt-6">
-            <TableCard title="Rješenja o kategorizaciji" badge={<Badge tone="brand">{rows.length} od {fmt(all.length)}</Badge>} description="Evidencija prema Zakonu o ugostiteljskoj djelatnosti.">
+            <TableCard title="Rješenja o kategorizaciji" badge={<Badge tone="brand">{rows.length} od {fmt(all.length)}</Badge>} description="Evidencija prema Zakonu o ugostiteljskoj djelatnosti. Vodi se u CMS-u kao javni registar; podaci su dostupni i kao otvoreni podaci.">
               <table className="w-full min-w-[900px]">
                 <thead><tr><th className={th}>Objekat</th><th className={th}>Lokacija</th><th className={th}>Kategorija</th><th className={th}>Kapacitet</th><th className={th}>Rješenje</th><th className={th}>Status</th><th className={`${th} text-right`}><span className="sr-only">Radnje</span></th></tr></thead>
                 <tbody>
                   {rows.length === 0 && <tr><td colSpan={7} className={`${td} py-12 text-center`}>Nema objekata za odabrane kriterije.</td></tr>}
                   {rows.map((f) => (
                     <tr key={f.id} className="hover:bg-[#fafafa]">
-                      <td className={td}><span className="block font-medium text-[#171717]">{f.name}{f.isDemo && <Badge tone="warning" className="ml-2">Demo</Badge>}</span><span>{f.kind}</span></td>
+                      <td className={td}><Link href={`/registri/ugostiteljski-objekti/${f.id}`} className="block font-medium text-[#171717] hover:underline">{f.name}{f.isDemo && <Badge tone="warning" className="ml-2">Demo</Badge>}</Link><span>{f.kind}</span></td>
                       <td className={td}><span className="block font-medium text-[#171717]">{f.municipality}</span><span>{f.address}</span></td>
                       <td className={td}><Stars n={f.stars} /></td>
                       <td className={`${td} whitespace-nowrap`}><span className="block text-[#171717]">{f.rooms ?? '—'} jedinica</span><span>{f.beds ?? '—'} ležaja</span></td>
                       <td className={`${td} whitespace-nowrap`}><span className="block font-medium text-[#171717]">{f.decisionNumber || '—'}</span><span>{dateShort(f.decisionDate)}</span></td>
-                      <td className={td}><Badge tone="success" dot>Aktivno</Badge></td>
-                      <td className={`${td} text-right`}>{f.lat != null && <Link href="/mapa" title="Prikaži na karti" aria-label={`${f.name} na karti`} className="inline-flex rounded-[8px] p-2 text-[#a3a3a3] hover:bg-[#fafafa] hover:text-[#525252]"><MarkerPin04 size={20} /></Link>}</td>
+                      <td className={td}><Badge tone={STATUS_TONE[f.categoryStatus ?? 'Važeća'] ?? 'success'} dot>{f.categoryStatus ?? 'Važeća'}</Badge>{f.validUntil && <span className="mt-1 block whitespace-nowrap text-[12px]">do {dateShort(f.validUntil)}</span>}</td>
+                      <td className={`${td} text-right`}>{f.lat != null && <Link href={`/registri/ugostiteljski-objekti/${f.id}`} title="Dosje i lokacija" aria-label={`${f.name}: dosje i lokacija`} className="inline-flex rounded-[8px] p-2 text-[#a3a3a3] hover:bg-[#fafafa] hover:text-[#525252]"><MarkerPin04 size={20} /></Link>}</td>
                     </tr>
                   ))}
                 </tbody>

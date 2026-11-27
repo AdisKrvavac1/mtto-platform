@@ -42,7 +42,7 @@ async function main() {
     return;
   }
   if (args.includes('--reset')) {
-    await db.q('TRUNCATE documents, posts, permits, facilities, map_locations, media, audit_log, users');
+    await db.q('TRUNCATE documents, posts, permits, facilities, registry_entries, map_locations, media, audit_log, users');
   }
 
   // ---- Korisnik ----
@@ -182,7 +182,12 @@ async function main() {
     ['Hotel Primjer Prozor (demo)', 'Hotel', 3, 'Prozor-Rama', 32, 66, 43.822, 17.611],
   ] as const;
   for (const [name, kind, stars, municipality, rooms, beds, lat, lng] of fac) {
-    await db.insert('facilities', { id: id(), ...{ name, kind, stars, municipality, rooms, beds, lat, lng, address: `${municipality}, HNK`, decisionNumber: `DEMO-MTU-${Math.round(lat * 100)}`, decisionDate: new Date('2025-03-15') } });
+    // F2-13: objekti žive u registru „ugostiteljski-objekti“ (registry builder, migracija 0010)
+    const opcina = municipality === 'Blagaj' ? 'Mostar' : municipality;
+    const data = { naziv: name, vrsta: kind, kategorija: String(stars), opcina, adresa: `${municipality}, HNK`, jedinice: rooms, lezaji: beds, rjesenje: `DEMO-MTU-${Math.round(lat * 100)}`, datumRjesenja: '2025-03-15', vrijediDo: '2029-03-15', status: 'Važeća' };
+    if (await db.one(`SELECT 1 FROM registries WHERE "id"='mtto-smjestaj'`)) {
+      await db.insert('registry_entries', { id: id(), registryId: 'mtto-smjestaj', data: JSON.stringify(data), searchText: `${name} ${data.adresa} ${data.rjesenje}`.toLowerCase(), lat, lng, isDemo: true });
+    }
   }
 
   // ---- Mapa: stvarne lokacije ----

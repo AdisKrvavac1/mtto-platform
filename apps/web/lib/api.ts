@@ -31,5 +31,7 @@ export type Permit = {
 export type Facility = {
   id: string; name: string; kind: string; stars: number | null; municipality: string; address: string; rooms: number | null; beds: number | null;
   decisionNumber: string | null; decisionDate: string | null; lat: number | null; lng: number | null; isDemo: boolean;
+  /** F2-13: rok važenja i status kategorije (registar „ugostiteljski-objekti“) */
+  validUntil?: string | null; categoryStatus?: string | null;
 };
 export type MapPoint = { id: string; layer: 'TURIZAM' | 'ZASTICENO' | 'DOZVOLA' | 'PROJEKT'; name: string; description: string; lat: number; lng: number; link: string | null };

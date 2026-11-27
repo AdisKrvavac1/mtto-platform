@@ -4,6 +4,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileStore } from './storage';
+import { FACILITIES_SQL } from './registries.controller';
 import { Db, Where, id } from './db';
 import { AuthGuard } from './auth';
 import { DOC_COLS } from './public.controller';
@@ -68,7 +69,7 @@ export class AdminController {
       c(`SELECT coalesce(sum("views"),0) n FROM posts`),
       c(`SELECT count(*) n FROM documents`),
       c(`SELECT count(*) n FROM permits`),
-      c(`SELECT count(*) n FROM facilities`),
+      c(`SELECT count(*) n FROM ${FACILITIES_SQL}`),
       c(`SELECT count(*) n FROM map_locations`),
       this.db.q(`SELECT "id","registerNumber","operator","validUntil","status" FROM permits WHERE "validUntil" BETWEEN now() AND now() + interval '60 days' ORDER BY "validUntil" LIMIT 5`),
       this.db.q(`SELECT "id","title","status","type","category","updatedAt","publishedAt" FROM posts ORDER BY "updatedAt" DESC LIMIT 6`),
@@ -163,33 +164,5 @@ export class AdminController {
     await this.audit.log(req, { action: 'Uklonio/la lokaciju s mape', entity: 'lokacija', entityId: locId, target: l.name, before: l, after: null });
     return { ok: true };
   }
-
-  // ---------- Ugostiteljski objekti ----------
-  @Get('facilities')
-  @Can('registri', 'read')
-  facilities() {
-    return this.db.q(`SELECT * FROM facilities ORDER BY "name"`);
-  }
-
-  @Post('facilities')
-  @Can('registri', 'write')
-  async createFacility(@Body() b: any, @Req() req: any) {
-    if (!b?.name || !b?.kind || !b?.municipality) throw new BadRequestException('Naziv, vrsta i općina su obavezni');
-    const f = await this.db.insert('facilities', {
-      id: id(), name: String(b.name), kind: String(b.kind), stars: b.stars ? toInt(b.stars, 0) : null, municipality: String(b.municipality),
-      address: String(b.address || ''), rooms: b.rooms ? toInt(b.rooms, 0) : null, beds: b.beds ? toInt(b.beds, 0) : null,
-      decisionNumber: b.decisionNumber || null, decisionDate: toDate(b.decisionDate), lat: toFloat(b.lat), lng: toFloat(b.lng),
-    });
-    await this.audit.log(req, { action: 'Dodao/la ugostiteljski objekt', entity: 'objekt', entityId: f.id, target: f.name, after: f });
-    return f;
-  }
-
-  @Delete('facilities/:id')
-  @Can('registri', 'delete')
-  async deleteFacility(@Param('id') facId: string, @Req() req: any) {
-    const f = await this.db.one(`DELETE FROM facilities WHERE "id"=$1 RETURNING *`, [facId]);
-    if (!f) throw new NotFoundException();
-    await this.audit.log(req, { action: 'Obrisao/la ugostiteljski objekt', entity: 'objekt', entityId: facId, target: f.name, before: f, after: null });
-    return { ok: true };
-  }
+  // Ugostiteljski objekti: od F2-13 registar „ugostiteljski-objekti“ u registry builderu (registries.controller.ts).
 }
