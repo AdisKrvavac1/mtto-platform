@@ -80,3 +80,37 @@ test('objave: saradnik šalje, urednik vraća/objavljuje/povlači, četiri oka, 
     await db.pool.end();
   }
 });
+
+test('sektori: urednik vezan za sektor ne mijenja tuđe objave', { skip: !process.env.DATABASE_URL }, async () => {
+  const { Db, withTenant } = await import('./db');
+  const { AuditService } = await import('./audit');
+  const { PostsController } = await import('./posts.controller');
+  const { JwtService } = await import('@nestjs/jwt');
+  const { inScope } = await import('./sectors');
+  assert.equal(inScope({ role: 'UREDNIK', sectors: [] }, 'Trgovina'), true, 'bez sektora = svi');
+  assert.equal(inScope({ role: 'ADMIN', sectors: ['Turizam'] }, 'Trgovina'), true, 'administrator = svi');
+  const db = new Db();
+  const ctl = new PostsController(db, new AuditService(db), new JwtService({ secret: 'test-secret-test-secret-test-secret' }));
+  const turizam = { user: { sub: 'test-tur', name: 'Urednik turizma', role: 'UREDNIK', sectors: ['Turizam'] } };
+  const trgovina = { user: { sub: 'test-trg', name: 'Urednik trgovine', role: 'UREDNIK', sectors: ['Trgovina'] } };
+  const ids: string[] = [];
+  try {
+    await withTenant('mtto', async () => {
+      const p = await ctl.create({ title: 'Sektor turizam (automatski test)', category: 'Turizam' }, turizam);
+      ids.push(p.id);
+      await assert.rejects(ctl.create({ title: 'x', category: 'Turizam' }, trgovina), /svojih sektora/);
+      await assert.rejects(ctl.update(p.id, { body: 'tuđe' }, trgovina), /svojih sektora/);
+      await assert.rejects(ctl.workflow(p.id, { action: 'publish' }, trgovina), /svojih sektora/);
+      await assert.rejects(ctl.update(p.id, { category: 'Trgovina' }, turizam), /svojih sektora/);
+      await ctl.workflow(p.id, { action: 'submit' }, turizam);
+      const queueTrg = await ctl.list({ queue: 1 }, trgovina);
+      assert.ok(!queueTrg.some((x: any) => x.id === p.id), 'urednik trgovine ne vidi tuđi red');
+      const queueTur = await ctl.list({ queue: 1 }, turizam);
+      assert.ok(queueTur.some((x: any) => x.id === p.id), 'urednik turizma vidi svoj red');
+      assert.equal((await ctl.workflow(p.id, { action: 'publish' }, turizam)).status, 'OBJAVLJENO');
+    });
+  } finally {
+    await withTenant('mtto', () => db.q(`DELETE FROM posts WHERE "id" = ANY($1)`, [ids]));
+    await db.pool.end();
+  }
+});

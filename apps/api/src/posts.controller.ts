@@ -19,6 +19,7 @@ import { AuditService } from './audit';
 import { Can, can } from './rbac';
 import { slugify, toDate } from './util';
 import { logJson } from './observability';
+import { assertScope } from './sectors';
 
 export const POST_STATUS = ['NACRT', 'NA_ODOBRENJU', 'VRACENO', 'ZAKAZANO', 'OBJAVLJENO', 'POVUCENO'] as const;
 const POST_TYPES = ['VIJEST', 'JAVNI_POZIV', 'SAOPCENJE'];
@@ -70,11 +71,14 @@ export class PostsController {
 
   @Get()
   @Can('objave', 'read')
-  list(@Query() q: any) {
+  list(@Query() q: any, @Req() req: any) {
     const w = new Where();
     if (q.status) w.add(`"status"=?`, q.status);
     if (q.type) w.add(`"type"=?`, q.type);
     if (q.q) w.add(`"title" ILIKE ?`, `%${q.q}%`);
+    // F2-22: „Moji sektori“ i red za odobrenje
+    if ((q.mine || q.queue) && req.user.role !== 'ADMIN' && req.user.sectors?.length) w.add(`"category" = ANY(?)`, req.user.sectors);
+    if (q.queue) w.add(`"status"='NA_ODOBRENJU'`);
     return this.db.q(`SELECT "id","slug","title","excerpt","status","type","category","publishedAt","unpublishAt","updatedAt","views","authorName","coverImage","isDemo","version" FROM posts ${w.sql} ORDER BY "updatedAt" DESC LIMIT 200`, w.params);
   }
 
@@ -94,6 +98,8 @@ export class PostsController {
   async create(@Body() b: any, @Req() req: any) {
     if (!b?.title?.trim()) throw new BadRequestException('Naslov je obavezan');
     const data = postData(b);
+    if (!data.category && req.user.sectors?.length && req.user.role !== 'ADMIN') data.category = req.user.sectors[0];
+    assertScope(req.user, data.category ?? 'Opće', 'objave');
     let slug = slugify(b.slug || b.title) || `objava-${Date.now()}`;
     if (await this.db.one(`SELECT 1 FROM posts WHERE "slug"=$1`, [slug])) slug = `${slug}-${Date.now().toString(36)}`;
     const p = await this.db.insert('posts', { id: id(), ...data, status: 'NACRT', slug, createdBy: req.user.sub, authorName: data.authorName ?? req.user?.name ?? 'Uredništvo MTTO' });
@@ -109,6 +115,8 @@ export class PostsController {
     if (b?.status !== undefined) throw new BadRequestException('Status se mijenja radnjama (pošalji na odobrenje, objavi, povuci…).');
     const before = await this.db.one(`SELECT * FROM posts WHERE "id"=$1`, [postId]);
     if (!before) throw new NotFoundException();
+    assertScope(req.user, before.category, 'objave');
+    if (b?.category !== undefined) assertScope(req.user, String(b.category), 'objave');
     const publisher = can(req.user.role, 'objave', 'publish');
     if ((LIVE.includes(before.status) || before.status === 'POVUCENO') && !publisher) throw new ForbiddenException('Objavljenu objavu mijenja urednik.');
     if (before.status === 'NA_ODOBRENJU' && !publisher) throw new ForbiddenException('Objava čeka odobrenje i ne može se mijenjati. Urednik je može vratiti na doradu.');
@@ -126,6 +134,7 @@ export class PostsController {
   async workflow(@Param('id') postId: string, @Body() b: { action?: Action; note?: string; publishedAt?: string }, @Req() req: any) {
     const p = await this.db.one<any>(`SELECT * FROM posts WHERE "id"=$1`, [postId]);
     if (!p) throw new NotFoundException();
+    assertScope(req.user, p.category, 'objave');
     const action = b?.action;
     const note = String(b?.note ?? '').trim().slice(0, 1000);
     const publisher = can(req.user.role, 'objave', 'publish');
@@ -232,6 +241,8 @@ export class PostsController {
   @Delete(':id')
   @Can('objave', 'delete')
   async remove(@Param('id') postId: string, @Req() req: any) {
+    const cur = await this.db.one<any>(`SELECT "category" FROM posts WHERE "id"=$1`, [postId]);
+    if (cur) assertScope(req.user, cur.category, 'objave');
     const p = await this.db.one(`DELETE FROM posts WHERE "id"=$1 RETURNING *`, [postId]);
     if (!p) throw new NotFoundException();
     await this.audit.log(req, { action: 'Obrisao/la objavu', entity: 'objava', entityId: postId, target: p.title, before: snapshotOf(p), after: null });

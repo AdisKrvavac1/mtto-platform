@@ -1,19 +1,24 @@
 'use client';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { adminFetch, useCan } from '@/lib/adminApi';
+import { adminFetch, useCan, getUser, useSectors } from '@/lib/adminApi';
 import { dateShort, POST_TYPE } from '@/lib/format';
 import { Announcement01, ArrowLeft, ArrowRight, Download01, Edit01, Eye, LinkExternal01, Plus, SearchLg, Trash01, UploadCloud02, Archive } from '@untitledui/icons';
 import { Badge, Card, CardHeader, EmptyState, MetricCard, PageTitle, StatusChip, Tabs, btnPrimary, btnSecondary, iconBtn, input, td, th, tr, useToast } from '@/components/admin/ui';
 
 type Row = { id: string; slug: string; title: string; excerpt: string; status: string; type: string; category: string; publishedAt: string | null; updatedAt: string; views: number; authorName: string; coverImage: string | null; isDemo: boolean };
-const CATS = ['Zaštita okoliša', 'Turizam', 'Trgovina', 'Opće'];
+
 const PAGE = 10;
 type St = '' | 'OBJAVLJENO' | 'NACRT' | 'NA_ODOBRENJU' | 'VRACENO' | 'ZAKAZANO' | 'POVUCENO';
 
 export default function PostsAdmin() {
   const canPost = useCan('objave', 'write');
   const canPublish = useCan('objave', 'publish');
+  const sectorList = useSectors();
+  const CATS = sectorList.length ? sectorList.map((x) => x.key) : ['Zaštita okoliša', 'Turizam', 'Trgovina', 'Opće'];
+  const [mineOnly, setMineOnly] = useState(false);
+  const mySectors = getUser()?.role === 'ADMIN' ? [] : getUser()?.sectors ?? [];
+  useEffect(() => { if (mySectors.length) setMineOnly(true); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const [all, setAll] = useState<Row[] | null>(null);
   const [status, setStatus] = useState<St>('');
   const [type, setType] = useState('');
@@ -27,7 +32,7 @@ export default function PostsAdmin() {
   useEffect(() => { setQ(new URLSearchParams(window.location.search).get('q') ?? ''); load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => setPage(1), [status, type, cat, q]);
 
-  const rows = useMemo(() => (all ?? []).filter((r) => (!status || r.status === status || (status === 'NACRT' && r.status === 'VRACENO')) && (!type || r.type === type) && (!cat || r.category === cat) && (!q || r.title.toLowerCase().includes(q.toLowerCase()))), [all, status, type, cat, q]);
+  const rows = useMemo(() => (all ?? []).filter((r) => (!status || r.status === status || (status === 'NACRT' && r.status === 'VRACENO')) && (!type || r.type === type) && (!cat || r.category === cat) && (!mineOnly || !mySectors.length || mySectors.includes(r.category)) && (!q || r.title.toLowerCase().includes(q.toLowerCase()))), [all, status, type, cat, q, mineOnly]);
   const pages = Math.max(1, Math.ceil(rows.length / PAGE));
   const shown = rows.slice((page - 1) * PAGE, page * PAGE);
   const n = (s: string) => (all ?? []).filter((r) => r.status === s).length;
@@ -92,6 +97,7 @@ export default function PostsAdmin() {
             <div className="flex flex-wrap gap-3">
               <select className={`${input} !w-auto min-w-[160px]`} value={type} onChange={(e) => setType(e.target.value)} aria-label="Vrsta"><option value="">Sve vrste</option>{Object.entries(POST_TYPE).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>
               <select className={`${input} !w-auto min-w-[160px]`} value={cat} onChange={(e) => setCat(e.target.value)} aria-label="Resor"><option value="">Svi resori</option>{CATS.map((c) => <option key={c}>{c}</option>)}</select>
+              {mySectors.length > 0 && <label className="flex items-center gap-2 whitespace-nowrap text-[14px] font-medium text-[#404040]"><input type="checkbox" className="size-4 rounded border-[#d4d4d4] text-[#7f56d9] focus:ring-[#9e77ed]" checked={mineOnly} onChange={(e) => setMineOnly(e.target.checked)} />Samo moji sektori</label>}
             </div>
           </div>
         </div>

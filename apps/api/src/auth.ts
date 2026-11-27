@@ -64,11 +64,11 @@ async function readSession(jwt: JwtService, req: any): Promise<Session> {
 /** Učitava korisnika iz baze uz svaki zahtjev: deaktiviran nalog ili promijenjena uloga odmah poništava stare sesije. */
 async function loadUser(db: Db, s: Session) {
   // RLS već skriva korisnike drugih institucija; provjera tid čuva od sesije prenesene na tuđu domenu
-  const u = await db.one<any>('SELECT "id","name","email","role","active","sessionVersion","tenantId" FROM users WHERE "id"=$1', [s.sub]);
+  const u = await db.one<any>('SELECT "id","name","email","role","active","sessionVersion","tenantId","sectors" FROM users WHERE "id"=$1', [s.sub]);
   if (!u || !u.active || Number(u.sessionVersion) !== Number(s.sv ?? 0) || (s.tid && s.tid !== u.tenantId) || u.tenantId !== currentTenant()) {
     throw new UnauthorizedException('Sesija više ne važi, prijavite se ponovo');
   }
-  return { sub: u.id, name: u.name, email: u.email, role: u.role, mfa: !!s.mfa, sv: Number(u.sessionVersion), tenantId: u.tenantId };
+  return { sub: u.id, name: u.name, email: u.email, role: u.role, mfa: !!s.mfa, sv: Number(u.sessionVersion), tenantId: u.tenantId, sectors: (u.sectors ?? []) as string[] };
 }
 
 /**
@@ -120,7 +120,7 @@ export class AuthController {
   constructor(private db: Db, private jwt: JwtService, private auditLog: AuditService) {}
 
   private publicUser(u: any) {
-    return { id: u.id, name: u.name, email: u.email, role: u.role, roleLabel: ROLE_LABELS[u.role as keyof typeof ROLE_LABELS] ?? u.role, permissions: permissionsFor(u.role), mfaEnabled: !!u.mfaEnabled };
+    return { id: u.id, name: u.name, email: u.email, role: u.role, roleLabel: ROLE_LABELS[u.role as keyof typeof ROLE_LABELS] ?? u.role, permissions: permissionsFor(u.role), sectors: u.sectors ?? [], mfaEnabled: !!u.mfaEnabled };
   }
   private session(u: any, mfa: boolean) {
     return this.jwt.signAsync({ sub: u.id, name: u.name, role: u.role, mfa, sv: Number(u.sessionVersion ?? 0), tid: u.tenantId });

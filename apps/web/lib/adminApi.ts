@@ -6,7 +6,26 @@ const USER = 'mtto_cms_user';
 
 export type Module = 'kontrolna' | 'objave' | 'dokumenti' | 'mediji' | 'registri' | 'eko' | 'uvoz' | 'korisnici' | 'dnevnik';
 export type Action = 'read' | 'write' | 'delete' | 'publish';
-export type CmsUser = { id: string; name: string; email: string; role: string; roleLabel?: string; permissions?: Partial<Record<Module, Action[]>>; mfaEnabled?: boolean };
+export type CmsUser = { id: string; name: string; email: string; role: string; roleLabel?: string; permissions?: Partial<Record<Module, Action[]>>; sectors?: string[]; mfaEnabled?: boolean };
+export type Sector = { id: string; key: string; name: string; active: boolean; sort: number };
+
+/** F2-22: sme li korisnik mijenjati sadržaj sektora (ključ = kategorija objave). */
+export function inMySectors(u: CmsUser | null, key: string | null | undefined) {
+  if (!u || u.role === 'ADMIN' || !u.sectors?.length) return true;
+  return !!key && u.sectors.includes(key);
+}
+
+let sectorCache: Promise<Sector[]> | null = null;
+/** Sektori institucije (keš za trajanje stranice). */
+export function useSectors() {
+  const [list, setList] = useState<Sector[]>([]);
+  useEffect(() => {
+    sectorCache ??= adminFetch<Sector[]>('/admin/sectors').catch(() => { sectorCache = null; return []; });
+    sectorCache.then(setList);
+  }, []);
+  return list;
+}
+export const resetSectors = () => { sectorCache = null; };
 
 /** Prikaz u sučelju (meni, dugmad). Server svejedno provjerava svako pravo. */
 export function can(u: CmsUser | null, module: Module, action: Action = 'read') {
@@ -75,7 +94,7 @@ export async function verifyMfa(mfaToken: string, code: string) {
 /** Svježa uloga i prava sa servera (npr. nakon što administrator promijeni ulogu). */
 export async function refreshUser() {
   const me = await adminFetch<CmsUser>('/auth/me');
-  updateUser({ id: me.id, name: me.name, email: me.email, role: me.role, roleLabel: me.roleLabel, permissions: me.permissions, mfaEnabled: me.mfaEnabled });
+  updateUser({ id: me.id, name: me.name, email: me.email, role: me.role, roleLabel: me.roleLabel, permissions: me.permissions, sectors: me.sectors, mfaEnabled: me.mfaEnabled });
   return getUser();
 }
 

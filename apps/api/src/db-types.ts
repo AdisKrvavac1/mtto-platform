@@ -267,6 +267,16 @@ export interface SchemaMigrations {
   id: string;
 }
 
+export interface Sectors {
+  active: Generated<boolean>;
+  createdAt: Generated<Timestamp>;
+  id: string;
+  key: string;
+  name: string;
+  sort: Generated<number>;
+  tenantId: Generated<string>;
+}
+
 export interface Tenants {
   active: Generated<boolean>;
   createdAt: Generated<Timestamp>;
@@ -297,6 +307,7 @@ export interface Users {
   name: string;
   passwordHash: string;
   role: Generated<string>;
+  sectors: Generated<string[]>;
   sessionVersion: Generated<number>;
   tenantId: Generated<string>;
 }
@@ -315,6 +326,7 @@ export interface DB {
   post_versions: PostVersions;
   posts: Posts;
   schema_migrations: SchemaMigrations;
+  sectors: Sectors;
   tenants: Tenants;
   users: Users;
 }

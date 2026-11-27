@@ -1,12 +1,12 @@
 'use client';
 // F1-04: korisnici, uloge i dnevnik aktivnosti. Vidi samo administrator; server provjerava svako pravo.
 import { Fragment, useCallback, useEffect, useState } from 'react';
-import { adminFetch, can, getUser, type CmsUser } from '@/lib/adminApi';
+import { adminFetch, can, getUser, resetSectors, type CmsUser, type Sector } from '@/lib/adminApi';
 import { dateTime } from '@/lib/format';
 import { Avatar, Badge, Card, CardHeader, EmptyState, Field, PageTitle, btnPrimary, btnSecondary, btnTertiary, iconBtn, input, td, th, tr, useToast } from '@/components/admin/ui';
 import { AlertTriangle, ChevronDown, Copy01, Download01, Lock01, Plus, RefreshCw01, ShieldTick, UserPlus01, Users01, XClose } from '@untitledui/icons';
 
-type U = { id: string; email: string; name: string; role: string; active: boolean; mfaEnabled: boolean; lastLoginAt: string | null; createdAt: string; invitePending: boolean; inviteExpires: string | null };
+type U = { id: string; email: string; name: string; role: string; active: boolean; mfaEnabled: boolean; lastLoginAt: string | null; createdAt: string; invitePending: boolean; inviteExpires: string | null; sectors: string[] };
 type Role = { value: string; label: string };
 type A = { seq: number; id: string; createdAt: string; userId: string | null; userName: string; action: string; entity: string | null; entityId: string | null; target: string; changes: Record<string, [unknown, unknown]> | null; ip: string | null };
 type Verify = { ok: boolean; total: number; brokenAt: number[] };
@@ -60,9 +60,70 @@ function InviteLink({ inv, onClose }: { inv: Invite; onClose: () => void }) {
   );
 }
 
+/** Izbor sektora korisnika (prazno = svi sektori). */
+function SectorPicker({ u, sectors, disabled, onSave }: { u: U; sectors: Sector[]; disabled?: boolean; onSave: (keys: string[]) => void }) {
+  const [open, setOpen] = useState(false);
+  const [sel, setSel] = useState<string[]>(u.sectors ?? []);
+  useEffect(() => setSel(u.sectors ?? []), [u.sectors]);
+  const label = !u.sectors?.length ? 'Svi sektori' : u.sectors.map((k) => sectors.find((x) => x.key === k)?.name ?? k).join(', ');
+  if (u.role === 'ADMIN') return <span className="text-[14px] text-[#525252]">Svi (administrator)</span>;
+  return (
+    <div className="relative">
+      <button type="button" disabled={disabled} aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen(!open)}
+        className="flex h-9 w-[200px] items-center justify-between gap-2 rounded-[8px] bg-white px-3 text-left text-[14px] text-[#404040] ring-1 ring-inset ring-[#d4d4d4] disabled:opacity-60">
+        <span className="truncate">{label}</span><ChevronDown size={16} className="shrink-0 text-[#a3a3a3]" />
+      </button>
+      {open && (
+        <div role="dialog" aria-label={`Sektori: ${u.name}`} className="absolute left-0 top-10 z-20 w-64 rounded-[8px] bg-white p-3 shadow-[0_12px_16px_-4px_rgba(10,13,18,0.08),0_4px_6px_-2px_rgba(10,13,18,0.03)] ring-1 ring-[#e5e5e5]">
+          <p className="mb-2 text-[12px] leading-[18px] text-[#525252]">Bez označenog sektora korisnik radi nad svim sektorima.</p>
+          {sectors.filter((x) => x.active).map((x) => (
+            <label key={x.key} className="flex cursor-pointer items-center gap-2 rounded-[6px] px-1 py-1.5 text-[14px] text-[#404040] hover:bg-[#fafafa]">
+              <input type="checkbox" className="size-4 rounded border-[#d4d4d4] text-[#7f56d9] focus:ring-[#9e77ed]" checked={sel.includes(x.key)} onChange={(e) => setSel(e.target.checked ? [...sel, x.key] : sel.filter((k) => k !== x.key))} />{x.name}
+            </label>
+          ))}
+          <div className="mt-3 flex justify-end gap-2"><button type="button" className={btnTertiary} onClick={() => { setSel(u.sectors ?? []); setOpen(false); }}>Odustani</button><button type="button" className={btnPrimary} onClick={() => { onSave(sel); setOpen(false); }}>Spremi</button></div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SectorsCard({ sectors, reload, toast }: { sectors: Sector[]; reload: () => void; toast: ReturnType<typeof useToast> }) {
+  const [name, setName] = useState('');
+  async function add(e: React.FormEvent) {
+    e.preventDefault();
+    try { await adminFetch('/admin/sectors', { method: 'POST', body: JSON.stringify({ name }) }); setName(''); resetSectors(); reload(); toast.ok('Sektor dodan'); } catch (err: any) { toast.err(err.message); }
+  }
+  async function patch(x: Sector, body: Partial<Sector>, msg: string) {
+    try { await adminFetch(`/admin/sectors/${x.id}`, { method: 'PATCH', body: JSON.stringify(body) }); resetSectors(); reload(); toast.ok(msg); } catch (err: any) { toast.err(err.message); }
+  }
+  return (
+    <Card className="mt-6">
+      <CardHeader title="Sektori" badge={<Badge tone="gray">{sectors.filter((x) => x.active).length} aktivnih</Badge>}
+        description="Urednik ili saradnik vezan za sektor mijenja i objavljuje samo sadržaj svog sektora; ostalo samo čita. Uskladite s organizacionom šemom Ministarstva." />
+      <ul className="divide-y divide-[#e5e5e5]">
+        {sectors.map((x) => (
+          <li key={x.id} className={`flex flex-wrap items-center gap-3 px-4 py-3 md:px-6 ${x.active ? '' : 'opacity-60'}`}>
+            <span className="min-w-0 flex-1"><span className="block text-[14px] font-medium text-[#171717]">{x.name}</span><span className="block text-[12px] text-[#525252]">Resor objava: {x.key}</span></span>
+            <button type="button" className={btnTertiary} onClick={() => { const n = prompt('Novi naziv sektora', x.name)?.trim(); if (n && n !== x.name) patch(x, { name: n }, 'Naziv promijenjen'); }}>Preimenuj</button>
+            <button type="button" className={btnTertiary} onClick={() => patch(x, { active: !x.active }, x.active ? 'Sektor deaktiviran' : 'Sektor aktiviran')}>{x.active ? 'Deaktiviraj' : 'Aktiviraj'}</button>
+          </li>
+        ))}
+      </ul>
+      <form onSubmit={add} className="flex flex-wrap items-end gap-3 border-t border-[#e5e5e5] px-4 py-4 md:px-6">
+        <label className="min-w-[240px] flex-1"><span className="mb-1.5 block text-[14px] font-medium text-[#404040]">Novi sektor</span><input className={input} value={name} onChange={(e) => setName(e.target.value)} placeholder="npr. Sektor za inspekcijski nadzor" /></label>
+        <button className={btnSecondary} disabled={name.trim().length < 2}><Plus />Dodaj sektor</button>
+      </form>
+    </Card>
+  );
+}
+
 function Users({ me, toast, onChange }: { me: CmsUser | null; toast: ReturnType<typeof useToast>; onChange: () => void }) {
   const [users, setUsers] = useState<U[] | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
+  const [sectors, setSectors] = useState<Sector[]>([]);
+  const loadSectors = useCallback(() => adminFetch<Sector[]>('/admin/sectors').then(setSectors).catch(() => {}), []);
+  useEffect(() => { loadSectors(); }, [loadSectors]);
   const [form, setForm] = useState<{ name: string; email: string; role: string } | null>(null);
   const [invite, setInvite] = useState<Invite | null>(null);
   const [busy, setBusy] = useState(false);
@@ -99,10 +160,10 @@ function Users({ me, toast, onChange }: { me: CmsUser | null; toast: ReturnType<
           description="Promjena uloge ili deaktivacija odmah odjavljuje korisnika sa svih uređaja."
           actions={<button type="button" className={btnPrimary} onClick={() => { setInvite(null); setForm({ name: '', email: '', role: 'UREDNIK' }); }}><Plus />Dodaj korisnika</button>} />
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[820px]">
-            <thead><tr><th className={th}>Korisnik</th><th className={th}>Uloga</th><th className={th}>Status</th><th className={th}>Dvofaktorska</th><th className={th}>Zadnja prijava</th><th className={th}><span className="sr-only">Radnje</span></th></tr></thead>
+          <table className="w-full min-w-[1020px]">
+            <thead><tr><th className={th}>Korisnik</th><th className={th}>Uloga</th><th className={th}>Sektori</th><th className={th}>Status</th><th className={th}>Dvofaktorska</th><th className={th}>Zadnja prijava</th><th className={th}><span className="sr-only">Radnje</span></th></tr></thead>
             <tbody>
-              {users === null && <tr><td colSpan={6} className={td}><div className="h-12 animate-pulse rounded-[8px] bg-[#f5f5f5]" /></td></tr>}
+              {users === null && <tr><td colSpan={7} className={td}><div className="h-12 animate-pulse rounded-[8px] bg-[#f5f5f5]" /></td></tr>}
               {users?.map((u) => {
                 const self = u.id === me?.id;
                 return (
@@ -114,6 +175,7 @@ function Users({ me, toast, onChange }: { me: CmsUser | null; toast: ReturnType<
                         {roles.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
                       </select>
                     </td>
+                    <td className={td}><SectorPicker u={u} sectors={sectors} disabled={!u.active} onSave={(keys) => patch(u, { sectors: keys } as any, 'Sektori korisnika spremljeni')} /></td>
                     <td className={td}><UserStatus u={u} /></td>
                     <td className={td}>{u.mfaEnabled ? <Badge tone="success"><ShieldTick size={12} className="mr-1" />Uključena</Badge> : <Badge tone="warning">Nije uključena</Badge>}</td>
                     <td className={`${td} whitespace-nowrap`}>{u.lastLoginAt ? dateTime(u.lastLoginAt) : '—'}</td>
@@ -140,6 +202,7 @@ function Users({ me, toast, onChange }: { me: CmsUser | null; toast: ReturnType<
         </dl>
       </Card>
 
+      <SectorsCard sectors={sectors} reload={loadSectors} toast={toast} />
       <PublishRules toast={toast} onChange={onChange} />
 
       {(form || invite) && (

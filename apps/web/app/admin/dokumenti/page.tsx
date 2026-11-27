@@ -1,6 +1,6 @@
 'use client';
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
-import { adminFetch, getUser, useCan } from '@/lib/adminApi';
+import { adminFetch, getUser, inMySectors, useCan, useSectors } from '@/lib/adminApi';
 import { Badge, Card, CardHeader, EmptyState, F2Badge, Field, MetricCard, PageTitle, ProgressBar, StatusChip, btnPrimary, btnSecondary, iconBtn, input, td, th, tr, useToast } from '@/components/admin/ui';
 import { AlertTriangle, Archive, Clock, ClockRewind, Download01, Edit01, Folder, FolderClosed, Globe01, Lock01, SearchLg, ShieldTick, Trash01, UploadCloud02, XClose } from '@untitledui/icons';
 import { DOC_TYPE, dateShort, dateTime, fileExt, fileSize } from '@/lib/format';
@@ -18,13 +18,14 @@ const DEFAULT_RETENTION: Record<string, string> = { ZAKON: 'TRAJNO', PRAVILNIK: 
 const STATUS_OPT: [string, string][] = [['VAZECI', 'Važeći'], ['STAVLJEN_VAN_SNAGE', 'Stavljen van snage'], ['ZAMIJENJEN', 'Zamijenjen'], ['ARHIVIRAN', 'Arhiviran']];
 const today = () => new Date().toISOString().slice(0, 10);
 const isDue = (d: Doc) => !!d.retainUntil && d.retainUntil <= today() && !d.disposedAt && !d.legalHold;
-const SECTORS = ['Turizam i ugostiteljstvo', 'Zaštita okoliša', 'Trgovina', 'Opće'];
 const EMPTY = { title: '', docType: 'ZAKON', sector: 'Opće', number: '', issuedAt: '', status: 'VAZECI', description: '', accessLevel: 'JAVNO', retentionClass: '' };
 const FOLDERS: [string, string][] = [['ZAKON', '01_Zakoni'], ['PRAVILNIK', '02_Pravilnici'], ['OBRAZAC', '03_Obrasci_zahtjeva'], ['ODLUKA', '04_Rjesenja_i_odluke'], ['UPUTSTVO', '05_Uputstva'], ['IZVJESTAJ', '06_Izvjestaji_i_strategije'], ['OSTALO', '07_Ostalo']];
 const EXT_BG: Record<string, string> = { PDF: 'bg-[#d92d20]', DOC: 'bg-[#155eef]', DOCX: 'bg-[#155eef]', XLS: 'bg-[#079455]', XLSX: 'bg-[#079455]' };
 
 export default function DocumentsAdmin() {
   const canEdit = useCan('dokumenti', 'write');
+  const sectorList = useSectors();
+  const mySectorNames = sectorList.filter((x) => x.active && inMySectors(getUser(), x.key)).map((x) => x.name);
   const [all, setAll] = useState<Doc[] | null>(null);
   const [folder, setFolder] = useState('');
   const [quick, setQuick] = useState('');
@@ -49,6 +50,7 @@ export default function DocumentsAdmin() {
 
   function pick(f: File | undefined) {
     if (!f) return;
+    if (mySectorNames.length && !mySectorNames.includes(meta.sector)) setMeta((m) => ({ ...m, sector: mySectorNames[0] }));
     if (f.size > 10 * 1024 * 1024) { toast.err('Datoteka je veća od 10 MB'); return; }
     setFile(f);
     setMeta((m) => ({ ...m, docType: folder || m.docType, title: m.title || f.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ') }));
@@ -130,7 +132,7 @@ export default function DocumentsAdmin() {
                 <div className="grid gap-4 md:grid-cols-12">
                   <div className="md:col-span-6"><Field label="Naziv dokumenta" required><input required className={input} value={meta.title} onChange={(e) => setMeta({ ...meta, title: e.target.value })} /></Field></div>
                   <div className="md:col-span-3"><Field label="Vrsta"><select className={input} value={meta.docType} onChange={(e) => setMeta({ ...meta, docType: e.target.value })}>{Object.entries(DOC_TYPE).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></Field></div>
-                  <div className="md:col-span-3"><Field label="Resor"><select className={input} value={meta.sector} onChange={(e) => setMeta({ ...meta, sector: e.target.value })}>{SECTORS.map((s) => <option key={s}>{s}</option>)}</select></Field></div>
+                  <div className="md:col-span-3"><Field label="Resor"><select className={input} value={meta.sector} onChange={(e) => setMeta({ ...meta, sector: e.target.value })}>{(mySectorNames.length ? mySectorNames : ['Opće']).map((x) => <option key={x}>{x}</option>)}</select></Field></div>
                   <div className="md:col-span-4"><Field label="Broj akta / glasnika"><input className={input} value={meta.number} onChange={(e) => setMeta({ ...meta, number: e.target.value })} placeholder="npr. SN HNK 6/12" /></Field></div>
                   <div className="md:col-span-3"><Field label="Datum"><input type="date" className={input} value={meta.issuedAt} onChange={(e) => setMeta({ ...meta, issuedAt: e.target.value })} /></Field></div>
                   <div className="md:col-span-2"><Field label="Status"><select className={input} value={meta.status} onChange={(e) => setMeta({ ...meta, status: e.target.value })}>{STATUS_OPT.map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></Field></div>

@@ -61,7 +61,10 @@ export class AdminController {
       c(`SELECT count(*) n FROM posts WHERE "status"='OBJAVLJENO'`),
       c(`SELECT count(*) n FROM posts WHERE "status"='NACRT'`),
       c(`SELECT count(*) n FROM posts WHERE "status"='ZAKAZANO'`),
-      c(`SELECT count(*) n FROM posts WHERE "status"='NA_ODOBRENJU'`),
+      // F2-22: urednik vezan za sektore vidi samo svoj red za odobrenje
+      req.user.role !== 'ADMIN' && req.user.sectors?.length
+        ? this.db.count(`SELECT count(*) n FROM posts WHERE "status"='NA_ODOBRENJU' AND "category" = ANY($1)`, [req.user.sectors])
+        : c(`SELECT count(*) n FROM posts WHERE "status"='NA_ODOBRENJU'`),
       c(`SELECT coalesce(sum("views"),0) n FROM posts`),
       c(`SELECT count(*) n FROM documents`),
       c(`SELECT count(*) n FROM permits`),

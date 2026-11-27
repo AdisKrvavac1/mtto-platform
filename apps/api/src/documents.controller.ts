@@ -18,6 +18,7 @@ import { AuditService } from './audit';
 import { Can } from './rbac';
 import { FileStore } from './storage';
 import { toDate } from './util';
+import { assertScope, keyForName } from './sectors';
 
 export const MAX_DOC = 10 * 1024 * 1024;
 export const DOC_MIME = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -82,6 +83,10 @@ function meta(b: any) {
 export class DocumentsController {
   constructor(private db: Db, private files: FileStore, private audit: AuditService) {}
 
+  private async scope(req: any, sectorName: string | null) {
+    assertScope(req.user, await keyForName(this.db, sectorName), 'dokumente');
+  }
+
   @Get()
   @Can('dokumenti', 'read')
   list(@Query() q: any) {
@@ -127,6 +132,8 @@ export class DocumentsController {
     checkFile(file);
     if (!b?.title?.trim()) throw new BadRequestException('Naziv dokumenta je obavezan');
     const m = meta(b);
+    if (!m.sector && req.user.sectors?.length && req.user.role !== 'ADMIN') m.sector = req.user.sectors[0];
+    assertScope(req.user, await keyForName(this.db, m.sector ?? 'Opće'), 'dokumente');
     m.docType = m.docType ?? 'OSTALO';
     m.retentionClass = m.retentionClass ?? DEFAULT_RETENTION[m.docType] ?? 'GODINA_10';
     m.retainUntil = retainUntil(m.retentionClass, { ...m, createdAt: new Date() });
@@ -145,7 +152,9 @@ export class DocumentsController {
     const before = await this.db.one<any>(`SELECT ${ADMIN_DOC_COLS} FROM documents WHERE "id"=$1`, [docId]);
     if (!before) throw new NotFoundException();
     if (before.disposedAt) throw new BadRequestException('Dokument je izlučen; zapis se više ne mijenja.');
+    await this.scope(req, before.sector);
     const m = meta(b);
+    if (m.sector) await this.scope(req, m.sector);
     if (m.legalHold !== undefined && m.legalHold !== before.legalHold && !['ADMIN'].includes(req.user.role)) throw new ForbiddenException('Zabranu izlučivanja postavlja administrator.');
     if (m.replacedById === docId) throw new BadRequestException('Dokument ne može zamijeniti sam sebe.');
     if (m.replacedById) m.status = 'ZAMIJENJEN';
@@ -165,6 +174,7 @@ export class DocumentsController {
     const cur = await this.db.one<any>(`SELECT * FROM documents WHERE "id"=$1`, [docId]);
     if (!cur) throw new NotFoundException();
     if (cur.disposedAt) throw new BadRequestException('Dokument je izlučen.');
+    await this.scope(req, cur.sector);
     const note = String(b?.note ?? '').trim().slice(0, 300) || null;
     const stored = await this.files.put('dokumenti', file.buffer, file.mimetype);
     await this.db.insert('document_versions', {
@@ -212,6 +222,7 @@ export class DocumentsController {
     const d = await this.db.one<any>(`SELECT * FROM documents WHERE "id"=$1`, [docId]);
     if (!d) throw new NotFoundException();
     if (d.disposedAt) throw new BadRequestException('Dokument je već izlučen.');
+    await this.scope(req, d.sector);
     if (d.legalHold) throw new ForbiddenException('Za dokument važi zabrana izlučivanja.');
     if (!d.retainUntil || String(d.retainUntil) > new Date().toISOString().slice(0, 10)) throw new BadRequestException('Rok čuvanja još nije istekao.');
     const note = String(b?.note ?? '').trim();
@@ -229,6 +240,8 @@ export class DocumentsController {
   @Delete(':id')
   @Can('dokumenti', 'delete')
   async remove(@Param('id') docId: string, @Req() req: any) {
+    const cur = await this.db.one<any>(`SELECT "sector" FROM documents WHERE "id"=$1`, [docId]);
+    if (cur) await this.scope(req, cur.sector);
     const versions = await this.db.q<any>(`SELECT "storageKey" FROM document_versions WHERE "documentId"=$1`, [docId]);
     const d = await this.db.one<any>(`DELETE FROM documents WHERE "id"=$1 RETURNING "title","storageKey","fileName","sha256","docType","number"`, [docId]);
     if (!d) throw new NotFoundException();

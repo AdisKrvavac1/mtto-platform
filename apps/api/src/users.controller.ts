@@ -11,7 +11,7 @@ import { AuthGuard, inviteHash, newInviteToken } from './auth';
 import { AuditService } from './audit';
 import { Can, ROLES, ROLE_LABELS, type Role } from './rbac';
 
-const COLS = `"id","email","name","role","active","mfaEnabled","lastLoginAt","createdAt","inviteExpires",("inviteHash" IS NOT NULL) "invitePending"`;
+const COLS = `"id","email","name","role","active","mfaEnabled","lastLoginAt","createdAt","inviteExpires",("inviteHash" IS NOT NULL) "invitePending","sectors"`;
 const INVITE_HOURS = 72;
 
 function publicBase() {
@@ -68,6 +68,13 @@ export class UsersController {
     if (b.name !== undefined) { const n = String(b.name).trim(); if (n.length < 3) throw new BadRequestException('Unesite ime i prezime.'); d.name = n; }
     if (b.role !== undefined) { if (!ROLES.includes(b.role)) throw new BadRequestException('Nepoznata uloga.'); d.role = b.role; }
     if (b.active !== undefined) d.active = !!b.active;
+    if (b.sectors !== undefined) {
+      const keys = (await this.db.q<{ key: string }>(`SELECT "key" FROM sectors WHERE "active"`)).map((x) => x.key);
+      const arr = (Array.isArray(b.sectors) ? b.sectors : []).map(String);
+      const bad = arr.filter((k: string) => !keys.includes(k));
+      if (bad.length) throw new BadRequestException(`Nepoznat sektor: ${bad.join(', ')}`);
+      d.sectors = [...new Set(arr)];
+    }
     const self = userId === req.user.sub;
     if (self && (d.active === false || (d.role && d.role !== before.role))) throw new ForbiddenException('Ne možete promijeniti vlastitu ulogu ni deaktivirati sebe.');
     if (before.role === 'ADMIN' && before.active && ((d.role && d.role !== 'ADMIN') || d.active === false)) await this.assertNotLastAdmin(userId);
@@ -76,7 +83,7 @@ export class UsersController {
     const revoke = (d.role && d.role !== before.role) || d.active === false;
     if (revoke) sets.push(`"sessionVersion"="sessionVersion"+1`);
     const u = await this.db.one(`UPDATE users SET ${sets.join(',')} WHERE "id"=$1 RETURNING ${COLS}`, [userId, ...Object.values(d)]);
-    const action = d.active === false ? 'Deaktivirao/la korisnika' : d.active === true && !before.active ? 'Ponovo aktivirao/la korisnika' : d.role && d.role !== before.role ? `Promijenio/la ulogu u ${ROLE_LABELS[d.role as Role]}` : 'Uredio/la korisnika';
+    const action = d.sectors !== undefined && Object.keys(d).length === 1 ? 'Promijenio/la sektore korisnika' : d.active === false ? 'Deaktivirao/la korisnika' : d.active === true && !before.active ? 'Ponovo aktivirao/la korisnika' : d.role && d.role !== before.role ? `Promijenio/la ulogu u ${ROLE_LABELS[d.role as Role]}` : 'Uredio/la korisnika';
     await this.audit.log(req, { action, entity: 'korisnik', entityId: userId, target: before.email, before, after: u });
     return u;
   }

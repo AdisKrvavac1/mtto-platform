@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { adminFetch, getUser, useCan } from '@/lib/adminApi';
+import { adminFetch, getUser, inMySectors, useCan, useSectors } from '@/lib/adminApi';
 import { dateTime } from '@/lib/format';
 import { Badge, Card, CardHeader, F2Badge, Field, PageTitle, StatusChip, btnPrimary, btnSecondary, btnTertiary, iconBtn, input, useToast } from '@/components/admin/ui';
 import { AlertTriangle, Archive, ClockRewind, FlipBackward, Send01, Bold01, Calendar, CheckCircle, Clock, Download01, Edit01, Eye, Globe01, Heading01, Heading02, Image01, Italic01, LinkExternal01, Link01, Lock01, Paperclip, Dotpoints01, List, MessageTextSquare01, Save01, ShieldTick, Strikethrough01, Table, Trash01, UploadCloud02, XClose, File06 } from '@untitledui/icons';
@@ -55,7 +55,8 @@ export default function PostEditor({ id }: { id?: string }) {
   const [busy, setBusy] = useState(false);
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const toast = useToast();
-  const publisher = useCan('objave', 'publish');
+  const canPublishRole = useCan('objave', 'publish');
+  const sectorList = useSectors();
   const canDelete = useCan('objave', 'delete');
   const [dirty, setDirty] = useState(false);
   const [dialog, setDialog] = useState<null | { action: Wf; title: string; label: string; required: boolean; placeholder: string }>(null);
@@ -66,13 +67,18 @@ export default function PostEditor({ id }: { id?: string }) {
 
   const loadVersions = (pid = p.id) => pid && adminFetch<Ver[]>(`/admin/posts/${pid}/versions`).then(setVersions).catch(() => {});
   useEffect(() => {
+    const mine = getUser()?.sectors;
+    if (!id && mine?.length && getUser()?.role !== 'ADMIN') setP((s) => ({ ...s, category: mine[0] }));
     if (!id) return;
     adminFetch<Post>(`/admin/posts/${id}`).then((x) => { setP(x); setLoaded(true); }).catch((e) => toast.err(e.message));
     loadVersions(id);
   }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const set = <K extends keyof Post>(k: K, v: Post[K]) => { setP((s) => ({ ...s, [k]: v })); setDirty(true); };
-  const locked = (p.status === 'NA_ODOBRENJU' || LIVE.includes(p.status) || p.status === 'POVUCENO') && !publisher;
+  // F2-22: objava tuđeg sektora je samo za čitanje
+  const outOfScope = !!p.id && !inMySectors(getUser(), p.category);
+  const publisher = canPublishRole && !outOfScope;
+  const locked = outOfScope || ((p.status === 'NA_ODOBRENJU' || LIVE.includes(p.status) || p.status === 'POVUCENO') && !publisher);
   const ownWork = !!me && (p.createdBy === me || p.submittedBy === me);
   const needsSecondPair = !!p.fourEyes && ownWork && getUser()?.role !== 'ADMIN';
 
@@ -212,7 +218,7 @@ export default function PostEditor({ id }: { id?: string }) {
         <button className={btnSecondary} type="button" disabled={busy} onClick={openPreview} title="Otvara stranicu kako će izgledati na portalu (link važi 72 sata i može se poslati na provjeru)"><Eye />Pregled</button>
         {!locked && <button className={btnSecondary} type="button" disabled={busy || (!!p.id && !dirty)} onClick={() => save()}><Save01 />{LIVE.includes(p.status) ? 'Spremi izmjene' : 'Spremi'}</button>}
         {/* autor (ili urednik kad važi pravilo četiri oka) šalje na odobrenje */}
-        {['NACRT', 'VRACENO'].includes(p.status) && (!publisher || needsSecondPair) && (
+        {['NACRT', 'VRACENO'].includes(p.status) && !outOfScope && (!publisher || needsSecondPair) && (
           <button className={btnPrimary} type="button" disabled={busy} onClick={() => act('submit')}><Send01 />Pošalji na odobrenje</button>
         )}
         {publisher && p.status === 'NA_ODOBRENJU' && (
@@ -229,6 +235,9 @@ export default function PostEditor({ id }: { id?: string }) {
         )}
       </PageTitle>
 
+      {outOfScope && (
+        <div role="status" className="mb-6 flex items-start gap-3 rounded-[12px] bg-[#fafafa] p-4 ring-1 ring-inset ring-[#e5e5e5]"><Lock01 size={20} className="mt-0.5 shrink-0 text-[#737373]" /><p className="text-[14px] leading-5 text-[#404040]"><b className="font-semibold">Objava pripada sektoru „{sectorList.find((x) => x.key === p.category)?.name ?? p.category}”.</b> Možete je čitati; mijenjaju je i objavljuju urednici tog sektora.</p></div>
+      )}
       {p.status === 'VRACENO' && p.reviewNote && (
         <div role="status" className="mb-6 flex items-start gap-3 rounded-[12px] bg-[#fef3f2] p-4 ring-1 ring-inset ring-[#fecdca]"><AlertTriangle size={20} className="mt-0.5 shrink-0 text-[#d92d20]" /><div><p className="text-[14px] font-semibold text-[#b42318]">Urednik je vratio objavu na doradu</p><p className="mt-1 text-[14px] leading-5 text-[#b42318]">{p.reviewNote}</p></div></div>
       )}
@@ -340,12 +349,15 @@ export default function PostEditor({ id }: { id?: string }) {
               </Field>
               <div className="space-y-2">
                 <span className="text-[14px] font-medium text-[#404040]">Resor</span>
-                {Object.keys(CATLABEL).map((c) => (
-                  <label key={c} className={`flex cursor-pointer items-center gap-3 rounded-[12px] p-3 ring-inset ${p.category === c ? 'bg-[#f9f5ff] ring-2 ring-[#7f56d9]' : 'ring-1 ring-[#e5e5e5] hover:bg-[#fafafa]'}`}>
-                    <input type="radio" name="cat" className="size-4 border-[#d4d4d4] text-[#7f56d9] focus:ring-[#9e77ed]" checked={p.category === c} onChange={() => set('category', c)} />
-                    <span className={`text-[14px] font-medium ${p.category === c ? 'text-[#53389e]' : 'text-[#404040]'}`}>{CATLABEL[c]}</span>
-                  </label>
-                ))}
+                {(sectorList.length ? sectorList.filter((x) => x.active || x.key === p.category).map((x) => [x.key, x.name] as const) : Object.entries(CATLABEL)).map(([c, label]) => {
+                  const allowed = inMySectors(getUser(), c) && !locked;
+                  return (
+                    <label key={c} className={`flex items-center gap-3 rounded-[12px] p-3 ring-inset ${allowed ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'} ${p.category === c ? 'bg-[#f9f5ff] ring-2 ring-[#7f56d9]' : 'ring-1 ring-[#e5e5e5] hover:bg-[#fafafa]'}`}>
+                      <input type="radio" name="cat" disabled={!allowed} className="size-4 border-[#d4d4d4] text-[#7f56d9] focus:ring-[#9e77ed]" checked={p.category === c} onChange={() => set('category', c)} />
+                      <span className={`text-[14px] font-medium ${p.category === c ? 'text-[#53389e]' : 'text-[#404040]'}`}>{label}</span>
+                    </label>
+                  );
+                })}
               </div>
               {p.type === 'JAVNI_POZIV' && (
                 <div className="flex flex-col gap-5 border-t border-[#e5e5e5] pt-5">
