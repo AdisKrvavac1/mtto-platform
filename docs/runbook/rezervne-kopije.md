@@ -38,3 +38,6 @@ Ciljevi: RPO ≤ 24 h (logička kopija), RTO ≤ 4 h.
 
 ## Ručni upiti u bazu (RLS, ADR 0011)
 Tabele imaju Row-Level Security. U psql/Render konzoli prvo: `SELECT set_config('app.tenant','*',false);` (sve institucije) ili `'mtto'`.
+
+## Deploy (od 27.11.2026)
+Render Auto-Deploy je isključen. Deploy pokreće zadnji korak CI-ja (`.github/workflows/ci.yml`) preko Render Deploy Hooka (GitHub secret `RENDER_DEPLOY_HOOK`), samo za push na `main` i tek kad prođu svi koraci. Ručni deploy: Render → mtto-platform → Manual Deploy. Ako hook procuri: Render → Settings → Deploy Hook → Regenerate hook, pa novi link u GitHub secret.
