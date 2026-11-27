@@ -33,4 +33,10 @@ jobs:
         run: node dist/backup.js restore s3:latest postgres://mtto:mtto@localhost:5432/restore | tee restore.log
       - name: Sažetak
         if: always()
-        run: { echo '### Test vraćanja kopije'; echo '```'; cat apps/api/restore.log 2>/dev/null; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+        run: |
+          {
+            echo '### Test vraćanja kopije'
+            echo '```'
+            cat apps/api/restore.log 2>/dev/null || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
