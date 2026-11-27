@@ -17,21 +17,6 @@ const MAX_IMG = 5 * 1024 * 1024;
 const DOC_TYPES = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
 const IMG_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-const POST_STATUS = ['NACRT', 'OBJAVLJENO', 'ZAKAZANO'];
-const POST_TYPES = ['VIJEST', 'JAVNI_POZIV', 'SAOPCENJE'];
-
-function postData(b: any) {
-  const d: any = {};
-  for (const k of ['type', 'category', 'title', 'excerpt', 'body', 'coverImage', 'status', 'formUrl', 'authorName']) {
-    if (b[k] !== undefined) d[k] = b[k] === '' && (k === 'coverImage' || k === 'formUrl') ? null : String(b[k]);
-  }
-  if (d.status && !POST_STATUS.includes(d.status)) throw new BadRequestException('Nepoznat status');
-  if (d.type && !POST_TYPES.includes(d.type)) throw new BadRequestException('Nepoznata vrsta objave');
-  if (d.formUrl && !/^https:\/\//.test(d.formUrl)) throw new BadRequestException('Link na formu mora počinjati s https://');
-  if (b.publishedAt !== undefined) d.publishedAt = toDate(b.publishedAt);
-  if (b.deadline !== undefined) d.deadline = toDate(b.deadline);
-  return d;
-}
 
 function permitData(b: any) {
   const d: any = {};
@@ -59,14 +44,6 @@ function utf8Name(name: string) {
 export class AdminController {
   constructor(private db: Db, private importer: MttoImporter, private files: FileStore, private audit: AuditService) {}
 
-  /** Objava i zakazivanje traže pravo 'publish' (urednik, administrator). */
-  private assertPublish(req: any, status?: string) {
-    if ((status === 'OBJAVLJENO' || status === 'ZAKAZANO') && !can(req.user.role, 'objave', 'publish')) {
-      throw new ForbiddenException({ statusCode: 403, code: 'NO_PERMISSION', message: 'Vaša uloga može spremiti nacrt, ali ne i objaviti.' });
-    }
-  }
-
-  // ---------- Uvoz s mtto.gov.ba ----------
   @Post('import/mtto')
   @Can('uvoz', 'write')
   async importMtto(@Req() req: any) {
@@ -80,10 +57,11 @@ export class AdminController {
   @Can('kontrolna', 'read')
   async dashboard(@Req() req: any) {
     const c = (sql: string) => this.db.count(sql);
-    const [published, drafts, scheduled, views, documents, permits, facilities, locations, expiring, recentPosts, audit] = await Promise.all([
+    const [published, drafts, scheduled, pending, views, documents, permits, facilities, locations, expiring, recentPosts, audit] = await Promise.all([
       c(`SELECT count(*) n FROM posts WHERE "status"='OBJAVLJENO'`),
       c(`SELECT count(*) n FROM posts WHERE "status"='NACRT'`),
       c(`SELECT count(*) n FROM posts WHERE "status"='ZAKAZANO'`),
+      c(`SELECT count(*) n FROM posts WHERE "status"='NA_ODOBRENJU'`),
       c(`SELECT coalesce(sum("views"),0) n FROM posts`),
       c(`SELECT count(*) n FROM documents`),
       c(`SELECT count(*) n FROM permits`),
@@ -100,66 +78,10 @@ export class AdminController {
       this.db.q(`SELECT "status", count(*)::int n FROM eco_reports GROUP BY 1`).catch(() => []),
     ]);
     const showAudit = can(req.user.role, 'dnevnik', 'read');
-    return { published, drafts, scheduled, views, documents, permits, facilities, locations, expiring, recentPosts, audit: showAudit ? audit : [], monthly, topPosts, reports };
+    return { published, drafts, scheduled, pending, views, documents, permits, facilities, locations, expiring, recentPosts, audit: showAudit ? audit : [], monthly, topPosts, reports };
   }
 
   // ---------- Objave ----------
-  @Get('posts')
-  @Can('objave', 'read')
-  posts(@Query() q: any) {
-    const w = new Where();
-    if (q.status) w.add(`"status"=?`, q.status);
-    if (q.type) w.add(`"type"=?`, q.type);
-    if (q.q) w.add(`"title" ILIKE ?`, `%${q.q}%`);
-    return this.db.q(`SELECT "id","slug","title","excerpt","status","type","category","publishedAt","updatedAt","views","authorName","coverImage","isDemo" FROM posts ${w.sql} ORDER BY "updatedAt" DESC LIMIT 200`, w.params);
-  }
-
-  @Get('posts/:id')
-  @Can('objave', 'read')
-  async post(@Param('id') postId: string) {
-    const p = await this.db.one(`SELECT * FROM posts WHERE "id"=$1`, [postId]);
-    if (!p) throw new NotFoundException();
-    p.documents = await this.db.q(`SELECT "id","title","fileName","size","docType" FROM documents WHERE "postId"=$1 ORDER BY "createdAt"`, [postId]);
-    return p;
-  }
-
-  @Post('posts')
-  @Can('objave', 'write')
-  async createPost(@Body() b: any, @Req() req: any) {
-    if (!b?.title?.trim()) throw new BadRequestException('Naslov je obavezan');
-    const data = postData(b);
-    this.assertPublish(req, data.status);
-    if (data.status === 'OBJAVLJENO' && !data.publishedAt) data.publishedAt = new Date();
-    let slug = slugify(b.slug || b.title) || `objava-${Date.now()}`;
-    if (await this.db.one(`SELECT 1 FROM posts WHERE "slug"=$1`, [slug])) slug = `${slug}-${Date.now().toString(36)}`;
-    const p = await this.db.insert('posts', { id: id(), ...data, slug, authorName: data.authorName ?? req.user?.name ?? 'Uredništvo MTTO' });
-    await this.audit.log(req, { action: p.status === 'OBJAVLJENO' ? 'Objavio/la objavu' : 'Kreirao/la nacrt', entity: 'objava', entityId: p.id, target: p.title, after: p });
-    return p;
-  }
-
-  @Patch('posts/:id')
-  @Can('objave', 'write')
-  async updatePost(@Param('id') postId: string, @Body() b: any, @Req() req: any) {
-    const before = await this.db.one(`SELECT * FROM posts WHERE "id"=$1`, [postId]);
-    if (!before) throw new NotFoundException();
-    const data = postData(b);
-    if (data.status && data.status !== before.status) this.assertPublish(req, data.status);
-    if (before.status === 'OBJAVLJENO' && !can(req.user.role, 'objave', 'publish')) this.assertPublish(req, 'OBJAVLJENO');
-    if (data.status === 'OBJAVLJENO' && !before.publishedAt && !data.publishedAt) data.publishedAt = new Date();
-    const p = await this.db.update('posts', postId, data, true);
-    await this.audit.log(req, { action: before.status !== 'OBJAVLJENO' && p.status === 'OBJAVLJENO' ? 'Objavio/la objavu' : 'Uredio/la objavu', entity: 'objava', entityId: postId, target: p.title, before, after: p });
-    return p;
-  }
-
-  @Delete('posts/:id')
-  @Can('objave', 'delete')
-  async deletePost(@Param('id') postId: string, @Req() req: any) {
-    const p = await this.db.one(`DELETE FROM posts WHERE "id"=$1 RETURNING *`, [postId]);
-    if (!p) throw new NotFoundException();
-    await this.audit.log(req, { action: 'Obrisao/la objavu', entity: 'objava', entityId: postId, target: p.title, before: p, after: null });
-    return { ok: true };
-  }
-
   // ---------- Dokumenti ----------
   @Get('documents')
   @Can('dokumenti', 'read')

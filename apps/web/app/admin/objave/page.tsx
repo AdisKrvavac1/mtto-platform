@@ -9,10 +9,11 @@ import { Badge, Card, CardHeader, EmptyState, MetricCard, PageTitle, StatusChip,
 type Row = { id: string; slug: string; title: string; excerpt: string; status: string; type: string; category: string; publishedAt: string | null; updatedAt: string; views: number; authorName: string; coverImage: string | null; isDemo: boolean };
 const CATS = ['Zaštita okoliša', 'Turizam', 'Trgovina', 'Opće'];
 const PAGE = 10;
-type St = '' | 'OBJAVLJENO' | 'NACRT' | 'ZAKAZANO';
+type St = '' | 'OBJAVLJENO' | 'NACRT' | 'NA_ODOBRENJU' | 'VRACENO' | 'ZAKAZANO' | 'POVUCENO';
 
 export default function PostsAdmin() {
   const canPost = useCan('objave', 'write');
+  const canPublish = useCan('objave', 'publish');
   const [all, setAll] = useState<Row[] | null>(null);
   const [status, setStatus] = useState<St>('');
   const [type, setType] = useState('');
@@ -26,16 +27,24 @@ export default function PostsAdmin() {
   useEffect(() => { setQ(new URLSearchParams(window.location.search).get('q') ?? ''); load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => setPage(1), [status, type, cat, q]);
 
-  const rows = useMemo(() => (all ?? []).filter((r) => (!status || r.status === status) && (!type || r.type === type) && (!cat || r.category === cat) && (!q || r.title.toLowerCase().includes(q.toLowerCase()))), [all, status, type, cat, q]);
+  const rows = useMemo(() => (all ?? []).filter((r) => (!status || r.status === status || (status === 'NACRT' && r.status === 'VRACENO')) && (!type || r.type === type) && (!cat || r.category === cat) && (!q || r.title.toLowerCase().includes(q.toLowerCase()))), [all, status, type, cat, q]);
   const pages = Math.max(1, Math.ceil(rows.length / PAGE));
   const shown = rows.slice((page - 1) * PAGE, page * PAGE);
   const n = (s: string) => (all ?? []).filter((r) => r.status === s).length;
   const views = (all ?? []).reduce((s, r) => s + r.views, 0);
 
-  async function setStatusOf(ids: string[], s: string) {
+  /** Grupne radnje idu kroz urednički tok (isto kao u editoru): objava ili povlačenje s razlogom. */
+  async function setStatusOf(ids: string[], action: 'publish' | 'withdraw') {
+    let note = '';
+    if (action === 'withdraw') {
+      note = prompt(`Razlog povlačenja (${ids.length} objav${ids.length === 1 ? 'a' : 'e'}). Upisuje se u dnevnik aktivnosti.`)?.trim() ?? '';
+      if (note.length < 3) return;
+    }
     try {
-      await Promise.all(ids.map((id) => adminFetch(`/admin/posts/${id}`, { method: 'PATCH', body: JSON.stringify({ status: s }) })));
-      toast.ok(s === 'OBJAVLJENO' ? 'Objavljeno na portalu' : 'Vraćeno u nacrt');
+      const rows = (all ?? []).filter((r) => ids.includes(r.id));
+      const ok = rows.filter((r) => action === 'publish' ? !['OBJAVLJENO'].includes(r.status) : ['OBJAVLJENO', 'ZAKAZANO'].includes(r.status));
+      await Promise.all(ok.map((r) => adminFetch(`/admin/posts/${r.id}/workflow`, { method: 'POST', body: JSON.stringify({ action, note }) })));
+      toast.ok(action === 'publish' ? `Objavljeno: ${ok.length}` : `Povučeno s portala: ${ok.length}`);
       setPicked(new Set());
       load();
     } catch (e: any) { toast.err(e.message); }
@@ -77,7 +86,7 @@ export default function PostsAdmin() {
       <Card className="mt-8 overflow-hidden">
         <CardHeader title="Sve objave" badge={<Badge tone="brand">{rows.length} zapisa</Badge>} description="Uredite, objavite ili povucite objave. Svaka izmjena se bilježi u dnevnik." />
         <div className="flex flex-col gap-4 px-4 pt-4 md:px-6">
-          <Tabs<St> value={status} onChange={setStatus} items={[{ value: '', label: 'Sve', count: all?.length ?? 0 }, { value: 'OBJAVLJENO', label: 'Objavljeno', count: n('OBJAVLJENO') }, { value: 'NACRT', label: 'Nacrti', count: n('NACRT') }, { value: 'ZAKAZANO', label: 'Zakazano', count: n('ZAKAZANO') }]} />
+          <Tabs<St> value={status} onChange={setStatus} items={[{ value: '', label: 'Sve', count: all?.length ?? 0 }, { value: 'NA_ODOBRENJU', label: 'Na odobrenju', count: n('NA_ODOBRENJU') }, { value: 'OBJAVLJENO', label: 'Objavljeno', count: n('OBJAVLJENO') }, { value: 'NACRT', label: 'Nacrti', count: n('NACRT') + n('VRACENO') }, { value: 'ZAKAZANO', label: 'Zakazano', count: n('ZAKAZANO') }, { value: 'POVUCENO', label: 'Povučeno', count: n('POVUCENO') }]} />
           <div className="flex flex-col gap-3 pb-4 lg:flex-row lg:items-center lg:justify-between">
             <label className="relative w-full lg:max-w-[320px]"><span className="sr-only">Pretraga</span><SearchLg size={20} className="pointer-events-none absolute left-3 top-2.5 text-[#a3a3a3]" /><input className={`${input} pl-10`} placeholder="Pretraži naslove" value={q} onChange={(e) => setQ(e.target.value)} /></label>
             <div className="flex flex-wrap gap-3">
@@ -91,8 +100,8 @@ export default function PostsAdmin() {
           <div className="flex flex-wrap items-center justify-between gap-3 border-y border-[#e9d7fe] bg-[#f9f5ff] px-4 py-3 md:px-6">
             <span className="text-[14px] font-semibold text-[#6941c6]">Odabrano: {picked.size}</span>
             <div className="flex flex-wrap gap-2">
-              <button type="button" onClick={() => setStatusOf([...picked], 'OBJAVLJENO')} className={btnSecondary}><UploadCloud02 />Objavi</button>
-              <button type="button" onClick={() => setStatusOf([...picked], 'NACRT')} className={btnSecondary}><Archive />U nacrt</button>
+              {canPublish && <button type="button" onClick={() => setStatusOf([...picked], 'publish')} className={btnSecondary}><UploadCloud02 />Objavi</button>}
+              {canPublish && <button type="button" onClick={() => setStatusOf([...picked], 'withdraw')} className={btnSecondary}><Archive />Povuci s portala</button>}
               <button type="button" onClick={() => removeMany([...picked])} className={`${btnSecondary} !text-[#b42318] [&_svg]:!text-[#d92d20]`}><Trash01 />Obriši</button>
             </div>
           </div>
@@ -125,7 +134,7 @@ export default function PostsAdmin() {
                   <td className={td}>{r.views.toLocaleString('bs-BA')}</td>
                   <td className={`${td} whitespace-nowrap text-right`}>
                     {r.status === 'OBJAVLJENO' && <a href={`/vijesti/${r.slug}`} target="_blank" rel="noopener" className={iconBtn} title="Otvori na portalu"><LinkExternal01 /></a>}
-                    <button type="button" onClick={() => setStatusOf([r.id], r.status === 'OBJAVLJENO' ? 'NACRT' : 'OBJAVLJENO')} className={iconBtn} title={r.status === 'OBJAVLJENO' ? 'Povuci u nacrt' : 'Objavi'}>{r.status === 'OBJAVLJENO' ? <Archive /> : <Eye />}</button>
+                    {canPublish && <button type="button" onClick={() => setStatusOf([r.id], r.status === 'OBJAVLJENO' ? 'withdraw' : 'publish')} className={iconBtn} title={r.status === 'OBJAVLJENO' ? 'Povuci s portala' : 'Objavi'} aria-label={r.status === 'OBJAVLJENO' ? `Povuci s portala: ${r.title}` : `Objavi: ${r.title}`}>{r.status === 'OBJAVLJENO' ? <Archive /> : <Eye />}</button>}
                     <button type="button" onClick={() => removeMany([r.id])} className={`${iconBtn} hover:!text-[#d92d20]`} title="Obriši"><Trash01 /></button>
                     <Link href={`/admin/objave/${r.id}`} className={iconBtn} title="Uredi"><Edit01 /></Link>
                   </td>

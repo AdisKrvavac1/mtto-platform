@@ -9,10 +9,11 @@ import { AdminController } from './admin.controller';
 import { AdminRiskController } from './risk';
 import { UsersController } from './users.controller';
 import { AuditController } from './audit.controller';
+import { PostsController } from './posts.controller';
 
 test('svaka admin ruta ima @Can (ruta bez prava ne smije proći CI)', () => {
   const missing: string[] = [];
-  for (const C of [AdminController, AdminRiskController, UsersController, AuditController] as any[]) {
+  for (const C of [AdminController, AdminRiskController, UsersController, AuditController, PostsController] as any[]) {
     for (const name of Object.getOwnPropertyNames(C.prototype)) {
       const fn = C.prototype[name];
       if (name === 'constructor' || typeof fn !== 'function') continue;

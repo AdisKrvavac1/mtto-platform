@@ -6,7 +6,7 @@
 import { BadRequestException, Body, Controller, ForbiddenException, Get, NotFoundException, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
-import { Db, id } from './db';
+import { Db, currentTenant, id } from './db';
 import { AuthGuard, inviteHash, newInviteToken } from './auth';
 import { AuditService } from './audit';
 import { Can, ROLES, ROLE_LABELS, type Role } from './rbac';
@@ -94,5 +94,23 @@ export class UsersController {
       ${resetMfa ? `, "mfaEnabled"=false, "mfaSecret"=NULL, "mfaPendingSecret"=NULL, "mfaRecovery"='[]'::jsonb` : ''} WHERE "id"=$1`, [userId, passwordHash]);
     await this.audit.log(req, { action: resetMfa ? 'Poslao/la novi link za aktivaciju i poništio/la drugi faktor' : 'Poslao/la novi link za aktivaciju', entity: 'korisnik', entityId: userId, target: u.email });
     return this.invite(userId);
+  }
+
+  /** Pravila institucije (npr. četiri oka za objave). */
+  @Get('/settings/current')
+  @Can('korisnici', 'read')
+  async settings() {
+    const t = await this.db.one<any>(`SELECT "settings" FROM tenants WHERE "id"=$1`, [currentTenant()]);
+    return { fourEyes: !!t?.settings?.fourEyes };
+  }
+
+  @Patch('/settings/current')
+  @Can('korisnici', 'write')
+  async updateSettings(@Body() b: any, @Req() req: any) {
+    const before = await this.settings();
+    const next = { fourEyes: !!b?.fourEyes };
+    await this.db.q(`UPDATE tenants SET "settings" = "settings" || $2::jsonb WHERE "id"=$1`, [currentTenant(), JSON.stringify(next)]);
+    await this.audit.log(req, { action: next.fourEyes ? 'Uključio/la pravilo četiri oka za objave' : 'Isključio/la pravilo četiri oka za objave', entity: 'postavke', target: 'Pravila objave', before, after: next });
+    return next;
   }
 }

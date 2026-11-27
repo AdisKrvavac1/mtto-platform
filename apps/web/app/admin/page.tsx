@@ -8,7 +8,7 @@ import { Avatar, Badge, BarChart, ButtonGroup, Card, CardHeader, EmptyState, Met
 import { getUser } from '@/lib/adminApi';
 
 type Dash = {
-  published: number; drafts: number; scheduled: number; views: number; documents: number; permits: number; facilities: number; locations: number;
+  published: number; drafts: number; scheduled: number; pending?: number; views: number; documents: number; permits: number; facilities: number; locations: number;
   expiring: { id: string; registerNumber: string; operator: string; validUntil: string; status: string }[];
   recentPosts: { id: string; title: string; status: string; type: string; category: string; updatedAt: string }[];
   audit: { id: string; userName: string; action: string; target: string; createdAt: string }[];
@@ -74,7 +74,7 @@ export default function Dashboard() {
 
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
         <MetricCard title="Objavljeno" value={d.published.toLocaleString('bs-BA')} trend={trend} spark={all} href="/admin/objave" />
-        <MetricCard title="Pregledi objava" value={d.views.toLocaleString('bs-BA')} footer={`${d.drafts} nacrta · ${d.scheduled} zakazano`} spark={all.map((v, i) => v + i)} href="/admin/objave" />
+        <MetricCard title="Pregledi objava" value={d.views.toLocaleString('bs-BA')} footer={d.pending ? `${d.pending} čeka odobrenje · ${d.scheduled} zakazano` : `${d.drafts} nacrta · ${d.scheduled} zakazano`} spark={all.map((v, i) => v + i)} href="/admin/objave" />
         <MetricCard title="Okolišne dozvole" value={d.permits} footer={d.expiring.length ? <span className="text-[#d92d20]">{d.expiring.length} ističe u 60 dana</span> : 'Nijedna ne ističe uskoro'} href="/admin/registri" />
         <MetricCard title="Prijave građana" value={reportsTotal} footer={reportsNew ? <Badge tone="error" dot>{reportsNew} nove</Badge> : 'Sve prijave obrađene'} href="/admin/eko-rizik" />
       </div>

@@ -5,12 +5,13 @@
  */
 import { SetMetadata } from '@nestjs/common';
 
-export const ROLES = ['ADMIN', 'UREDNIK', 'REFERENT', 'PREGLED'] as const;
+export const ROLES = ['ADMIN', 'UREDNIK', 'SARADNIK', 'REFERENT', 'PREGLED'] as const;
 export type Role = (typeof ROLES)[number];
 
 export const ROLE_LABELS: Record<Role, string> = {
   ADMIN: 'Administrator',
   UREDNIK: 'Urednik',
+  SARADNIK: 'Saradnik (autor)',
   REFERENT: 'Referent registra',
   PREGLED: 'Samo pregled',
 };
@@ -28,6 +29,7 @@ const ALL: Action[] = ['read', 'write', 'delete', 'publish'];
 export const PERMISSIONS: Record<Role, Partial<Record<Module, Action[]>>> = {
   ADMIN: Object.fromEntries(MODULES.map((m) => [m, ALL])) as Record<Module, Action[]>,
   UREDNIK: { kontrolna: R, objave: ALL, dokumenti: RWD, mediji: RW, uvoz: RW, registri: R, eko: R },
+  SARADNIK: { kontrolna: R, objave: RW, dokumenti: RW, mediji: RW },
   REFERENT: { kontrolna: R, registri: RWD, eko: RWD, dokumenti: RW, mediji: RW, objave: R },
   PREGLED: { kontrolna: R, objave: R, dokumenti: R, registri: R, eko: R },
 };

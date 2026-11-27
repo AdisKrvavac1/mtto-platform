@@ -186,11 +186,14 @@ export interface Permits {
 }
 
 export interface Posts {
+  approvedAt: Timestamp | null;
+  approvedBy: string | null;
   authorName: Generated<string>;
   body: Generated<string>;
   category: Generated<string>;
   coverImage: string | null;
   createdAt: Generated<Timestamp>;
+  createdBy: string | null;
   deadline: Timestamp | null;
   excerpt: Generated<string>;
   externalId: string | null;
@@ -198,14 +201,33 @@ export interface Posts {
   id: string;
   isDemo: Generated<boolean>;
   publishedAt: Timestamp | null;
+  reviewNote: string | null;
   slug: string;
   sourceUrl: string | null;
   status: Generated<string>;
+  submittedAt: Timestamp | null;
+  submittedBy: string | null;
   tenantId: Generated<string>;
   title: string;
   type: Generated<string>;
+  unpublishAt: Timestamp | null;
   updatedAt: Generated<Timestamp>;
+  version: Generated<number>;
   views: Generated<number>;
+  withdrawnReason: string | null;
+}
+
+export interface PostVersions {
+  createdAt: Generated<Timestamp>;
+  id: string;
+  note: string | null;
+  postId: string;
+  snapshot: Json;
+  status: string;
+  tenantId: Generated<string>;
+  userId: string | null;
+  userName: string;
+  version: number;
 }
 
 export interface SchemaMigrations {
@@ -219,6 +241,7 @@ export interface Tenants {
   domains: Generated<string[]>;
   id: string;
   name: string;
+  settings: Generated<Json>;
   shortName: string;
   theme: Generated<Json>;
 }
@@ -256,6 +279,7 @@ export interface DB {
   map_locations: MapLocations;
   media: Media;
   permits: Permits;
+  post_versions: PostVersions;
   posts: Posts;
   schema_migrations: SchemaMigrations;
   tenants: Tenants;

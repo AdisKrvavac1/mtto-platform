@@ -31,7 +31,7 @@ export const Obrazac: S = {
 
 export const StatusiIZnacke: S = {
   name: 'Statusi i značke',
-  render: () => <div className="flex flex-wrap gap-3">{['OBJAVLJENO', 'NACRT', 'ZAKAZANO', 'VAZECA', 'U_OBNOVI', 'ISTEKLA'].map((s) => <StatusChip key={s} status={s} />)}<Badge tone="brand">Samo administrator</Badge></div>,
+  render: () => <div className="flex flex-wrap gap-3">{['NACRT', 'NA_ODOBRENJU', 'VRACENO', 'ZAKAZANO', 'OBJAVLJENO', 'POVUCENO', 'VAZECA', 'U_OBNOVI', 'ISTEKLA'].map((s) => <StatusChip key={s} status={s} />)}<Badge tone="brand">Samo administrator</Badge></div>,
 };
 
 export const Kartice: S = {

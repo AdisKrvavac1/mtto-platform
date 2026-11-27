@@ -16,10 +16,11 @@ type Invite = { link: string; expiresInHours: number; email: string };
 const ROLE_INFO: Record<string, string> = {
   ADMIN: 'Sve, uključujući korisnike i dnevnik aktivnosti.',
   UREDNIK: 'Objave (i objavljivanje), dokumenti, slike, uvoz vijesti. Registre samo čita.',
+  SARADNIK: 'Piše objave i šalje ih uredniku na odobrenje; ne objavljuje. Učitava dokumente i slike.',
   REFERENT: 'Registri dozvola i objekata, lokacije, klizišta i eko-prijave. Objave samo čita.',
   PREGLED: 'Samo čitanje sadržaja i registara, bez izmjena.',
 };
-const ENTITIES: Record<string, string> = { objava: 'Objave', dokument: 'Dokumenti', medij: 'Slike', dozvola: 'Dozvole', lokacija: 'Lokacije', objekt: 'Ugostiteljski objekti', 'klizište': 'Klizišta', 'eko-prijava': 'Eko-prijave', korisnik: 'Korisnici i prijave', uvoz: 'Uvoz vijesti' };
+const ENTITIES: Record<string, string> = { postavke: 'Postavke', objava: 'Objave', dokument: 'Dokumenti', medij: 'Slike', dozvola: 'Dozvole', lokacija: 'Lokacije', objekt: 'Ugostiteljski objekti', 'klizište': 'Klizišta', 'eko-prijava': 'Eko-prijave', korisnik: 'Korisnici i prijave', uvoz: 'Uvoz vijesti' };
 
 const FIELDS: Record<string, string> = {
   title: 'Naslov', excerpt: 'Sažetak', body: 'Tekst', status: 'Status', type: 'Vrsta', category: 'Kategorija', slug: 'Adresa', coverImage: 'Naslovna slika',
@@ -28,7 +29,7 @@ const FIELDS: Record<string, string> = {
   registerNumber: 'Broj rješenja', operator: 'Operater', facility: 'Postrojenje', activity: 'Djelatnost', municipality: 'Općina', address: 'Adresa', lat: 'Geogr. širina', lng: 'Geogr. dužina',
   isPublic: 'Javno', note: 'Interna bilješka', publicNote: 'Javno obrazloženje', photosPublic: 'Javne fotografije', risk: 'Rizik', isDemo: 'Demo zapis', sha256: 'Otisak datoteke (sha256)',
 };
-const ROLE_NAMES: Record<string, string> = { ADMIN: 'Administrator', UREDNIK: 'Urednik', REFERENT: 'Referent registra', PREGLED: 'Samo pregled' };
+const ROLE_NAMES: Record<string, string> = { ADMIN: 'Administrator', UREDNIK: 'Urednik', SARADNIK: 'Saradnik (autor)', REFERENT: 'Referent registra', PREGLED: 'Samo pregled' };
 
 function show(v: unknown, field?: string) {
   if (field === 'role' && typeof v === 'string') return ROLE_NAMES[v] ?? v;
@@ -139,6 +140,8 @@ function Users({ me, toast, onChange }: { me: CmsUser | null; toast: ReturnType<
         </dl>
       </Card>
 
+      <PublishRules toast={toast} onChange={onChange} />
+
       {(form || invite) && (
         <>
           <div className="fixed inset-0 z-[55] bg-[#0a0d12]/70 backdrop-blur-[2px]" onClick={close} />
@@ -173,6 +176,28 @@ function Users({ me, toast, onChange }: { me: CmsUser | null; toast: ReturnType<
         </>
       )}
     </>
+  );
+}
+
+function PublishRules({ toast, onChange }: { toast: ReturnType<typeof useToast>; onChange: () => void }) {
+  const [on, setOn] = useState<boolean | null>(null);
+  useEffect(() => { adminFetch<{ fourEyes: boolean }>('/admin/users/settings/current').then((r) => setOn(r.fourEyes)).catch(() => setOn(false)); }, []);
+  async function toggle() {
+    const next = !on;
+    if (!confirm(next ? 'Uključiti pravilo četiri oka? Urednik više neće moći sam objaviti objavu koju je napisao.' : 'Isključiti pravilo četiri oka?')) return;
+    try { const r = await adminFetch<{ fourEyes: boolean }>('/admin/users/settings/current', { method: 'PATCH', body: JSON.stringify({ fourEyes: next }) }); setOn(r.fourEyes); onChange(); toast.ok(r.fourEyes ? 'Pravilo četiri oka je uključeno' : 'Pravilo četiri oka je isključeno'); } catch (e: any) { toast.err(e.message); }
+  }
+  return (
+    <Card className="mt-6">
+      <div className="flex flex-wrap items-start justify-between gap-4 px-4 py-5 md:px-6">
+        <div className="max-w-[640px]"><h2 className="text-[18px] font-semibold leading-7 text-[#171717]">Pravilo četiri oka za objave</h2>
+          <p className="mt-1 text-[14px] leading-5 text-[#525252]">Kad je uključeno, objavu koju je urednik napisao ili poslao na odobrenje mora objaviti drugi urednik. Administrator može objaviti i sam; to se posebno bilježi u dnevniku.</p></div>
+        <button type="button" role="switch" aria-checked={!!on} aria-label="Pravilo četiri oka" disabled={on === null} onClick={toggle}
+          className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#9e77ed]/40 ${on ? 'bg-[#7f56d9]' : 'bg-[#e5e5e5]'}`}>
+          <span className={`absolute top-0.5 size-5 rounded-full bg-white shadow-sm transition-transform ${on ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
+        </button>
+      </div>
+    </Card>
   );
 }
 

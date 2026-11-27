@@ -210,7 +210,8 @@ export function Field({ label, hint, children, required }: { label: string; hint
 
 export function StatusChip({ status }: { status: string }) {
   const map: Record<string, ['success' | 'gray' | 'warning' | 'error' | 'brand', string]> = {
-    OBJAVLJENO: ['success', 'Objavljeno'], NACRT: ['gray', 'Nacrt'], ZAKAZANO: ['warning', 'Zakazano'],
+    OBJAVLJENO: ['success', 'Objavljeno'], NACRT: ['gray', 'Nacrt'], ZAKAZANO: ['brand', 'Zakazano'],
+    NA_ODOBRENJU: ['warning', 'Na odobrenju'], VRACENO: ['error', 'Vraćeno na doradu'], POVUCENO: ['gray', 'Povučeno'],
     VAZECA: ['success', 'Važeća'], U_OBNOVI: ['warning', 'U obnovi'], ISTEKLA: ['error', 'Istekla'], VAZECI: ['success', 'Važeći'], ARHIVIRAN: ['gray', 'Arhiviran'],
   };
   const [tone, label] = map[status] ?? ['gray', status];

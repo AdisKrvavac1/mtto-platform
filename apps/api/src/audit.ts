@@ -48,6 +48,8 @@ export type AuditEntry = {
   target?: string;
   before?: Record<string, any> | null;
   after?: Record<string, any> | null;
+  /** Samo za sistemske poslove preko svih institucija (inače iz sesije). */
+  tenantId?: string;
 };
 
 @Injectable()
@@ -69,6 +71,7 @@ export class AuditService {
       changes: changes ? JSON.stringify(changes) : null,
       ip: req ? ipPrefix(clientIp(req)) : null,
       requestId: req?.requestId ?? req?.headers?.['x-request-id'] ?? null,
+      ...(e.tenantId ? { tenantId: e.tenantId } : {}),
     }, `"id"`);
   }
 }
