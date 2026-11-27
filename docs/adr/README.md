@@ -18,3 +18,4 @@ Odluka se ne briše; kad se promijeni, piše se nova koja zamjenjuje staru.
 | [0011](0011-vise-institucija-rls.md) | Više institucija: tenantId i Row-Level Security | Prihvaćena |
 | [0012](0012-urednicki-tok-objava.md) | Urednički tok objava, verzije, automatsko povlačenje | Prihvaćena |
 | [0013](0013-editor-blokovi-i-pregled.md) | Editor s blokovima (Tiptap) i link za pregled | Prihvaćena |
+| [0014](0014-dokumentacijski-centar.md) | Dokumentacijski centar: metapodaci, verzije, rokovi čuvanja | Prihvaćena |

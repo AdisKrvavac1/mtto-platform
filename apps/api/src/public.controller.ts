@@ -4,7 +4,9 @@ import { FileStore } from './storage';
 import { Db, Where } from './db';
 import { toInt } from './util';
 
-export const DOC_COLS = `"id","title","docType","sector","number","issuedAt","status","description","fileName","mimeType","size","downloads","isDemo","postId","permitId","createdAt"`;
+export const DOC_COLS = `"id","title","docType","sector","number","issuedAt","status","description","fileName","mimeType","size","downloads","isDemo","postId","permitId","createdAt","updatedAt","publisher","gazette","validFrom","validUntil","keywords","language","replacedById","version"`;
+/** Javno je samo ono što nije interno ni izlučeno (F2-03). */
+const PUBLIC_DOC = `"accessLevel"='JAVNO' AND "disposedAt" IS NULL`;
 const POST_LIST_COLS = `"id","slug","type","category","title","excerpt","coverImage","publishedAt","deadline","views","authorName","isDemo"`;
 const PUBLISHED = `"status" IN ('OBJAVLJENO','ZAKAZANO') AND "publishedAt" <= now() AND ("unpublishAt" IS NULL OR "unpublishAt" > now())`;
 
@@ -26,7 +28,7 @@ export class PublicController {
     if (q.type) w.add(`"type"=?`, q.type);
     if (q.category) w.add(`"category"=?`, q.category);
     if (q.q) w.add(`("title" ILIKE ? OR "excerpt" ILIKE ?)`, `%${q.q}%`, `%${q.q}%`);
-    const items = await this.db.q(`SELECT ${POST_LIST_COLS}, (SELECT count(*)::int FROM documents d WHERE d."postId"=posts."id") AS "attachmentCount" FROM posts ${w.sql} ORDER BY "publishedAt" DESC LIMIT ${take} OFFSET ${(page - 1) * take}`, w.params);
+    const items = await this.db.q(`SELECT ${POST_LIST_COLS}, (SELECT count(*)::int FROM documents d WHERE d."postId"=posts."id" AND d."accessLevel"='JAVNO' AND d."disposedAt" IS NULL) AS "attachmentCount" FROM posts ${w.sql} ORDER BY "publishedAt" DESC LIMIT ${take} OFFSET ${(page - 1) * take}`, w.params);
     const total = await this.db.count(`SELECT count(*) n FROM posts ${w.sql}`, w.params);
     return { items, total, page, pages: Math.max(1, Math.ceil(total / take)) };
   }
@@ -35,23 +37,23 @@ export class PublicController {
   async post(@Param('slug') slug: string) {
     const post = await this.db.one(`UPDATE posts SET "views"="views"+1 WHERE "slug"=$1 AND ${PUBLISHED} RETURNING *`, [slug]);
     if (!post) throw new NotFoundException();
-    post.documents = await this.db.q(`SELECT ${DOC_COLS} FROM documents WHERE "postId"=$1 ORDER BY "createdAt"`, [post.id]);
+    post.documents = await this.db.q(`SELECT ${DOC_COLS} FROM documents WHERE "postId"=$1 AND ${PUBLIC_DOC} ORDER BY "createdAt"`, [post.id]);
     return post;
   }
 
   @Get('documents')
   async documents(@Query() q: any) {
-    const w = new Where().add(`"postId" IS NULL AND "permitId" IS NULL`);
+    const w = new Where().add(`"postId" IS NULL AND "permitId" IS NULL AND ${PUBLIC_DOC}`);
     if (q.docType) w.add(`"docType"=?`, q.docType);
     if (q.sector) w.add(`"sector"=?`, q.sector);
     if (q.status) w.add(`"status"=?`, q.status);
-    if (q.q) w.add(`("title" ILIKE ? OR coalesce("number",'') ILIKE ?)`, `%${q.q}%`, `%${q.q}%`);
+    if (q.q) w.add(`("title" ILIKE ? OR coalesce("number",'') ILIKE ? OR ? = ANY("keywords"))`, `%${q.q}%`, `%${q.q}%`, String(q.q).toLowerCase());
     return this.db.q(`SELECT ${DOC_COLS} FROM documents ${w.sql} ORDER BY "issuedAt" DESC NULLS LAST, "createdAt" DESC LIMIT 200`, w.params);
   }
 
   @Get('documents/:id/file')
   async file(@Param('id') docId: string, @Res() res: Response) {
-    const doc = await this.db.one(`UPDATE documents SET "downloads"="downloads"+1 WHERE "id"=$1 RETURNING "fileName","mimeType","data","storageKey"`, [docId]);
+    const doc = await this.db.one(`UPDATE documents SET "downloads"="downloads"+1 WHERE "id"=$1 AND ${PUBLIC_DOC} RETURNING "fileName","mimeType","data","storageKey"`, [docId]);
     if (!doc) throw new NotFoundException();
     res.setHeader('Content-Type', doc.mimeType);
     res.setHeader('Content-Disposition', `inline; filename*=UTF-8''${encodeURIComponent(doc.fileName)}`);
@@ -83,7 +85,7 @@ export class PublicController {
   async permit(@Param('id') permitId: string) {
     const p = await this.db.one(`SELECT * FROM permits WHERE "id"=$1`, [permitId]);
     if (!p) throw new NotFoundException();
-    p.documents = await this.db.q(`SELECT ${DOC_COLS} FROM documents WHERE "permitId"=$1 ORDER BY "createdAt"`, [permitId]);
+    p.documents = await this.db.q(`SELECT ${DOC_COLS} FROM documents WHERE "permitId"=$1 AND ${PUBLIC_DOC} ORDER BY "createdAt"`, [permitId]);
     return p;
   }
 
@@ -117,7 +119,7 @@ export class PublicController {
     const [posts, calls, documents, permits, permitsRenewal, facilities, locations] = await Promise.all([
       c(`SELECT count(*) n FROM posts WHERE ${PUBLISHED}`),
       c(`SELECT count(*) n FROM posts WHERE ${PUBLISHED} AND "type"='JAVNI_POZIV' AND ("deadline" IS NULL OR "deadline" >= now())`),
-      c(`SELECT count(*) n FROM documents WHERE "postId" IS NULL AND "permitId" IS NULL`),
+      c(`SELECT count(*) n FROM documents WHERE "postId" IS NULL AND "permitId" IS NULL AND ${PUBLIC_DOC}`),
       c(`SELECT count(*) n FROM permits`),
       c(`SELECT count(*) n FROM permits WHERE "status"='U_OBNOVI'`),
       c(`SELECT count(*) n FROM facilities`),

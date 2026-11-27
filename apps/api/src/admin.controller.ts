@@ -83,58 +83,6 @@ export class AdminController {
 
   // ---------- Objave ----------
   // ---------- Dokumenti ----------
-  @Get('documents')
-  @Can('dokumenti', 'read')
-  documents(@Query() q: any) {
-    const w = new Where();
-    if (q.docType) w.add(`"docType"=?`, q.docType);
-    if (q.q) w.add(`"title" ILIKE ?`, `%${q.q}%`);
-    return this.db.q(`SELECT ${DOC_COLS} FROM documents ${w.sql} ORDER BY "createdAt" DESC LIMIT 300`, w.params);
-  }
-
-  @Post('documents')
-  @Can('dokumenti', 'write')
-  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: MAX_DOC } }))
-  async upload(@UploadedFile() file: Express.Multer.File, @Body() b: any, @Req() req: any) {
-    if (!file) throw new BadRequestException('Datoteka nije priložena (najviše 10 MB)');
-    if (!DOC_TYPES.includes(file.mimetype)) throw new BadRequestException('Dozvoljeni formati: PDF, DOC, DOCX, XLS, XLSX');
-    if (file.mimetype === 'application/pdf' && file.buffer.subarray(0, 5).toString() !== '%PDF-') throw new BadRequestException('Datoteka nije ispravan PDF');
-    if (!b?.title?.trim()) throw new BadRequestException('Naziv dokumenta je obavezan');
-    const stored = await this.files.put('dokumenti', file.buffer, file.mimetype);
-    const d = await this.db.insert('documents', {
-      id: id(), title: String(b.title).trim(), docType: String(b.docType || 'OSTALO'), sector: String(b.sector || 'Opće'),
-      number: b.number || null, issuedAt: toDate(b.issuedAt), status: String(b.status || 'VAZECI'), description: String(b.description || ''),
-      fileName: utf8Name(file.originalname), mimeType: file.mimetype, size: file.size, ...stored,
-      postId: b.postId || null, permitId: b.permitId || null,
-    }, `"id","title","fileName","size","docType"`);
-    await this.audit.log(req, { action: 'Učitao/la dokument', entity: 'dokument', entityId: d.id, target: d.title, after: { title: d.title, fileName: d.fileName, size: d.size, docType: d.docType, sha256: stored.sha256 } });
-    return d;
-  }
-
-  @Patch('documents/:id')
-  @Can('dokumenti', 'write')
-  async updateDoc(@Param('id') docId: string, @Body() b: any, @Req() req: any) {
-    const before = await this.db.one(`SELECT ${DOC_COLS} FROM documents WHERE "id"=$1`, [docId]);
-    if (!before) throw new NotFoundException();
-    const data: any = {};
-    for (const k of ['title', 'docType', 'sector', 'number', 'status', 'description', 'postId', 'permitId']) if (b[k] !== undefined) data[k] = b[k] === '' ? null : b[k];
-    if (b.issuedAt !== undefined) data.issuedAt = toDate(b.issuedAt);
-    const d = await this.db.update('documents', docId, data, false, DOC_COLS);
-    if (!d) throw new NotFoundException();
-    await this.audit.log(req, { action: 'Uredio/la dokument', entity: 'dokument', entityId: docId, target: d.title, before, after: d });
-    return d;
-  }
-
-  @Delete('documents/:id')
-  @Can('dokumenti', 'delete')
-  async deleteDoc(@Param('id') docId: string, @Req() req: any) {
-    const d = await this.db.one(`DELETE FROM documents WHERE "id"=$1 RETURNING "title","storageKey","fileName","sha256","docType","number"`, [docId]);
-    if (!d) throw new NotFoundException();
-    await this.files.remove(d.storageKey);
-    await this.audit.log(req, { action: 'Obrisao/la dokument', entity: 'dokument', entityId: docId, target: d.title, before: d, after: null });
-    return { ok: true };
-  }
-
   // ---------- Slike ----------
   @Post('media')
   @Can('mediji', 'write')

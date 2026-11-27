@@ -44,19 +44,30 @@ export interface AuditLog {
 }
 
 export interface Documents {
+  accessLevel: Generated<string>;
   createdAt: Generated<Timestamp>;
   data: Buffer | null;
   description: Generated<string>;
+  disposalNote: string | null;
+  disposedAt: Timestamp | null;
   docType: string;
   downloads: Generated<number>;
   fileName: string;
+  gazette: string | null;
   id: string;
   isDemo: Generated<boolean>;
   issuedAt: Timestamp | null;
+  keywords: Generated<string[]>;
+  language: Generated<string>;
+  legalHold: Generated<boolean>;
   mimeType: string;
   number: string | null;
   permitId: string | null;
   postId: string | null;
+  publisher: string | null;
+  replacedById: string | null;
+  retainUntil: Timestamp | null;
+  retentionClass: Generated<string>;
   scanStatus: Generated<string>;
   sector: Generated<string>;
   sha256: string | null;
@@ -65,6 +76,27 @@ export interface Documents {
   storageKey: string | null;
   tenantId: Generated<string>;
   title: string;
+  updatedAt: Generated<Timestamp>;
+  validFrom: Timestamp | null;
+  validUntil: Timestamp | null;
+  version: Generated<number>;
+}
+
+export interface DocumentVersions {
+  createdAt: Generated<Timestamp>;
+  data: Buffer | null;
+  documentId: string;
+  fileName: string;
+  id: string;
+  mimeType: string;
+  note: string | null;
+  scanStatus: string | null;
+  sha256: string | null;
+  size: number;
+  storageKey: string | null;
+  tenantId: Generated<string>;
+  userName: string;
+  version: number;
 }
 
 export interface EcoReportPhotos {
@@ -271,6 +303,7 @@ export interface Users {
 
 export interface DB {
   audit_log: AuditLog;
+  document_versions: DocumentVersions;
   documents: Documents;
   eco_report_photos: EcoReportPhotos;
   eco_reports: EcoReports;

@@ -275,7 +275,7 @@ export class PreviewController {
     if (t.purpose !== 'preview' || !t.pid || t.tid !== currentTenant()) throw new NotFoundException('Link za pregled nije ispravan ili je istekao.');
     const post = await this.db.one<any>(`SELECT * FROM posts WHERE "id"=$1`, [t.pid]);
     if (!post) throw new NotFoundException('Objava više ne postoji.');
-    post.documents = await this.db.q(`SELECT "id","title","docType","sector","number","issuedAt","status","description","fileName","mimeType","size","downloads","isDemo","postId","permitId","createdAt" FROM documents WHERE "postId"=$1 ORDER BY "createdAt"`, [post.id]);
+    post.documents = await this.db.q(`SELECT "id","title","docType","sector","number","issuedAt","status","description","fileName","mimeType","size","downloads","isDemo","postId","permitId","createdAt" FROM documents WHERE "postId"=$1 AND "disposedAt" IS NULL ORDER BY "createdAt"`, [post.id]);
     res.setHeader('Cache-Control', 'no-store');
     res.setHeader('X-Robots-Tag', 'noindex, nofollow');
     for (const k of ['createdBy', 'submittedBy', 'approvedBy', 'reviewNote']) delete post[k];
