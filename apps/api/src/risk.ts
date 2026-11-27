@@ -4,6 +4,8 @@ import type { Response } from 'express';
 import { Db, id } from './db';
 import { AuthGuard } from './auth';
 import { toFloat } from './util';
+import { Throttle } from '@nestjs/throttler';
+import { clientIp, THROTTLE_PUBLIC_FORM, verifyAltcha } from './security';
 
 /* ───────────── Vanjski izvori (s keširanjem) ───────────── */
 
@@ -257,13 +259,15 @@ export class RiskController {
   }
 
   @Post('eco-reports')
+  @Throttle(THROTTLE_PUBLIC_FORM)
   @UseInterceptors(FilesInterceptor('photos', 3, { limits: { fileSize: MAX_PHOTO, files: 3 } }))
   async report(@Body() b: any, @Req() req: any, @UploadedFiles() files: Express.Multer.File[] = []) {
     if (b?.website) return { ok: true, code: 'EKO-0000' }; // honeypot
-    const ip = String(req.headers['x-forwarded-for'] ?? req.ip ?? '').split(',')[0].trim();
+    const ip = clientIp(req);
     const now = Date.now();
     const list = (hits.get(ip) ?? []).filter((t) => now - t < 3600_000);
     if (list.length >= 5) throw new BadRequestException('Previše prijava s iste adrese. Pokušajte kasnije ili nazovite +387 36 551 823.');
+    if (!(await verifyAltcha(b?.altcha))) throw new BadRequestException('Provjera da niste robot nije uspjela. Osvježite stranicu i pokušajte ponovo.');
     const kind = String(b?.kind ?? '');
     const municipality = String(b?.municipality ?? '');
     const description = String(b?.description ?? '').trim();

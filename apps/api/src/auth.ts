@@ -1,8 +1,11 @@
-import { BadRequestException, Body, CanActivate, Controller, ExecutionContext, ForbiddenException, Get, HttpException, HttpStatus, Injectable, Post, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, CanActivate, Controller, ExecutionContext, ForbiddenException, Get, HttpCode, HttpException, HttpStatus, Injectable, Post, Req, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
+import type { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import * as QRCode from 'qrcode';
 import { Db, id } from './db';
+import { Throttle } from '@nestjs/throttler';
+import { THROTTLE_AUTH } from './security';
 import { hashRecovery, newRecoveryCodes, newSecret, normalizeRecovery, openSecret, otpauthUri, sealSecret, verifyTotp } from './mfa';
 
 const DUMMY_HASH = bcrypt.hashSync('timing-safe-dummy', 10);
@@ -14,10 +17,40 @@ export const mfaRequired = () => String(process.env.MFA_REQUIRED ?? 'false').toL
 
 type Session = { sub: string; name: string; role: string; mfa?: boolean; purpose?: string };
 
+/**
+ * F1-03: sesija CMS-a je u httpOnly kolačiću (JavaScript na stranici je ne može pročitati ni ukrasti).
+ * __Host- prefiks: samo HTTPS, samo ovaj domen, cijeli sajt. SameSite=Strict + CSRF zaglavlje za izmjene.
+ */
+export const SESSION_COOKIE = '__Host-mtto_session';
+const SESSION_HOURS = 8;
+export const CSRF_HEADER = 'x-mtto-csrf';
+
+export function setSessionCookie(res: Response, token: string) {
+  res.cookie(SESSION_COOKIE, token, { httpOnly: true, secure: true, sameSite: 'strict', path: '/', maxAge: SESSION_HOURS * 3600_000 });
+}
+export function clearSessionCookie(res: Response) {
+  res.clearCookie(SESSION_COOKIE, { httpOnly: true, secure: true, sameSite: 'strict', path: '/' });
+}
+
+function readCookie(req: any, name: string): string {
+  const raw: string = req.headers?.cookie ?? '';
+  for (const part of raw.split(';')) {
+    const i = part.indexOf('=');
+    if (i > 0 && part.slice(0, i).trim() === name) return decodeURIComponent(part.slice(i + 1).trim());
+  }
+  return '';
+}
+
 async function readSession(jwt: JwtService, req: any): Promise<Session> {
   const h: string = req.headers['authorization'] ?? '';
-  const token = h.startsWith('Bearer ') ? h.slice(7) : '';
+  const fromHeader = h.startsWith('Bearer ') ? h.slice(7) : '';
+  const fromCookie = fromHeader ? '' : readCookie(req, SESSION_COOKIE);
+  const token = fromHeader || fromCookie;
   if (!token) throw new UnauthorizedException('Potrebna je prijava');
+  // CSRF: izmjene preko kolačića moraju nositi zaglavlje koje druga stranica ne može poslati bez CORS dozvole
+  if (fromCookie && !['GET', 'HEAD', 'OPTIONS'].includes(req.method) && req.headers[CSRF_HEADER] !== '1') {
+    throw new ForbiddenException('Zahtjev nije dozvoljen (CSRF zaštita)');
+  }
   let s: Session;
   try { s = await jwt.verifyAsync<Session>(token); } catch { throw new UnauthorizedException('Sesija je istekla'); }
   if (s.purpose) throw new UnauthorizedException('Prijava nije završena');
@@ -79,7 +112,8 @@ export class AuthController {
   }
 
   @Post('login')
-  async login(@Body() body: { email?: string; password?: string }) {
+  @Throttle(THROTTLE_AUTH)
+  async login(@Body() body: { email?: string; password?: string }, @Res({ passthrough: true }) res: Response) {
     const email = String(body?.email ?? '').trim().toLowerCase();
     const user = await this.db.one<any>('SELECT * FROM users WHERE "email"=$1', [email]);
     this.assertNotLocked(user);
@@ -94,12 +128,14 @@ export class AuthController {
     }
     await this.resetFailed(user.id);
     await this.audit(user, 'Prijava u CMS');
-    return { token: await this.session(user, false), user: this.publicUser(user), mfaSetupRequired: mfaRequired() };
+    setSessionCookie(res, await this.session(user, false));
+    return { user: this.publicUser(user), mfaSetupRequired: mfaRequired() };
   }
 
   /** Drugi korak prijave: kod iz aplikacije ili rezervni kod. */
   @Post('mfa/verify')
-  async verify(@Body() body: { mfaToken?: string; code?: string }) {
+  @Throttle(THROTTLE_AUTH)
+  async verify(@Body() body: { mfaToken?: string; code?: string }, @Res({ passthrough: true }) res: Response) {
     let p: { sub: string; purpose?: string };
     try { p = await this.jwt.verifyAsync(String(body?.mfaToken ?? '')); } catch { throw new UnauthorizedException('Prijava je istekla, unesite lozinku ponovo'); }
     if (p.purpose !== 'mfa') throw new UnauthorizedException('Neispravan zahtjev');
@@ -122,7 +158,8 @@ export class AuthController {
     }
     await this.resetFailed(user.id);
     await this.audit(user, `Prijava u CMS (MFA: ${how})`);
-    return { token: await this.session(user, true), user: this.publicUser(user) };
+    setSessionCookie(res, await this.session(user, true));
+    return { user: this.publicUser(user) };
   }
 
   @Get('me')
@@ -150,7 +187,7 @@ export class AuthController {
   /** Korak 2: potvrda prvim kodom; vraća rezervne kodove (prikazuju se samo jednom). */
   @Post('mfa/enable')
   @UseGuards(SessionGuard)
-  async enable(@Req() req: any, @Body() body: { code?: string }) {
+  async enable(@Req() req: any, @Body() body: { code?: string }, @Res({ passthrough: true }) res: Response) {
     const u = await this.db.one<any>('SELECT * FROM users WHERE "id"=$1', [req.user.sub]);
     if (!u?.mfaPendingSecret) throw new BadRequestException('Prvo pokrenite postavljanje');
     const secret = openSecret(u.mfaPendingSecret);
@@ -162,7 +199,8 @@ export class AuthController {
       [u.id, sealSecret(secret), step, JSON.stringify(codes.map(hashRecovery))],
     );
     await this.audit(u, 'Uključena dvofaktorska prijava');
-    return { token: await this.session(u, true), recoveryCodes: codes };
+    setSessionCookie(res, await this.session(u, true));
+    return { recoveryCodes: codes };
   }
 
   /** Novi rezervni kodovi (stari prestaju važiti); traži važeći kod iz aplikacije. */
@@ -182,7 +220,7 @@ export class AuthController {
   /** Isključivanje: lozinka + kod. Nije dozvoljeno kad je MFA obavezan. */
   @Post('mfa/disable')
   @UseGuards(SessionGuard)
-  async disable(@Req() req: any, @Body() body: { password?: string; code?: string }) {
+  async disable(@Req() req: any, @Body() body: { password?: string; code?: string }, @Res({ passthrough: true }) res: Response) {
     if (mfaRequired()) throw new ForbiddenException('Dvofaktorska prijava je obavezna za sve korisnike CMS-a');
     const u = await this.db.one<any>('SELECT * FROM users WHERE "id"=$1', [req.user.sub]);
     if (!u?.mfaEnabled) throw new BadRequestException('Dvofaktorska prijava nije uključena');
@@ -191,6 +229,13 @@ export class AuthController {
     if (!pass || !step) throw new BadRequestException('Lozinka ili kod nisu ispravni');
     await this.db.q(`UPDATE users SET "mfaEnabled"=false, "mfaSecret"=NULL, "mfaRecovery"='[]'::jsonb WHERE "id"=$1`, [u.id]);
     await this.audit(u, 'Isključena dvofaktorska prijava');
-    return { token: await this.session(u, false) };
+    setSessionCookie(res, await this.session(u, false));
+    return { ok: true };
+  }
+
+  @Post('logout')
+  @HttpCode(204)
+  logout(@Res({ passthrough: true }) res: Response) {
+    clearSessionCookie(res);
   }
 }

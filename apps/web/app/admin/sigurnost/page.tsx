@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
-import { adminFetch, replaceToken } from '@/lib/adminApi';
+import { adminFetch, updateUser } from '@/lib/adminApi';
 import { Badge, Card, CardHeader, PageTitle, btnPrimary, btnSecondary, input, useToast } from '@/components/admin/ui';
 import { AlertTriangle, Copy01, Download01, Lock01, Phone01, RefreshCw01, ShieldTick } from '@untitledui/icons';
 
@@ -57,8 +57,8 @@ function SecurityPage() {
 
   const start = () => run(async () => { setSetup(await adminFetch<Setup>('/auth/mfa/setup', { method: 'POST' })); setCode(''); });
   const enable = () => run(async () => {
-    const r = await adminFetch<{ token: string; recoveryCodes: string[] }>('/auth/mfa/enable', { method: 'POST', body: JSON.stringify({ code }) });
-    replaceToken(r.token, { mfaEnabled: true });
+    const r = await adminFetch<{ recoveryCodes: string[] }>('/auth/mfa/enable', { method: 'POST', body: JSON.stringify({ code }) });
+    updateUser({ mfaEnabled: true });
     setCodes(r.recoveryCodes); setSetup(null); setCode('');
     toast.ok('Dvofaktorska prijava je uključena');
     await load();
@@ -69,8 +69,8 @@ function SecurityPage() {
     await load();
   });
   const turnOff = () => run(async () => {
-    const r = await adminFetch<{ token: string }>('/auth/mfa/disable', { method: 'POST', body: JSON.stringify(disable) });
-    replaceToken(r.token, { mfaEnabled: false });
+    await adminFetch('/auth/mfa/disable', { method: 'POST', body: JSON.stringify(disable) });
+    updateUser({ mfaEnabled: false });
     setDisable({ password: '', code: '' });
     toast.ok('Dvofaktorska prijava je isključena');
     await load();

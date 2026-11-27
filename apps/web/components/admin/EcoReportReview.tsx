@@ -1,7 +1,6 @@
 'use client';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
-import { getToken } from '@/lib/adminApi';
 import { Badge, btnPrimary, btnSecondary, input } from '@/components/admin/ui';
 import { Eye, EyeOff, Image01, LinkExternal01, MarkerPin02, Save01 } from '@untitledui/icons';
 
@@ -15,7 +14,7 @@ function SecurePhoto({ pid, alt }: { pid: string; alt: string }) {
   const [err, setErr] = useState(false);
   useEffect(() => {
     let u: string | null = null; let off = false;
-    fetch(`/api/admin/eco-report-photos/${pid}`, { headers: { Authorization: `Bearer ${getToken() ?? ''}` }, cache: 'no-store' })
+    fetch(`/api/admin/eco-report-photos/${pid}`, { cache: 'no-store', credentials: 'same-origin' })
       .then((r) => (r.ok ? r.blob() : Promise.reject())).then((b) => { if (off) return; u = URL.createObjectURL(b); setUrl(u); })
       .catch(() => !off && setErr(true));
     return () => { off = true; if (u) URL.revokeObjectURL(u); };

@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import { clearSession, getToken, getUser, type CmsUser } from '@/lib/adminApi';
+import { getUser, isSignedIn, logout, type CmsUser } from '@/lib/adminApi';
 import { AlertTriangle, Announcement01, BarChartSquare02, Building07, ClockRewind, Folder, Image01, Inbox01, LinkExternal01, LogOut01, Map01, Menu02, SearchLg, ClipboardCheck, ShieldTick, Users01, XClose } from '@untitledui/icons';
 
 type Icon = React.FC<React.SVGProps<SVGSVGElement> & { size?: number }>;
@@ -42,7 +42,7 @@ export default function CmsShell({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (isLogin) { setReady(true); return; }
-    if (!getToken()) { router.replace('/admin/prijava'); return; }
+    if (!isSignedIn()) { router.replace('/admin/prijava'); return; }
     setUser(getUser());
     setReady(true);
   }, [isLogin, router, path]);
@@ -112,7 +112,7 @@ export default function CmsShell({ children }: { children: React.ReactNode }) {
           <div className="relative flex items-center gap-3 rounded-[12px] p-3 ring-1 ring-inset ring-[#e5e5e5]">
             <span className="relative flex size-10 shrink-0 items-center justify-center rounded-full bg-[#f9f5ff] text-[14px] font-semibold text-[#7f56d9] ring-1 ring-inset ring-black/10">{ini}<span className="absolute bottom-0 right-0 size-2.5 rounded-full bg-[#17b26a] ring-[1.5px] ring-white" /></span>
             <span className="flex min-w-0 flex-1 flex-col"><span className="truncate text-[14px] leading-5 font-semibold text-[#171717]">{name}</span><span className="truncate text-[14px] leading-5 text-[#525252]">{user?.email ?? (user?.role === 'ADMIN' ? 'Administrator' : 'Urednik')}</span></span>
-            <button type="button" onClick={() => { clearSession(); router.replace('/admin/prijava'); }} className="rounded-[6px] p-1.5 text-[#a3a3a3] hover:bg-[#fafafa] hover:text-[#d92d20]" title="Odjava" aria-label="Odjava"><LogOut01 size={20} /></button>
+            <button type="button" onClick={async () => { await logout(); router.replace('/admin/prijava'); }} className="rounded-[6px] p-1.5 text-[#a3a3a3] hover:bg-[#fafafa] hover:text-[#d92d20]" title="Odjava" aria-label="Odjava"><LogOut01 size={20} /></button>
           </div>
         </div>
       </aside>

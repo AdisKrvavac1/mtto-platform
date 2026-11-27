@@ -10,4 +10,4 @@ Odluka se ne briše; kad se promijeni, piše se nova koja zamjenjuje staru.
 | [0003](0003-dvofaktorska-prijava.md) | Dvofaktorska prijava (TOTP) za CMS | Prihvaćena |
 | [0004](0004-kysely-i-postgis.md) | Kysely za upite i PostGIS za prostorne podatke | Prihvaćena |
 | [0005](0005-nadzor-i-logovi.md) | Nadzor grešaka i dostupnosti | Prihvaćena |
-| [0006](0006-osnova-cms-a.md) | Osnova CMS-a: vlastiti CMS ili Payload | Predložena |
+| [0006](0006-osnova-cms-a.md) | Osnova CMS-a: vlastiti CMS ili Payload | Prihvaćena |

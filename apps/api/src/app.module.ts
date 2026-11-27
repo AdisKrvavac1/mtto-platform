@@ -1,5 +1,8 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { IpThrottlerGuard, SecurityController } from './security';
 import { Db } from './db';
 import { HealthController } from './health.controller';
 import { GeoController } from './geo.controller';
@@ -15,8 +18,8 @@ if (!secret || secret.length < 32) {
 }
 
 @Module({
-  imports: [JwtModule.register({ global: true, secret: secret || 'dev-only-secret-dev-only-secret-0000', signOptions: { expiresIn: '8h' } })],
-  controllers: [HealthController, GeoController, AuthController, PublicController, AdminController, RiskController, AdminRiskController],
-  providers: [Db, AuthGuard, SessionGuard, MttoImporter, RiskService],
+  imports: [ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: 300 }]), JwtModule.register({ global: true, secret: secret || 'dev-only-secret-dev-only-secret-0000', signOptions: { expiresIn: '8h' } })],
+  controllers: [SecurityController, HealthController, GeoController, AuthController, PublicController, AdminController, RiskController, AdminRiskController],
+  providers: [{ provide: APP_GUARD, useClass: IpThrottlerGuard }, Db, AuthGuard, SessionGuard, MttoImporter, RiskService],
 })
 export class AppModule {}

@@ -1,6 +1,6 @@
 # 0006: Osnova CMS-a — vlastiti CMS ili Payload
 
-**Datum:** 27. 11. 2026. · **Status:** predložena, čeka odluku vlasnika projekta · **Zadatak:** F1-09
+**Datum:** 27. 11. 2026. · **Status:** prihvaćena (27. 11. 2026., Adis Krvavac) · **Zadatak:** F1-09
 
 ## Kontekst
 Faza 2 traži urednički tok s odobravanjem, verzije, zakazanu objavu, četiri jezika i prava po sektorima (F2-01, F2-02, F2-22). Pitanje je da li to gradimo sami u postojećem CMS-u ili uvodimo Payload CMS (MIT licenca, TypeScript, Next.js, PostgreSQL).

@@ -1,11 +1,14 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter, initSentry, logJson, requestId } from './observability';
 
 async function bootstrap() {
   initSentry();
-  const app = await NestFactory.create(AppModule, { bodyParser: true });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { bodyParser: true });
+  // CSP izvještaji stižu kao application/csp-report ili application/reports+json
+  app.useBodyParser('json', { type: ['application/json', 'application/csp-report', 'application/reports+json'], limit: '100kb' });
   app.use(requestId);
   app.useGlobalFilters(new AllExceptionsFilter());
   app.use((_req: any, res: any, next: any) => {

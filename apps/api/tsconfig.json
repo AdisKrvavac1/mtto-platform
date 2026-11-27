@@ -10,7 +10,18 @@
     "emitDecoratorMetadata": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "baseUrl": ".",
+    "paths": {
+      "altcha-lib": [
+        "node_modules/altcha-lib/dist/cjs/v2/index.d.ts"
+      ],
+      "altcha-lib/algorithms/*": [
+        "node_modules/altcha-lib/dist/cjs/v2/algorithms/*.d.ts"
+      ]
+    }
   },
-  "include": ["src"]
+  "include": [
+    "src"
+  ]
 }

@@ -82,6 +82,16 @@ function PhotoField({ photos, setPhotos, setErr }: { photos: Photo[]; setPhotos:
   );
 }
 
+/** ALTCHA: provjera da niste robot, bez kolačića i bez slanja podataka trećoj strani (F1-10). */
+function HumanCheck() {
+  useEffect(() => { import('altcha').then(() => import('altcha/i18n/bs')).catch(() => {}); }, []);
+  return (
+    <div className="max-w-[320px]">
+      <altcha-widget challenge="/api/altcha/challenge" auto="onload" language="bs" name="altcha" />
+    </div>
+  );
+}
+
 export default function EcoReportForm() {
   const [kind, setKind] = useState('');
   useEffect(() => { const v = new URLSearchParams(window.location.search).get('vrsta'); if (v && KINDS.some(([k]) => k === v)) setKind(v); }, []);
@@ -106,10 +116,11 @@ export default function EcoReportForm() {
     setErr('');
     const f = new FormData(e.currentTarget);
     if (!kind) return setErr('Odaberite vrstu incidenta.');
+    if (!f.get('altcha')) return setErr('Pričekajte trenutak da se završi provjera da niste robot, pa pošaljite ponovo.');
     setBusy(true);
     try {
       const body = new FormData();
-      const fields: Record<string, unknown> = { kind, municipality: f.get('municipality'), location: f.get('location'), description: f.get('description'), contactName: f.get('contactName'), contactEmail: f.get('contactEmail'), website: f.get('website'), lat: pos.lat, lng: pos.lng };
+      const fields: Record<string, unknown> = { kind, municipality: f.get('municipality'), location: f.get('location'), description: f.get('description'), contactName: f.get('contactName'), contactEmail: f.get('contactEmail'), website: f.get('website'), altcha: f.get('altcha'), lat: pos.lat, lng: pos.lng };
       for (const [k, v] of Object.entries(fields)) if (v != null && v !== '') body.append(k, String(v));
       photos.forEach((p, i) => body.append('photos', p.blob, `foto-${i + 1}.jpg`));
       const r = await fetch('/api/eco-reports', { method: 'POST', body });
@@ -171,6 +182,7 @@ export default function EcoReportForm() {
       </div>
       <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
       <p className="text-[14px] leading-5 text-[#525252]">Prijava može biti anonimna. Lični podaci se koriste samo za povratnu informaciju i ne objavljuju se.</p>
+      <HumanCheck />
       {err && <p role="alert" className="flex gap-3 items-start p-4 rounded-[12px] bg-[#fef3f2] ring-1 ring-inset ring-[#fecdca] text-[#b42318] text-[14px]"><AlertCircle size={20} className="shrink-0" />{err}</p>}
       <button disabled={busy} className={`${btnP} self-start h-12 px-5 text-[16px] disabled:opacity-60`}>
         <Send01 size={20} />{busy ? 'Šaljem…' : 'Pošalji prijavu'}
