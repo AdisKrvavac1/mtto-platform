@@ -81,8 +81,14 @@ export class AdminController {
       this.db.q(`SELECT "id","title","views","type","publishedAt" FROM posts WHERE "status"='OBJAVLJENO' ORDER BY "views" DESC LIMIT 5`),
       this.db.q(`SELECT "status", count(*)::int n FROM eco_reports GROUP BY 1`).catch(() => []),
     ]);
+    // F2-05: otvoreni predmeti i predmeti s isteklim rokom
+    const cases = can(req.user.role, 'predmeti', 'read')
+      ? await this.db.one<{ open: number; overdue: number; mine: number }>(`SELECT count(*) FILTER (WHERE "status" IN ('ZAPRIMLJEN','U_OBRADI','DOPUNA'))::int "open",
+          count(*) FILTER (WHERE "status" IN ('ZAPRIMLJEN','U_OBRADI','DOPUNA') AND "dueAt" < now())::int "overdue",
+          count(*) FILTER (WHERE "status" IN ('ZAPRIMLJEN','U_OBRADI','DOPUNA') AND "assigneeId"=$1)::int "mine" FROM cases`, [req.user.sub]).catch(() => null)
+      : null;
     const showAudit = can(req.user.role, 'dnevnik', 'read');
-    return { published, drafts, scheduled, pending, views, documents, permits, facilities, locations, expiring, recentPosts, audit: showAudit ? audit : [], monthly, topPosts, reports };
+    return { cases, published, drafts, scheduled, pending, views, documents, permits, facilities, locations, expiring, recentPosts, audit: showAudit ? audit : [], monthly, topPosts, reports };
   }
 
   // ---------- Objave ----------

@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import {
   AlertTriangle, ArrowRight, ChevronRight, File06, Building07, CheckVerified01, ChevronDown, Clock, FileSearch02, Globe02, Image01, Map01, MarkerPin04, Menu02, Phone01,
-  Scales02, SearchLg, ShoppingCart01, Calendar, LineChartUp01, Sun, Ticket01, Trash03, User01, Users01, Waves, Wind01, XClose, Building02, Mail01,
+  Scales02, SearchLg, ShoppingCart01, Calendar, LineChartUp01, Sun, Ticket01, Trash03, User01, Users01, Waves, Wind01, XClose, Building02, Mail01, Edit05, Database01,
 } from '@untitledui/icons';
 import type { Icon } from './index';
 
@@ -23,10 +23,12 @@ export const NAV: Nav[] = [
     groups: [
       { title: 'E-usluge', items: [
         { href: '/e-usluge', label: 'Centar e-usluga', desc: 'Registri, obrasci i javni uvidi na jednom mjestu.', icon: Globe02 },
+        { href: '/e-usluge/obrasci', label: 'Elektronski zahtjevi', desc: 'Podnesite zahtjev i pratite status predmeta.', icon: Edit05 },
         { href: '/vijesti?type=JAVNI_POZIV', label: 'Javni pozivi', desc: 'Otvoreni pozivi, rokovi i online prijava.', icon: Ticket01 },
         { href: '/propisi', label: 'Propisi i obrasci', desc: 'Zakoni, pravilnici i obrasci zahtjeva.', icon: File06 },
       ] },
       { title: 'Registri', items: [
+        { href: '/registri', label: 'Svi registri', desc: 'Pretraga, CSV i otvoreni podaci.', icon: Database01 },
         { href: '/registri/okolisne-dozvole', label: 'Okolišne dozvole', desc: 'Javni registar izdatih dozvola.', icon: FileSearch02 },
         { href: '/registri/ugostiteljski-objekti', label: 'Ugostiteljski objekti', desc: 'Kategorizirani smještaj, izvoz u CSV.', icon: Building07 },
         { href: '/turisticki-vodici', label: 'Turistički vodiči', desc: 'Stručni ispit i licenciranje.', icon: Users01 },

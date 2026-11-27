@@ -26,7 +26,7 @@ const NAV: { group?: string; items: Item[] }[] = [
       { href: '/admin/registri', label: 'Javni registri', icon: Database01, perm: 'registri' },
       { href: '/admin/resorni-odjeli', label: 'Resorni odjeli', icon: Building07, f2: true },
       { href: '/admin/korisnici', label: 'Korisnici i dnevnik', icon: Users01, perm: 'korisnici' },
-      { href: '/admin/predmeti', label: 'E-pisarnica', icon: Inbox01, f2: true },
+      { href: '/admin/predmeti', label: 'E-pisarnica', icon: Inbox01, perm: 'predmeti' },
     ],
   },
 ];

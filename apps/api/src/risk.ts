@@ -226,7 +226,7 @@ function publicReport(r: any) {
 const PHOTOS_AGG = `COALESCE((SELECT json_agg(p."id" ORDER BY p."createdAt") FROM eco_report_photos p WHERE p."reportId"=r."id"), '[]'::json) "photos"`;
 const MAX_PHOTO = 8 * 1024 * 1024;
 /** Prepoznaje stvarni format slike po potpisu (ne vjeruje mimetype-u). */
-function sniffImage(b: Buffer): string | null {
+export function sniffImage(b: Buffer): string | null {
   if (b.length > 3 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return 'image/jpeg';
   if (b.length > 8 && b.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return 'image/png';
   if (b.length > 12 && b.subarray(0, 4).toString() === 'RIFF' && b.subarray(8, 12).toString() === 'WEBP') return 'image/webp';

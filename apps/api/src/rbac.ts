@@ -16,7 +16,7 @@ export const ROLE_LABELS: Record<Role, string> = {
   PREGLED: 'Samo pregled',
 };
 
-export const MODULES = ['kontrolna', 'objave', 'dokumenti', 'mediji', 'registri', 'eko', 'uvoz', 'korisnici', 'dnevnik'] as const;
+export const MODULES = ['kontrolna', 'objave', 'dokumenti', 'mediji', 'registri', 'eko', 'uvoz', 'korisnici', 'dnevnik', 'predmeti'] as const;
 export type Module = (typeof MODULES)[number];
 export type Action = 'read' | 'write' | 'delete' | 'publish';
 
@@ -28,10 +28,10 @@ const ALL: Action[] = ['read', 'write', 'delete', 'publish'];
 /** Matrica prava. Šta nije navedeno, nije dozvoljeno. */
 export const PERMISSIONS: Record<Role, Partial<Record<Module, Action[]>>> = {
   ADMIN: Object.fromEntries(MODULES.map((m) => [m, ALL])) as Record<Module, Action[]>,
-  UREDNIK: { kontrolna: R, objave: ALL, dokumenti: RWD, mediji: RW, uvoz: RW, registri: R, eko: R },
+  UREDNIK: { kontrolna: R, objave: ALL, dokumenti: RWD, mediji: RW, uvoz: RW, registri: R, eko: R, predmeti: R },
   SARADNIK: { kontrolna: R, objave: RW, dokumenti: RW, mediji: RW },
-  REFERENT: { kontrolna: R, registri: RWD, eko: RWD, dokumenti: RW, mediji: RW, objave: R },
-  PREGLED: { kontrolna: R, objave: R, dokumenti: R, registri: R, eko: R },
+  REFERENT: { kontrolna: R, registri: RWD, eko: RWD, dokumenti: RW, mediji: RW, objave: R, predmeti: RW },
+  PREGLED: { kontrolna: R, objave: R, dokumenti: R, registri: R, eko: R, predmeti: R },
 };
 
 export function can(role: string | undefined, module: Module, action: Action): boolean {

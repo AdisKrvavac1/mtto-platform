@@ -14,13 +14,13 @@ type Invite = { link: string; expiresInHours: number; email: string };
 
 /** Šta svaka uloga može (isto kao matrica prava na serveru, src/rbac.ts). */
 const ROLE_INFO: Record<string, string> = {
-  ADMIN: 'Sve, uključujući korisnike i dnevnik aktivnosti.',
-  UREDNIK: 'Objave (i objavljivanje), dokumenti, slike, uvoz vijesti. Registre samo čita.',
+  ADMIN: 'Sve, uključujući korisnike, dnevnik, polja registara i obrasce.',
+  UREDNIK: 'Objave (i objavljivanje), dokumenti, slike, uvoz vijesti. Registre i predmete samo čita.',
   SARADNIK: 'Piše objave i šalje ih uredniku na odobrenje; ne objavljuje. Učitava dokumente i slike.',
-  REFERENT: 'Registri dozvola i objekata, lokacije, klizišta i eko-prijave. Objave samo čita.',
+  REFERENT: 'Zapisi javnih registara, predmeti e-pisarnice, lokacije, klizišta i eko-prijave. Objave samo čita.',
   PREGLED: 'Samo čitanje sadržaja i registara, bez izmjena.',
 };
-const ENTITIES: Record<string, string> = { postavke: 'Postavke', objava: 'Objave', dokument: 'Dokumenti', medij: 'Slike', dozvola: 'Dozvole', lokacija: 'Lokacije', objekt: 'Ugostiteljski objekti', 'klizište': 'Klizišta', 'eko-prijava': 'Eko-prijave', korisnik: 'Korisnici i prijave', uvoz: 'Uvoz vijesti' };
+const ENTITIES: Record<string, string> = { postavke: 'Postavke', objava: 'Objave', dokument: 'Dokumenti', medij: 'Slike', dozvola: 'Dozvole', lokacija: 'Lokacije', objekt: 'Ugostiteljski objekti', 'klizište': 'Klizišta', 'eko-prijava': 'Eko-prijave', korisnik: 'Korisnici i prijave', uvoz: 'Uvoz vijesti', registri: 'Javni registri', predmeti: 'Predmeti i obrasci' };
 
 const FIELDS: Record<string, string> = {
   title: 'Naslov', excerpt: 'Sažetak', body: 'Tekst', status: 'Status', type: 'Vrsta', category: 'Kategorija', slug: 'Adresa', coverImage: 'Naslovna slika',
