@@ -103,28 +103,14 @@
 .overflow-x-auto { position: relative; }
 
 /* ───── Brand skale: CMS = Untitled Purple, javni portal = Untitled Blue (+ Green za akcije i status) ───── */
-.cms-theme { --br-25:#fcfaff; --br-50:#f9f5ff; --br-100:#f4ebff; --br-200:#e9d7fe; --br-300:#d6bbfb; --br-400:#b692f6; --br-500:#9e77ed; --br-600:#7f56d9; --br-700:#6941c6; --br-800:#53389e; --br-900:#42307d; --br-950:#2c1c5f; --br-ring:rgba(158,119,237,.25); --br-ring2:rgba(158,119,237,.4); }
-.uui-theme { --br-25:#f5faff; --br-50:#eff8ff; --br-100:#d1e9ff; --br-200:#b2ddff; --br-300:#84caff; --br-400:#53b1fd; --br-500:#2e90fa; --br-600:#1570ef; --br-700:#175cd3; --br-800:#1849a9; --br-900:#194185; --br-950:#102a56; --br-ring:rgba(46,144,250,.25); --br-ring2:rgba(46,144,250,.4);
+.uui-theme { /* --br-* i --gr-* dolaze iz @mtto/ui/tokens.css */
   --c-primary: 21 112 239; --c-primary-container: 23 92 211; --c-surface-tint: 83 177 253; --c-primary-fixed: 239 248 255; --c-primary-fixed-dim: 178 221 255;
   --c-on-primary-fixed: 25 65 133; --c-on-primary-fixed-variant: 23 92 211; --c-mtto-primary: 21 112 239; --c-inverse-primary: 178 221 255; }
-.cms-theme, .uui-theme { --gr-25:#f6fef9; --gr-50:#edfcf2; --gr-100:#d3f8df; --gr-200:#aaf0c4; --gr-300:#73e2a3; --gr-400:#3ccb7f; --gr-500:#16b364; --gr-600:#099250; --gr-700:#087443; --gr-800:#095c37; --gr-900:#084c2e; --gr-950:#052e1c; }
 
 /* Grid stavke ne smiju širiti stupac preko ekrana (Safari/iOS „grid blowout“) */
 .uui-theme .grid > *, .cms-theme .grid > * { min-width: 0; }
 
-/* ───── Mikro animacije (Untitled stil: kratko, suptilno) ───── */
-@keyframes uui-ripple { 0% { transform: scale(1); opacity: .9; } 100% { transform: scale(2.1); opacity: 0; } }
-.uui-ripple { position: relative; isolation: isolate; }
-.uui-ripple::before, .uui-ripple::after { content: ''; position: absolute; inset: 0; border-radius: 9999px; background: var(--rip, rgba(46,144,250,.35)); z-index: 0; animation: uui-ripple 3.6s cubic-bezier(.2,.6,.3,1) infinite; }
-.uui-ripple::after { animation-delay: 1.8s; }
-.uui-lift { transition: transform .25s ease, box-shadow .25s ease, --tw-ring-color .25s ease; }
-.uui-lift:hover { transform: translateY(-3px); box-shadow: 0 12px 16px -4px rgba(10,13,18,.08), 0 4px 6px -2px rgba(10,13,18,.03); }
-.uui-theme a, .uui-theme button { transition-property: color, background-color, border-color, box-shadow, transform, opacity; transition-duration: .2s; }
-.uui-theme a:active, .uui-theme button:active { transform: scale(.98); }
-@media (prefers-reduced-motion: reduce) {
-  .uui-ripple::before, .uui-ripple::after { animation: none; opacity: 0; }
-  .uui-lift:hover { transform: none; }
-}
+/* Mikro animacije (uui-ripple, uui-lift) su u @mtto/ui/styles.css */
 
 /* Eko-rizik: animirane ikone vremena (blage, bez treperenja) */
 .wx-sun { transform-origin: 36px 36px; animation: wx-spin 18s linear infinite; }

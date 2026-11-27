@@ -30,6 +30,7 @@ const CSP_REPORT_ONLY = [
 export default {
   reactStrictMode: true,
   poweredByHeader: false,
+  transpilePackages: ['@mtto/ui'],
   images: { unoptimized: true },
   async rewrites() {
     // Preglednik uvijek razgovara s istim domenom; Next prosljeđuje /api/* na NestJS.

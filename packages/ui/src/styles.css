@@ -1,0 +1,15 @@
+/* @mtto/ui – zajednički stilovi komponenti (pored Tailwind klasa). */
+/* ───── Mikro animacije (Untitled stil: kratko, suptilno) ───── */
+@keyframes uui-ripple { 0% { transform: scale(1); opacity: .9; } 100% { transform: scale(2.1); opacity: 0; } }
+.uui-ripple { position: relative; isolation: isolate; }
+.uui-ripple::before, .uui-ripple::after { content: ''; position: absolute; inset: 0; border-radius: 9999px; background: var(--rip, rgba(46,144,250,.35)); z-index: 0; animation: uui-ripple 3.6s cubic-bezier(.2,.6,.3,1) infinite; }
+.uui-ripple::after { animation-delay: 1.8s; }
+.uui-lift { transition: transform .25s ease, box-shadow .25s ease, --tw-ring-color .25s ease; }
+.uui-lift:hover { transform: translateY(-3px); box-shadow: 0 12px 16px -4px rgba(10,13,18,.08), 0 4px 6px -2px rgba(10,13,18,.03); }
+.uui-theme a, .uui-theme button { transition-property: color, background-color, border-color, box-shadow, transform, opacity; transition-duration: .2s; }
+.uui-theme a:active, .uui-theme button:active { transform: scale(.98); }
+@media (prefers-reduced-motion: reduce) {
+  .uui-ripple::before, .uui-ripple::after { animation: none; opacity: 0; }
+  .uui-lift:hover { transform: none; }
+}
+

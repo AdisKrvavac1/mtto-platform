@@ -43,6 +43,21 @@ jobs:
         run: node -e "const {Pool}=require('pg');const {migrate}=require('./apps/api/dist/migrations');const p=new Pool({connectionString:process.env.DATABASE_URL});migrate(p).then(()=>migrate(p)).then(()=>p.query('SELECT count(*)::int n FROM schema_migrations')).then(r=>{console.log('migracija:',r.rows[0].n);if(r.rows[0].n<3)process.exit(1)}).then(()=>p.end())"
       - name: API – tipovi baze su ažurni
         run: npm run db:types -w apps/api -- --url "$DATABASE_URL" && git diff --exit-code apps/api/src/db-types.ts
+      - name: Dizajn sistem – tokeni su generisani iz tokens.json
+        run: npm run tokens -w packages/ui && git diff --exit-code packages/ui/src/tokens
+      - name: Dizajn sistem – tipovi i axe nad svim pričama (jsdom)
+        run: npx tsc --noEmit -p packages/ui && npm test -w packages/ui
+      - name: Dizajn sistem – Storybook build i axe u Chromiumu (kontrast)
+        run: |
+          npm run build-storybook -w packages/ui
+          npx playwright-core install --with-deps chromium
+          npm run test:browser -w packages/ui
+      - name: Storybook kao artefakt (za pregled)
+        uses: actions/upload-artifact@v4
+        with:
+          name: storybook
+          path: packages/ui/storybook-static
+          retention-days: 14
       - name: Web – provjera tipova
         run: npx tsc --noEmit -p apps/web
       - name: Web – produkcijski build

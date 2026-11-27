@@ -1,6 +1,6 @@
 /** Tokeni preuzeti iz Stitch dizajna (DESIGN.md + tailwind.config svih MVP ekrana). */
 module.exports = {
-  content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}'],
+  content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}', '../../packages/ui/src/**/*.{ts,tsx}'],
   theme: {
     extend: {
   "colors": {

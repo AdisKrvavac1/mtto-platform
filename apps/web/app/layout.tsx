@@ -16,6 +16,8 @@ import '@fontsource-variable/roboto-flex/index.css';
 import '@fontsource/roboto-mono/500.css';
 import 'material-symbols/outlined.css';
 import 'leaflet/dist/leaflet.css';
+import '@mtto/ui/tokens.css';
+import '@mtto/ui/styles.css';
 import './tokens.css';
 import './globals.css';
 import './cms-theme.css';
