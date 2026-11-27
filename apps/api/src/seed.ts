@@ -1,6 +1,6 @@
 /* Početni podaci za MVP. Stvarne objave s mtto.gov.ba (naslovi, slike, prilozi javnog poziva)
  * i jasno označeni DEMO zapisi za registre i propise. Pokretanje: node dist/seed.js [--if-empty] [--reset] */
-import { Db, id } from './db';
+import { Db, id, SYSTEM_TENANT, withTenant } from './db';
 import * as bcrypt from 'bcryptjs';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -203,4 +203,4 @@ async function main() {
   console.log('Seed završen.');
 }
 
-main().catch((e) => { console.error(e); process.exit(1); }).finally(() => db.pool.end());
+withTenant(SYSTEM_TENANT, main).catch((e) => { console.error(e); process.exit(1); }).finally(() => db.pool.end());

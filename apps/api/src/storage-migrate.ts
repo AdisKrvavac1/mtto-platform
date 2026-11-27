@@ -34,7 +34,7 @@ export async function migrateFilesToStorage(db: Db, files: FileStore, dry = fals
 async function main() {
   if (storageDriver() !== 's3') { console.error('S3 nije podešen (S3_BUCKET/STORAGE_DRIVER=s3).'); process.exit(1); }
   const db = new Db();
-  await migrateFilesToStorage(db, new FileStore(), process.argv.includes('--dry-run'));
+  await db.system(() => migrateFilesToStorage(db, new FileStore(), process.argv.includes('--dry-run')));
   await db.pool.end();
 }
 if (require.main === module) main().catch((e) => { console.error(e); process.exit(1); });
@@ -48,12 +48,10 @@ export class StorageMigrator implements OnApplicationBootstrap {
     setTimeout(async () => {
       try {
         if (!(await this.files.check()).ok) { logJson('error', 'Skladište nije dostupno, prenos datoteka preskočen'); return; }
-        const r = await this.db.pool.query(`SELECT pg_try_advisory_lock(727002) ok`);
-        if (!r.rows[0].ok) return;
-        try {
+        await this.db.system(() => this.db.withLock(727002, async () => {
           const res = await migrateFilesToStorage(this.db, this.files, false, (m) => logJson('info', `[prenos datoteka] ${m}`));
           logJson('info', 'Prenos datoteka u skladište završen', res);
-        } finally { await this.db.pool.query(`SELECT pg_advisory_unlock(727002)`); }
+        }));
       } catch (e: any) { logJson('error', 'Prenos datoteka nije uspio', { error: e?.message }); }
     }, 5000).unref();
   }

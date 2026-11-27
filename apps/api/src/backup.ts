@@ -13,7 +13,7 @@ import 'reflect-metadata';
 import { constants, createCipheriv, createDecipheriv, privateDecrypt, publicEncrypt, randomBytes } from 'crypto';
 import { gunzipSync, gzipSync } from 'zlib';
 import { readFileSync, writeFileSync } from 'fs';
-import { Pool } from 'pg';
+import { Pool, PoolClient } from 'pg';
 import { DeleteObjectCommand, GetObjectCommand, ListObjectsV2Command, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { migrate } from './migrations';
 import { logJson } from './observability';
@@ -34,14 +34,26 @@ function s3() {
 const backupBucket = () => process.env.BACKUP_BUCKET || process.env.S3_BUCKET || 'mtto-files';
 const pem = (v?: string) => (v ?? '').replace(/\\n/g, '\n');
 
-async function tables(pool: Pool): Promise<string[]> {
+async function tables(pool: Pool | PoolClient): Promise<string[]> {
   const r = await pool.query(`SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE'
     AND table_name NOT IN ('spatial_ref_sys','schema_migrations') ORDER BY table_name`);
   return r.rows.map((x) => x.table_name);
 }
 
 /** Pravi šifriranu kopiju cijele baze. */
-export async function createBackup(pool: Pool, publicKeyPem: string): Promise<{ file: Buffer; header: Omit<Header, 'key' | 'iv' | 'tag'> }> {
+export async function createBackup(db: Pool, publicKeyPem: string): Promise<{ file: Buffer; header: Omit<Header, 'key' | 'iv' | 'tag'> }> {
+  // jedna konekcija s app.tenant='*': kopija obuhvata sve institucije (RLS)
+  const pool = await db.connect();
+  try {
+    await pool.query(`SELECT set_config('app.tenant', '*', false)`);
+    return await createBackupOn(pool, publicKeyPem);
+  } finally {
+    await pool.query(`SELECT set_config('app.tenant', '', false)`).catch(() => {});
+    pool.release();
+  }
+}
+
+async function createBackupOn(pool: PoolClient, publicKeyPem: string): Promise<{ file: Buffer; header: Omit<Header, 'key' | 'iv' | 'tag'> }> {
   const lines: string[] = [];
   const counts: Record<string, number> = {};
   for (const t of await tables(pool)) {
@@ -85,11 +97,12 @@ export async function restoreBackup(file: Buffer, privateKeyPem: string, target:
   const c = await target.connect();
   const counts: Record<string, number> = {};
   try {
+    await c.query(`SELECT set_config('app.tenant', '*', false)`);
     await c.query('BEGIN');
     const ts = Object.keys(header.counts);
     if (ts.length) await c.query(`TRUNCATE ${ts.map((t) => `"${t}"`).join(',')} CASCADE`);
     // redoslijed: roditeljske tabele prije onih koje ih referenciraju
-    const order = ['users', 'posts', 'permits', 'facilities', 'documents', 'eco_reports', ...ts];
+    const order = ['tenants', 'users', 'posts', 'permits', 'facilities', 'documents', 'eco_reports', ...ts];
     const byTable = new Map<string, any[]>();
     for (const l of lines) { const { t, r } = JSON.parse(l); (byTable.get(t) ?? byTable.set(t, []).get(t)!).push(r); }
     for (const t of [...new Set(order)].filter((x) => byTable.has(x))) {
@@ -178,8 +191,7 @@ export class BackupScheduler implements OnModuleInit {
       setTimeout(async () => {
         try {
           // advisory lock: samo jedna instanca pravi kopiju
-          const r = await this.db.pool.query(`SELECT pg_try_advisory_lock(727001) ok`);
-          if (r.rows[0].ok) { try { await runScheduledBackup(this.db.pool); } finally { await this.db.pool.query(`SELECT pg_advisory_unlock(727001)`); } }
+          await this.db.system(() => this.db.withLock(727001, () => runScheduledBackup(this.db.pool.raw)));
         } catch (e: any) { logJson('error', 'Rezervna kopija nije uspjela', { error: e?.message }); }
         schedule();
       }, next.getTime() - now.getTime()).unref();

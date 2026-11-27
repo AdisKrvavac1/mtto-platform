@@ -1,7 +1,7 @@
 import { Controller, Get, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import { sql } from 'kysely';
-import { Db } from './db';
+import { Db, currentTenant } from './db';
 import { FileStore } from './storage';
 
 const STARTED = Date.now();
@@ -24,6 +24,7 @@ export class HealthController {
         db: { ok: true, latencyMs: Date.now() - t0 },
         migrations: rows.map((r) => r.id),
         storage: await this.files.check(),
+        tenant: currentTenant(),
         geo: rows.some((r) => r.id === '0003_postgis'),
         version: (process.env.RENDER_GIT_COMMIT ?? 'local').slice(0, 7),
         uptimeS: Math.round((Date.now() - STARTED) / 1000),

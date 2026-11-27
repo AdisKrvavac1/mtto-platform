@@ -38,6 +38,7 @@ export interface AuditLog {
   requestId: string | null;
   seq: Generated<Int8>;
   target: string;
+  tenantId: Generated<string>;
   userId: string | null;
   userName: string;
 }
@@ -62,6 +63,7 @@ export interface Documents {
   size: number;
   status: Generated<string>;
   storageKey: string | null;
+  tenantId: Generated<string>;
   title: string;
 }
 
@@ -75,6 +77,7 @@ export interface EcoReportPhotos {
   sha256: string | null;
   size: number;
   storageKey: string | null;
+  tenantId: Generated<string>;
 }
 
 export interface EcoReports {
@@ -95,6 +98,7 @@ export interface EcoReports {
   photosPublic: Generated<boolean>;
   publicNote: Generated<string>;
   status: Generated<string>;
+  tenantId: Generated<string>;
   updatedAt: Generated<Timestamp>;
 }
 
@@ -114,6 +118,7 @@ export interface Facilities {
   name: string;
   rooms: number | null;
   stars: number | null;
+  tenantId: Generated<string>;
 }
 
 export interface Landslides {
@@ -129,6 +134,7 @@ export interface Landslides {
   risk: Generated<number>;
   source: Generated<string>;
   status: Generated<string>;
+  tenantId: Generated<string>;
   updatedAt: Generated<Timestamp>;
 }
 
@@ -142,6 +148,7 @@ export interface MapLocations {
   link: string | null;
   lng: number;
   name: string;
+  tenantId: Generated<string>;
 }
 
 export interface Media {
@@ -154,6 +161,7 @@ export interface Media {
   sha256: string | null;
   size: number;
   storageKey: string | null;
+  tenantId: Generated<string>;
 }
 
 export interface Permits {
@@ -172,6 +180,7 @@ export interface Permits {
   operator: string;
   registerNumber: string;
   status: Generated<string>;
+  tenantId: Generated<string>;
   updatedAt: Generated<Timestamp>;
   validUntil: Timestamp;
 }
@@ -192,6 +201,7 @@ export interface Posts {
   slug: string;
   sourceUrl: string | null;
   status: Generated<string>;
+  tenantId: Generated<string>;
   title: string;
   type: Generated<string>;
   updatedAt: Generated<Timestamp>;
@@ -201,6 +211,16 @@ export interface Posts {
 export interface SchemaMigrations {
   appliedAt: Generated<Timestamp>;
   id: string;
+}
+
+export interface Tenants {
+  active: Generated<boolean>;
+  createdAt: Generated<Timestamp>;
+  domains: Generated<string[]>;
+  id: string;
+  name: string;
+  shortName: string;
+  theme: Generated<Json>;
 }
 
 export interface Users {
@@ -223,6 +243,7 @@ export interface Users {
   passwordHash: string;
   role: Generated<string>;
   sessionVersion: Generated<number>;
+  tenantId: Generated<string>;
 }
 
 export interface DB {
@@ -237,5 +258,6 @@ export interface DB {
   permits: Permits;
   posts: Posts;
   schema_migrations: SchemaMigrations;
+  tenants: Tenants;
   users: Users;
 }

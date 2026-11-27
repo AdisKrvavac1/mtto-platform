@@ -35,3 +35,6 @@ GitHub Action **Test vraćanja kopije** (1. u mjesecu): vraća najnoviju kopiju 
 4. Za gubitak manji od dana prvo pokušati Render point-in-time recovery (brže, manji gubitak).
 
 Ciljevi: RPO ≤ 24 h (logička kopija), RTO ≤ 4 h.
+
+## Ručni upiti u bazu (RLS, ADR 0011)
+Tabele imaju Row-Level Security. U psql/Render konzoli prvo: `SELECT set_config('app.tenant','*',false);` (sve institucije) ili `'mtto'`.

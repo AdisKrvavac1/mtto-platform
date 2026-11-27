@@ -15,3 +15,4 @@ Odluka se ne briše; kad se promijeni, piše se nova koja zamjenjuje staru.
 | [0008](0008-skladiste-datoteka-i-rezervne-kopije.md) | S3 skladište datoteka i šifrirane kopije | Prihvaćena |
 | [0009](0009-uloge-i-dnevnik-aktivnosti.md) | Uloge po modulu i dnevnik aktivnosti | Prihvaćena |
 | [0010](0010-dizajn-sistem-kao-paket.md) | Dizajn sistem kao paket @mtto/ui (tokeni, Storybook, axe) | Prihvaćena |
+| [0011](0011-vise-institucija-rls.md) | Više institucija: tenantId i Row-Level Security | Prihvaćena |

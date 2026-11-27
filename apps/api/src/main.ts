@@ -3,6 +3,8 @@ import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter, initSentry, logJson, requestId } from './observability';
+import { Db } from './db';
+import { tenantMiddleware } from './tenant';
 
 async function bootstrap() {
   initSentry();
@@ -10,6 +12,7 @@ async function bootstrap() {
   // CSP izvještaji stižu kao application/csp-report ili application/reports+json
   app.useBodyParser('json', { type: ['application/json', 'application/csp-report', 'application/reports+json'], limit: '100kb' });
   app.use(requestId);
+  app.use(tenantMiddleware(app.get(Db)));
   app.useGlobalFilters(new AllExceptionsFilter());
   app.use((_req: any, res: any, next: any) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');

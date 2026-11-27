@@ -27,7 +27,8 @@ jobs:
         options: >-
           --health-cmd "pg_isready -U mtto" --health-interval 5s --health-timeout 5s --health-retries 10
     env:
-      DATABASE_URL: postgres://mtto:mtto@localhost:5432/mtto
+      # aplikacija radi kao vlasnik baze bez superuser prava (kao na Renderu), inače RLS ne bi važio
+      DATABASE_URL: postgres://mtto_app:mtto_app@localhost:5432/mtto_app
       JWT_SECRET: ci-only-secret-ci-only-secret-0000000
       NEXT_TELEMETRY_DISABLED: '1'
     steps:
@@ -37,10 +38,14 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Baza – korisnik bez superuser prava i PostGIS (kao na Renderu)
+        run: |
+          psql postgres://mtto:mtto@localhost:5432/mtto -c "CREATE ROLE mtto_app LOGIN PASSWORD 'mtto_app'" -c "CREATE DATABASE mtto_app OWNER mtto_app"
+          psql postgres://mtto:mtto@localhost:5432/mtto_app -c "CREATE EXTENSION IF NOT EXISTS postgis"
       - name: API – build i testovi
         run: npm test -w apps/api
       - name: API – migracije na praznoj bazi (dvaput, druga ne smije ništa mijenjati)
-        run: node -e "const {Pool}=require('pg');const {migrate}=require('./apps/api/dist/migrations');const p=new Pool({connectionString:process.env.DATABASE_URL});migrate(p).then(()=>migrate(p)).then(()=>p.query('SELECT count(*)::int n FROM schema_migrations')).then(r=>{console.log('migracija:',r.rows[0].n);if(r.rows[0].n<3)process.exit(1)}).then(()=>p.end())"
+        run: node -e "const {Pool}=require('pg');const {migrate}=require('./apps/api/dist/migrations');const p=new Pool({connectionString:process.env.DATABASE_URL});migrate(p).then(()=>migrate(p)).then(()=>p.query('SELECT count(*)::int n FROM schema_migrations')).then(r=>{console.log('migracija:',r.rows[0].n);if(r.rows[0].n<6)process.exit(1)}).then(()=>p.end())"
       - name: API – tipovi baze su ažurni
         run: npm run db:types -w apps/api -- --url "$DATABASE_URL" && git diff --exit-code apps/api/src/db-types.ts
       - name: Dizajn sistem – tokeni su generisani iz tokens.json

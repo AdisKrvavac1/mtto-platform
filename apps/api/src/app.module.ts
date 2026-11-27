@@ -9,6 +9,7 @@ import { BackupScheduler } from './backup';
 import { AuditService } from './audit';
 import { AuditController } from './audit.controller';
 import { UsersController } from './users.controller';
+import { TenantController } from './tenant';
 import { StorageMigrator } from './storage-migrate';
 import { HealthController } from './health.controller';
 import { GeoController } from './geo.controller';
@@ -25,7 +26,7 @@ if (!secret || secret.length < 32) {
 
 @Module({
   imports: [ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: 300 }]), JwtModule.register({ global: true, secret: secret || 'dev-only-secret-dev-only-secret-0000', signOptions: { expiresIn: '8h' } })],
-  controllers: [AuditController, UsersController, SecurityController, HealthController, GeoController, AuthController, PublicController, AdminController, RiskController, AdminRiskController],
+  controllers: [TenantController, AuditController, UsersController, SecurityController, HealthController, GeoController, AuthController, PublicController, AdminController, RiskController, AdminRiskController],
   providers: [{ provide: APP_GUARD, useClass: IpThrottlerGuard }, Db, FileStore, AuditService, BackupScheduler, StorageMigrator, AuthGuard, SessionGuard, MttoImporter, RiskService],
 })
 export class AppModule {}

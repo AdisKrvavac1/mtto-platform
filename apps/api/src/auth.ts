@@ -5,7 +5,7 @@ import type { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import * as QRCode from 'qrcode';
-import { Db, id } from './db';
+import { Db, currentTenant, id } from './db';
 import { Throttle } from '@nestjs/throttler';
 import { THROTTLE_AUTH } from './security';
 import { AuditService } from './audit';
@@ -19,7 +19,7 @@ const LOCK_MINUTES = 15;
 /** Kad je MFA_REQUIRED=true, CMS je dostupan samo sesijama potvrđenim drugim faktorom. */
 export const mfaRequired = () => String(process.env.MFA_REQUIRED ?? 'false').toLowerCase() === 'true';
 
-type Session = { sub: string; name: string; role: string; mfa?: boolean; purpose?: string; sv?: number };
+type Session = { sub: string; name: string; role: string; mfa?: boolean; purpose?: string; sv?: number; tid?: string };
 
 /**
  * F1-03: sesija CMS-a je u httpOnly kolačiću (JavaScript na stranici je ne može pročitati ni ukrasti).
@@ -63,9 +63,12 @@ async function readSession(jwt: JwtService, req: any): Promise<Session> {
 
 /** Učitava korisnika iz baze uz svaki zahtjev: deaktiviran nalog ili promijenjena uloga odmah poništava stare sesije. */
 async function loadUser(db: Db, s: Session) {
-  const u = await db.one<any>('SELECT "id","name","email","role","active","sessionVersion" FROM users WHERE "id"=$1', [s.sub]);
-  if (!u || !u.active || Number(u.sessionVersion) !== Number(s.sv ?? 0)) throw new UnauthorizedException('Sesija više ne važi, prijavite se ponovo');
-  return { sub: u.id, name: u.name, email: u.email, role: u.role, mfa: !!s.mfa, sv: Number(u.sessionVersion) };
+  // RLS već skriva korisnike drugih institucija; provjera tid čuva od sesije prenesene na tuđu domenu
+  const u = await db.one<any>('SELECT "id","name","email","role","active","sessionVersion","tenantId" FROM users WHERE "id"=$1', [s.sub]);
+  if (!u || !u.active || Number(u.sessionVersion) !== Number(s.sv ?? 0) || (s.tid && s.tid !== u.tenantId) || u.tenantId !== currentTenant()) {
+    throw new UnauthorizedException('Sesija više ne važi, prijavite se ponovo');
+  }
+  return { sub: u.id, name: u.name, email: u.email, role: u.role, mfa: !!s.mfa, sv: Number(u.sessionVersion), tenantId: u.tenantId };
 }
 
 /**
@@ -120,7 +123,7 @@ export class AuthController {
     return { id: u.id, name: u.name, email: u.email, role: u.role, roleLabel: ROLE_LABELS[u.role as keyof typeof ROLE_LABELS] ?? u.role, permissions: permissionsFor(u.role), mfaEnabled: !!u.mfaEnabled };
   }
   private session(u: any, mfa: boolean) {
-    return this.jwt.signAsync({ sub: u.id, name: u.name, role: u.role, mfa, sv: Number(u.sessionVersion ?? 0) });
+    return this.jwt.signAsync({ sub: u.id, name: u.name, role: u.role, mfa, sv: Number(u.sessionVersion ?? 0), tid: u.tenantId });
   }
   private audit(u: { id?: string; name: string; email?: string }, action: string, req?: any) {
     return this.auditLog.log(req, { action, entity: 'korisnik', entityId: u.id ?? null, target: u.email ?? '' }, { id: u.id, name: u.name });

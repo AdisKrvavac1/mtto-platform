@@ -1,5 +1,6 @@
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
-import { Pool, PoolClient, types } from 'pg';
+import { AsyncLocalStorage } from 'node:async_hooks';
+import { Pool, PoolClient, QueryResult, types } from 'pg';
 
 // DATE kolone vraćamo kao 'YYYY-MM-DD' (bez pomjeranja vremenske zone)
 types.setTypeParser(1082, (v: string) => v);
@@ -19,11 +20,43 @@ export function makePool() {
   return new Pool({ connectionString: url, max: 10, ssl: local ? false : { rejectUnauthorized: false } });
 }
 
+/* ───── F1-11: institucija (tenant) uz svaki upit ─────
+ * Institucija tekućeg zahtjeva živi u AsyncLocalStorage (postavlja je middleware po domeni).
+ * Prije svakog upita konekcija dobija app.tenant, a RLS u bazi propušta samo redove te institucije.
+ * Sistemski poslovi (migracije, rezervne kopije, prenos datoteka) rade u Db.system() s app.tenant = '*'. */
+export const SYSTEM_TENANT = '*';
+export const DEFAULT_TENANT = 'mtto';
+export const tenantContext = new AsyncLocalStorage<string>();
+export const currentTenant = () => tenantContext.getStore() ?? DEFAULT_TENANT;
+/** Pokreće fn u ime institucije (ili '*' za sistemske poslove). */
+export const withTenant = <T>(tenant: string, fn: () => Promise<T>) => tenantContext.run(tenant, fn);
+
+/** Omotač oko pg.Pool: svaka konekcija koja izađe iz bazena nosi instituciju tekućeg konteksta. */
+export class TenantPool {
+  constructor(readonly raw: Pool) {}
+  async connect(): Promise<PoolClient> {
+    const c = await this.raw.connect();
+    try {
+      await c.query(`SELECT set_config('app.tenant', $1, false)`, [currentTenant()]);
+    } catch (e) {
+      c.release(e as Error);
+      throw e;
+    }
+    return c;
+  }
+  async query(text: string, params: any[] = []): Promise<QueryResult> {
+    const c = await this.connect();
+    try { return await c.query(text, params); } finally { c.release(); }
+  }
+  end() { return this.raw.end(); }
+  on(event: string, fn: (...a: any[]) => void) { this.raw.on(event as any, fn); return this; }
+}
+
 @Injectable()
 export class Db implements OnModuleDestroy {
-  pool = makePool();
-  private ready = migrate(this.pool);
-  private kysely = new Kysely<DB>({ dialect: new PostgresDialect({ pool: this.pool }) });
+  pool = new TenantPool(makePool());
+  private ready = withTenant(SYSTEM_TENANT, () => migrate(this.pool as unknown as Pool));
+  private kysely = new Kysely<DB>({ dialect: new PostgresDialect({ pool: this.pool as unknown as Pool }) });
 
   /** Upiti s provjerom tipova (ADR 0004). Tipovi se generišu iz baze: npm run db:types -w apps/api. */
   async k(): Promise<Kysely<DB>> {
@@ -81,6 +114,28 @@ export class Db implements OnModuleDestroy {
     } catch (e) {
       await c.query('ROLLBACK');
       throw e;
+    } finally {
+      c.release();
+    }
+  }
+
+  /** Sistemski posao preko svih institucija (app.tenant = '*'). */
+  system<T>(fn: () => Promise<T>): Promise<T> {
+    return withTenant(SYSTEM_TENANT, fn);
+  }
+
+  /**
+   * Posao pod advisory lockom na JEDNOJ konekciji (lock i unlock moraju biti na istoj sesiji).
+   * Vraća false ako drugi proces već radi isti posao.
+   */
+  async withLock(key: number, fn: () => Promise<void>): Promise<boolean> {
+    await this.ready;
+    const c = await this.pool.connect();
+    try {
+      const r = await c.query('SELECT pg_try_advisory_lock($1) ok', [key]);
+      if (!r.rows[0].ok) return false;
+      try { await fn(); } finally { await c.query('SELECT pg_advisory_unlock($1)', [key]); }
+      return true;
     } finally {
       c.release();
     }
