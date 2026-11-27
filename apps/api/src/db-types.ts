@@ -43,6 +43,63 @@ export interface AuditLog {
   userName: string;
 }
 
+export interface CaseCounters {
+  n: Generated<number>;
+  tenantId: Generated<string>;
+  year: number;
+}
+
+export interface CaseEvents {
+  actorId: string | null;
+  actorName: string;
+  caseId: string;
+  createdAt: Generated<Timestamp>;
+  fromStatus: string | null;
+  id: string;
+  kind: string;
+  note: Generated<string>;
+  public: Generated<boolean>;
+  tenantId: Generated<string>;
+  toStatus: string | null;
+}
+
+export interface CaseFiles {
+  caseId: string;
+  createdAt: Generated<Timestamp>;
+  data: Buffer | null;
+  fileName: string;
+  id: string;
+  mimeType: string;
+  scanStatus: Generated<string>;
+  sha256: string | null;
+  size: number;
+  source: Generated<string>;
+  storageKey: string | null;
+  tenantId: Generated<string>;
+  uploadedBy: string | null;
+}
+
+export interface Cases {
+  applicantEmail: string | null;
+  applicantName: string;
+  applicantPhone: string | null;
+  assigneeId: string | null;
+  closedAt: Timestamp | null;
+  createdAt: Generated<Timestamp>;
+  data: Generated<Json>;
+  dueAt: Timestamp;
+  formId: string;
+  id: string;
+  isDemo: Generated<boolean>;
+  number: string;
+  receivedAt: Generated<Timestamp>;
+  sector: string | null;
+  status: Generated<string>;
+  tenantId: Generated<string>;
+  trackingHash: string;
+  updatedAt: Generated<Timestamp>;
+}
+
 export interface Documents {
   accessLevel: Generated<string>;
   createdAt: Generated<Timestamp>;
@@ -151,6 +208,24 @@ export interface Facilities {
   rooms: number | null;
   stars: number | null;
   tenantId: Generated<string>;
+}
+
+export interface Forms {
+  active: Generated<boolean>;
+  attachmentHint: Generated<string>;
+  attachments: Generated<string>;
+  createdAt: Generated<Timestamp>;
+  description: Generated<string>;
+  fields: Generated<Json>;
+  id: string;
+  isDemo: Generated<boolean>;
+  legalBasis: Generated<string>;
+  sector: string | null;
+  slaDays: Generated<number>;
+  slug: string;
+  tenantId: Generated<string>;
+  title: string;
+  updatedAt: Generated<Timestamp>;
 }
 
 export interface Landslides {
@@ -262,6 +337,38 @@ export interface PostVersions {
   version: number;
 }
 
+export interface Registries {
+  createdAt: Generated<Timestamp>;
+  description: Generated<string>;
+  fields: Generated<Json>;
+  geo: Generated<boolean>;
+  id: string;
+  isDemo: Generated<boolean>;
+  legalBasis: Generated<string>;
+  name: string;
+  public: Generated<boolean>;
+  sector: string | null;
+  slug: string;
+  tenantId: Generated<string>;
+  titleField: string | null;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface RegistryEntries {
+  createdAt: Generated<Timestamp>;
+  createdBy: string | null;
+  data: Generated<Json>;
+  id: string;
+  isDemo: Generated<boolean>;
+  lat: number | null;
+  lng: number | null;
+  registryId: string;
+  searchText: Generated<string>;
+  status: Generated<string>;
+  tenantId: Generated<string>;
+  updatedAt: Generated<Timestamp>;
+}
+
 export interface SchemaMigrations {
   appliedAt: Generated<Timestamp>;
   id: string;
@@ -314,17 +421,24 @@ export interface Users {
 
 export interface DB {
   audit_log: AuditLog;
+  case_counters: CaseCounters;
+  case_events: CaseEvents;
+  case_files: CaseFiles;
+  cases: Cases;
   document_versions: DocumentVersions;
   documents: Documents;
   eco_report_photos: EcoReportPhotos;
   eco_reports: EcoReports;
   facilities: Facilities;
+  forms: Forms;
   landslides: Landslides;
   map_locations: MapLocations;
   media: Media;
   permits: Permits;
   post_versions: PostVersions;
   posts: Posts;
+  registries: Registries;
+  registry_entries: RegistryEntries;
   schema_migrations: SchemaMigrations;
   sectors: Sectors;
   tenants: Tenants;
