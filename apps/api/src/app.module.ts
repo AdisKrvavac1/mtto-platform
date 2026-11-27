@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { Db } from './db';
-import { AuthController, AuthGuard } from './auth';
+import { AuthController, AuthGuard, SessionGuard } from './auth';
 import { PublicController } from './public.controller';
 import { AdminController } from './admin.controller';
 import { MttoImporter } from './importer';
@@ -15,6 +15,6 @@ if (!secret || secret.length < 32) {
 @Module({
   imports: [JwtModule.register({ global: true, secret: secret || 'dev-only-secret-dev-only-secret-0000', signOptions: { expiresIn: '8h' } })],
   controllers: [AuthController, PublicController, AdminController, RiskController, AdminRiskController],
-  providers: [Db, AuthGuard, MttoImporter, RiskService],
+  providers: [Db, AuthGuard, SessionGuard, MttoImporter, RiskService],
 })
 export class AppModule {}

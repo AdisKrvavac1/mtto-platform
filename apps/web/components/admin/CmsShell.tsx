@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { clearSession, getToken, getUser, type CmsUser } from '@/lib/adminApi';
-import { AlertTriangle, Announcement01, BarChartSquare02, Building07, ClockRewind, Folder, Image01, Inbox01, LinkExternal01, LogOut01, Map01, Menu02, SearchLg, ClipboardCheck, Users01, XClose } from '@untitledui/icons';
+import { AlertTriangle, Announcement01, BarChartSquare02, Building07, ClockRewind, Folder, Image01, Inbox01, LinkExternal01, LogOut01, Map01, Menu02, SearchLg, ClipboardCheck, ShieldTick, Users01, XClose } from '@untitledui/icons';
 
 type Icon = React.FC<React.SVGProps<SVGSVGElement> & { size?: number }>;
 type Item = { href: string; label: string; icon: Icon; f2?: boolean };
@@ -46,6 +46,12 @@ export default function CmsShell({ children }: { children: React.ReactNode }) {
     setUser(getUser());
     setReady(true);
   }, [isLogin, router, path]);
+
+  useEffect(() => {
+    const u = () => setUser(getUser());
+    window.addEventListener('mtto-user', u);
+    return () => window.removeEventListener('mtto-user', u);
+  }, []);
 
   useEffect(() => {
     const k = (e: KeyboardEvent) => { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); search.current?.focus(); } };
@@ -101,6 +107,7 @@ export default function CmsShell({ children }: { children: React.ReactNode }) {
           <ul className="flex flex-col gap-0.5">
             <li><a href="/" target="_blank" rel="noopener" className={item(false)}><LinkExternal01 size={20} className="text-[#a3a3a3]" /><span className="flex-1">Javni portal</span></a></li>
             <li><Link href="/admin/korisnici#audit" className={item(false)}><ClockRewind size={20} className="text-[#a3a3a3]" /><span className="flex-1">Dnevnik aktivnosti</span></Link></li>
+            <li><Link href="/admin/sigurnost" aria-current={path.startsWith('/admin/sigurnost') ? 'page' : undefined} className={item(path.startsWith('/admin/sigurnost'))}><ShieldTick size={20} className="text-[#a3a3a3]" /><span className="flex-1">Sigurnost naloga</span>{user && !user.mfaEnabled && <span className="size-2 rounded-full bg-[#f79009]" aria-label="MFA nije uključen" />}</Link></li>
           </ul>
           <div className="relative flex items-center gap-3 rounded-[12px] p-3 ring-1 ring-inset ring-[#e5e5e5]">
             <span className="relative flex size-10 shrink-0 items-center justify-center rounded-full bg-[#f9f5ff] text-[14px] font-semibold text-[#7f56d9] ring-1 ring-inset ring-black/10">{ini}<span className="absolute bottom-0 right-0 size-2.5 rounded-full bg-[#17b26a] ring-[1.5px] ring-white" /></span>

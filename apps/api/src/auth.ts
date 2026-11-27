@@ -1,24 +1,49 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException, Controller, Post, Body, Get, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, CanActivate, Controller, ExecutionContext, ForbiddenException, Get, HttpException, HttpStatus, Injectable, Post, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
+import * as QRCode from 'qrcode';
 import { Db, id } from './db';
+import { hashRecovery, newRecoveryCodes, newSecret, normalizeRecovery, openSecret, otpauthUri, sealSecret, verifyTotp } from './mfa';
 
 const DUMMY_HASH = bcrypt.hashSync('timing-safe-dummy', 10);
+const MAX_FAILED = 5;
+const LOCK_MINUTES = 15;
 
+/** Kad je MFA_REQUIRED=true, CMS je dostupan samo sesijama potvrđenim drugim faktorom. */
+export const mfaRequired = () => String(process.env.MFA_REQUIRED ?? 'false').toLowerCase() === 'true';
+
+type Session = { sub: string; name: string; role: string; mfa?: boolean; purpose?: string };
+
+async function readSession(jwt: JwtService, req: any): Promise<Session> {
+  const h: string = req.headers['authorization'] ?? '';
+  const token = h.startsWith('Bearer ') ? h.slice(7) : '';
+  if (!token) throw new UnauthorizedException('Potrebna je prijava');
+  let s: Session;
+  try { s = await jwt.verifyAsync<Session>(token); } catch { throw new UnauthorizedException('Sesija je istekla'); }
+  if (s.purpose) throw new UnauthorizedException('Prijava nije završena');
+  return s;
+}
+
+/** Puni pristup CMS-u. Uz MFA_REQUIRED odbija sesije bez drugog faktora (kod MFA_SETUP_REQUIRED). */
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(private jwt: JwtService) {}
   async canActivate(ctx: ExecutionContext): Promise<boolean> {
     const req = ctx.switchToHttp().getRequest();
-    const h: string = req.headers['authorization'] ?? '';
-    const token = h.startsWith('Bearer ') ? h.slice(7) : '';
-    if (!token) throw new UnauthorizedException('Potrebna je prijava');
-    try {
-      req.user = await this.jwt.verifyAsync(token);
-      return true;
-    } catch {
-      throw new UnauthorizedException('Sesija je istekla');
-    }
+    req.user = await readSession(this.jwt, req);
+    if (mfaRequired() && !req.user.mfa) throw new ForbiddenException({ statusCode: 403, code: 'MFA_SETUP_REQUIRED', message: 'Uključite dvofaktorsku prijavu da biste nastavili.' });
+    return true;
+  }
+}
+
+/** Samo za postavljanje MFA: prijavljen korisnik, bez obzira na drugi faktor. */
+@Injectable()
+export class SessionGuard implements CanActivate {
+  constructor(private jwt: JwtService) {}
+  async canActivate(ctx: ExecutionContext): Promise<boolean> {
+    const req = ctx.switchToHttp().getRequest();
+    req.user = await readSession(this.jwt, req);
+    return true;
   }
 }
 
@@ -26,20 +51,146 @@ export class AuthGuard implements CanActivate {
 export class AuthController {
   constructor(private db: Db, private jwt: JwtService) {}
 
+  private publicUser(u: any) {
+    return { id: u.id, name: u.name, email: u.email, role: u.role, mfaEnabled: !!u.mfaEnabled };
+  }
+  private session(u: any, mfa: boolean) {
+    return this.jwt.signAsync({ sub: u.id, name: u.name, role: u.role, mfa });
+  }
+  private audit(u: { name: string; email?: string }, action: string) {
+    return this.db.insert('audit_log', { id: id(), userName: u.name, action, target: u.email ?? '' });
+  }
+  private assertNotLocked(u: any) {
+    if (u?.lockedUntil && new Date(u.lockedUntil) > new Date()) {
+      throw new HttpException(`Nalog je privremeno zaključan zbog više pogrešnih pokušaja. Pokušajte ponovo za ${LOCK_MINUTES} minuta.`, HttpStatus.TOO_MANY_REQUESTS);
+    }
+  }
+  private async failed(u: any, what: string) {
+    const n = (u.failedLogins ?? 0) + 1;
+    if (n >= MAX_FAILED) {
+      await this.db.q(`UPDATE users SET "failedLogins"=0, "lockedUntil"=now() + interval '${LOCK_MINUTES} minutes' WHERE "id"=$1`, [u.id]);
+      await this.audit(u, `Nalog zaključan (${what})`);
+    } else {
+      await this.db.q('UPDATE users SET "failedLogins"=$2 WHERE "id"=$1', [u.id, n]);
+    }
+  }
+  private resetFailed(userId: string) {
+    return this.db.q('UPDATE users SET "failedLogins"=0, "lockedUntil"=NULL WHERE "id"=$1', [userId]);
+  }
+
   @Post('login')
   async login(@Body() body: { email?: string; password?: string }) {
     const email = String(body?.email ?? '').trim().toLowerCase();
     const user = await this.db.one<any>('SELECT * FROM users WHERE "email"=$1', [email]);
+    this.assertNotLocked(user);
     const ok = user ? await bcrypt.compare(String(body?.password ?? ''), user.passwordHash) : await bcrypt.compare('x', DUMMY_HASH);
-    if (!user || !ok) throw new UnauthorizedException('Pogrešan e-mail ili lozinka');
-    const token = await this.jwt.signAsync({ sub: user.id, name: user.name, role: user.role });
-    await this.db.insert('audit_log', { id: id(), userName: user.name, action: 'Prijava u CMS', target: user.email });
-    return { token, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
+    if (!user || !ok) {
+      if (user) await this.failed(user, 'lozinka');
+      throw new UnauthorizedException('Pogrešan e-mail ili lozinka');
+    }
+    if (user.mfaEnabled) {
+      const mfaToken = await this.jwt.signAsync({ sub: user.id, purpose: 'mfa' }, { expiresIn: '5m' });
+      return { mfaRequired: true, mfaToken };
+    }
+    await this.resetFailed(user.id);
+    await this.audit(user, 'Prijava u CMS');
+    return { token: await this.session(user, false), user: this.publicUser(user), mfaSetupRequired: mfaRequired() };
+  }
+
+  /** Drugi korak prijave: kod iz aplikacije ili rezervni kod. */
+  @Post('mfa/verify')
+  async verify(@Body() body: { mfaToken?: string; code?: string }) {
+    let p: { sub: string; purpose?: string };
+    try { p = await this.jwt.verifyAsync(String(body?.mfaToken ?? '')); } catch { throw new UnauthorizedException('Prijava je istekla, unesite lozinku ponovo'); }
+    if (p.purpose !== 'mfa') throw new UnauthorizedException('Neispravan zahtjev');
+    const user = await this.db.one<any>('SELECT * FROM users WHERE "id"=$1', [p.sub]);
+    if (!user?.mfaEnabled) throw new UnauthorizedException('Neispravan zahtjev');
+    this.assertNotLocked(user);
+    const code = String(body?.code ?? '').trim();
+    let how = '';
+    if (/^\d{6}$/.test(code.replace(/\s+/g, ''))) {
+      const step = verifyTotp(openSecret(user.mfaSecret), code, Number(user.mfaLastStep ?? 0));
+      if (step) { await this.db.q('UPDATE users SET "mfaLastStep"=$2 WHERE "id"=$1', [user.id, step]); how = 'aplikacija'; }
+    } else if (normalizeRecovery(code).length === 8) {
+      const h = hashRecovery(code);
+      const left: string[] = (user.mfaRecovery ?? []).filter((x: string) => x !== h);
+      if (left.length < (user.mfaRecovery ?? []).length) { await this.db.q('UPDATE users SET "mfaRecovery"=$2 WHERE "id"=$1', [user.id, JSON.stringify(left)]); how = 'rezervni kod'; }
+    }
+    if (!how) {
+      await this.failed(user, 'drugi faktor');
+      throw new UnauthorizedException('Kod nije ispravan ili je istekao');
+    }
+    await this.resetFailed(user.id);
+    await this.audit(user, `Prijava u CMS (MFA: ${how})`);
+    return { token: await this.session(user, true), user: this.publicUser(user) };
   }
 
   @Get('me')
-  @UseGuards(AuthGuard)
-  me(@Req() req: any) {
-    return req.user;
+  @UseGuards(SessionGuard)
+  async me(@Req() req: any) {
+    const u = await this.db.one<any>('SELECT * FROM users WHERE "id"=$1', [req.user.sub]);
+    if (!u) throw new UnauthorizedException('Korisnik ne postoji');
+    return { ...this.publicUser(u), sessionMfa: !!req.user.mfa, mfaRequired: mfaRequired(), recoveryLeft: (u.mfaRecovery ?? []).length };
+  }
+
+  /** Korak 1 uključivanja: nova tajna, QR kod za aplikaciju. */
+  @Post('mfa/setup')
+  @UseGuards(SessionGuard)
+  async setup(@Req() req: any) {
+    const u = await this.db.one<any>('SELECT * FROM users WHERE "id"=$1', [req.user.sub]);
+    if (!u) throw new UnauthorizedException();
+    if (u.mfaEnabled) throw new BadRequestException('Dvofaktorska prijava je već uključena');
+    const secret = newSecret();
+    await this.db.q('UPDATE users SET "mfaPendingSecret"=$2 WHERE "id"=$1', [u.id, sealSecret(secret)]);
+    const uri = otpauthUri(secret, u.email);
+    const qr = await QRCode.toDataURL(uri, { margin: 1, width: 220, errorCorrectionLevel: 'M' });
+    return { qr, secret: secret.replace(/(.{4})/g, '$1 ').trim(), uri };
+  }
+
+  /** Korak 2: potvrda prvim kodom; vraća rezervne kodove (prikazuju se samo jednom). */
+  @Post('mfa/enable')
+  @UseGuards(SessionGuard)
+  async enable(@Req() req: any, @Body() body: { code?: string }) {
+    const u = await this.db.one<any>('SELECT * FROM users WHERE "id"=$1', [req.user.sub]);
+    if (!u?.mfaPendingSecret) throw new BadRequestException('Prvo pokrenite postavljanje');
+    const secret = openSecret(u.mfaPendingSecret);
+    const step = verifyTotp(secret, String(body?.code ?? ''));
+    if (!step) throw new BadRequestException('Kod nije ispravan. Provjerite da je vrijeme na telefonu tačno.');
+    const codes = newRecoveryCodes();
+    await this.db.q(
+      'UPDATE users SET "mfaEnabled"=true, "mfaSecret"=$2, "mfaPendingSecret"=NULL, "mfaLastStep"=$3, "mfaRecovery"=$4 WHERE "id"=$1',
+      [u.id, sealSecret(secret), step, JSON.stringify(codes.map(hashRecovery))],
+    );
+    await this.audit(u, 'Uključena dvofaktorska prijava');
+    return { token: await this.session(u, true), recoveryCodes: codes };
+  }
+
+  /** Novi rezervni kodovi (stari prestaju važiti); traži važeći kod iz aplikacije. */
+  @Post('mfa/recovery')
+  @UseGuards(SessionGuard)
+  async recovery(@Req() req: any, @Body() body: { code?: string }) {
+    const u = await this.db.one<any>('SELECT * FROM users WHERE "id"=$1', [req.user.sub]);
+    if (!u?.mfaEnabled) throw new BadRequestException('Dvofaktorska prijava nije uključena');
+    const step = verifyTotp(openSecret(u.mfaSecret), String(body?.code ?? ''), Number(u.mfaLastStep ?? 0));
+    if (!step) throw new BadRequestException('Kod nije ispravan');
+    const codes = newRecoveryCodes();
+    await this.db.q('UPDATE users SET "mfaLastStep"=$2, "mfaRecovery"=$3 WHERE "id"=$1', [u.id, step, JSON.stringify(codes.map(hashRecovery))]);
+    await this.audit(u, 'Novi rezervni kodovi za MFA');
+    return { recoveryCodes: codes };
+  }
+
+  /** Isključivanje: lozinka + kod. Nije dozvoljeno kad je MFA obavezan. */
+  @Post('mfa/disable')
+  @UseGuards(SessionGuard)
+  async disable(@Req() req: any, @Body() body: { password?: string; code?: string }) {
+    if (mfaRequired()) throw new ForbiddenException('Dvofaktorska prijava je obavezna za sve korisnike CMS-a');
+    const u = await this.db.one<any>('SELECT * FROM users WHERE "id"=$1', [req.user.sub]);
+    if (!u?.mfaEnabled) throw new BadRequestException('Dvofaktorska prijava nije uključena');
+    const pass = await bcrypt.compare(String(body?.password ?? ''), u.passwordHash);
+    const step = verifyTotp(openSecret(u.mfaSecret), String(body?.code ?? ''), Number(u.mfaLastStep ?? 0));
+    if (!pass || !step) throw new BadRequestException('Lozinka ili kod nisu ispravni');
+    await this.db.q(`UPDATE users SET "mfaEnabled"=false, "mfaSecret"=NULL, "mfaRecovery"='[]'::jsonb WHERE "id"=$1`, [u.id]);
+    await this.audit(u, 'Isključena dvofaktorska prijava');
+    return { token: await this.session(u, false) };
   }
 }

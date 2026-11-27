@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: mtto
+          POSTGRES_PASSWORD: mtto
+          POSTGRES_DB: mtto
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U mtto" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://mtto:mtto@localhost:5432/mtto
+      JWT_SECRET: ci-only-secret-ci-only-secret-0000000
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: API – build i testovi
+        run: npm test -w apps/api
+      - name: API – migracije na praznoj bazi
+        run: node -e "const {Pool}=require('pg');const {migrate}=require('./apps/api/dist/migrations');const p=new Pool({connectionString:process.env.DATABASE_URL});migrate(p).then(()=>migrate(p)).then(()=>p.end())"
+      - name: Web – provjera tipova
+        run: npx tsc --noEmit -p apps/web
+      - name: Web – produkcijski build
+        run: npm run build -w apps/web
+      - name: Ranjivosti u zavisnostima (produkcija)
+        run: npm audit --omit=dev --audit-level=high
