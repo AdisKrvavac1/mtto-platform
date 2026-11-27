@@ -35,7 +35,7 @@ export interface AuditLog {
 
 export interface Documents {
   createdAt: Generated<Timestamp>;
-  data: Buffer;
+  data: Buffer | null;
   description: Generated<string>;
   docType: string;
   downloads: Generated<number>;
@@ -47,19 +47,25 @@ export interface Documents {
   number: string | null;
   permitId: string | null;
   postId: string | null;
+  scanStatus: Generated<string>;
   sector: Generated<string>;
+  sha256: string | null;
   size: number;
   status: Generated<string>;
+  storageKey: string | null;
   title: string;
 }
 
 export interface EcoReportPhotos {
   createdAt: Generated<Timestamp>;
-  data: Buffer;
+  data: Buffer | null;
   id: string;
   mimeType: string;
   reportId: string;
+  scanStatus: Generated<string>;
+  sha256: string | null;
   size: number;
+  storageKey: string | null;
 }
 
 export interface EcoReports {
@@ -131,11 +137,14 @@ export interface MapLocations {
 
 export interface Media {
   createdAt: Generated<Timestamp>;
-  data: Buffer;
+  data: Buffer | null;
   fileName: string;
   id: string;
   mimeType: string;
+  scanStatus: Generated<string>;
+  sha256: string | null;
   size: number;
+  storageKey: string | null;
 }
 
 export interface Permits {

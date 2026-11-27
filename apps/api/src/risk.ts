@@ -2,6 +2,7 @@ import { BadRequestException, Body, Controller, Delete, Get, Injectable, Logger,
 import { FilesInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
 import { Db, id } from './db';
+import { FileStore } from './storage';
 import { AuthGuard } from './auth';
 import { toFloat } from './util';
 import { Throttle } from '@nestjs/throttler';
@@ -232,7 +233,7 @@ function sniffImage(b: Buffer): string | null {
 
 @Controller()
 export class RiskController {
-  constructor(private db: Db, private risk: RiskService) {}
+  constructor(private db: Db, private risk: RiskService, private files: FileStore) {}
 
   @Get('risk/summary')
   async summary() {
@@ -287,7 +288,10 @@ export class RiskController {
       id: rid, code, kind, municipality, location: String(b?.location ?? '').slice(0, 200), lat: inArea ? lat : null, lng: inArea ? lng : null,
       description: description.slice(0, 2000), contactName: String(b?.contactName ?? '').slice(0, 120) || null, contactEmail: email || null,
     });
-    for (const p of photos) await this.db.insert('eco_report_photos', { id: id(), reportId: rid, mimeType: p.type, size: p.f.size, data: p.f.buffer }, `"id"`);
+    for (const p of photos) {
+      const stored = await this.files.put('eko-prijave', p.f.buffer, p.type!);
+      await this.db.insert('eco_report_photos', { id: id(), reportId: rid, mimeType: p.type, size: p.f.size, ...stored }, `"id"`);
+    }
     list.push(now); hits.set(ip, list);
     return { ok: true, code, photos: photos.length };
   }
@@ -295,12 +299,12 @@ export class RiskController {
   /** Fotografija prijave — javno samo kad je prijava objavljena i fotografije su odobrene. */
   @Get('eco-reports/:id/photos/:pid')
   async photo(@Param('id') rid: string, @Param('pid') pid: string, @Res() res: Response) {
-    const p = await this.db.one<any>(`SELECT p."mimeType", p."data" FROM eco_report_photos p JOIN eco_reports r ON r."id"=p."reportId" WHERE p."id"=$1 AND r."id"=$2 AND r."isPublic" AND r."photosPublic"`, [pid, rid]);
+    const p = await this.db.one<any>(`SELECT p."mimeType", p."data", p."storageKey" FROM eco_report_photos p JOIN eco_reports r ON r."id"=p."reportId" WHERE p."id"=$1 AND r."id"=$2 AND r."isPublic" AND r."photosPublic"`, [pid, rid]);
     if (!p) throw new NotFoundException();
     res.setHeader('Content-Type', p.mimeType);
     res.setHeader('Cache-Control', 'public, max-age=300');
     res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.end(p.data);
+    res.end(await this.files.read(p));
   }
 }
 
@@ -323,7 +327,7 @@ function landslideData(b: any) {
 @Controller('admin')
 @UseGuards(AuthGuard)
 export class AdminRiskController {
-  constructor(private db: Db) {}
+  constructor(private db: Db, private files: FileStore) {}
   private log(req: any, action: string, target: string) {
     return this.db.insert('audit_log', { id: id(), userName: req.user?.name ?? 'Nepoznat', action, target });
   }
@@ -361,12 +365,12 @@ export class AdminRiskController {
 
   @Get('eco-report-photos/:pid')
   async photo(@Param('pid') pid: string, @Res() res: Response) {
-    const p = await this.db.one<any>(`SELECT "mimeType","data" FROM eco_report_photos WHERE "id"=$1`, [pid]);
+    const p = await this.db.one<any>(`SELECT "mimeType","data","storageKey" FROM eco_report_photos WHERE "id"=$1`, [pid]);
     if (!p) throw new NotFoundException();
     res.setHeader('Content-Type', p.mimeType);
     res.setHeader('Cache-Control', 'private, no-store');
     res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.end(p.data);
+    res.end(await this.files.read(p));
   }
 
   @Patch('eco-reports/:id')

@@ -3,6 +3,7 @@ import {
   UploadedFile, UseGuards, UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { FileStore } from './storage';
 import { Db, Where, id } from './db';
 import { AuthGuard } from './auth';
 import { DOC_COLS } from './public.controller';
@@ -54,7 +55,7 @@ function utf8Name(name: string) {
 @Controller('admin')
 @UseGuards(AuthGuard)
 export class AdminController {
-  constructor(private db: Db, private importer: MttoImporter) {}
+  constructor(private db: Db, private importer: MttoImporter, private files: FileStore) {}
 
   private log(req: any, action: string, target: string) {
     return this.db.insert('audit_log', { id: id(), userName: req.user?.name ?? 'Nepoznat', action, target: String(target).slice(0, 200) });
@@ -159,10 +160,11 @@ export class AdminController {
     if (!DOC_TYPES.includes(file.mimetype)) throw new BadRequestException('Dozvoljeni formati: PDF, DOC, DOCX, XLS, XLSX');
     if (file.mimetype === 'application/pdf' && file.buffer.subarray(0, 5).toString() !== '%PDF-') throw new BadRequestException('Datoteka nije ispravan PDF');
     if (!b?.title?.trim()) throw new BadRequestException('Naziv dokumenta je obavezan');
+    const stored = await this.files.put('dokumenti', file.buffer, file.mimetype);
     const d = await this.db.insert('documents', {
       id: id(), title: String(b.title).trim(), docType: String(b.docType || 'OSTALO'), sector: String(b.sector || 'Opće'),
       number: b.number || null, issuedAt: toDate(b.issuedAt), status: String(b.status || 'VAZECI'), description: String(b.description || ''),
-      fileName: utf8Name(file.originalname), mimeType: file.mimetype, size: file.size, data: file.buffer,
+      fileName: utf8Name(file.originalname), mimeType: file.mimetype, size: file.size, ...stored,
       postId: b.postId || null, permitId: b.permitId || null,
     }, `"id","title","fileName","size","docType"`);
     await this.log(req, 'Učitao/la dokument', d.title);
@@ -182,8 +184,9 @@ export class AdminController {
 
   @Delete('documents/:id')
   async deleteDoc(@Param('id') docId: string, @Req() req: any) {
-    const d = await this.db.one(`DELETE FROM documents WHERE "id"=$1 RETURNING "title"`, [docId]);
+    const d = await this.db.one(`DELETE FROM documents WHERE "id"=$1 RETURNING "title","storageKey"`, [docId]);
     if (!d) throw new NotFoundException();
+    await this.files.remove(d.storageKey);
     await this.log(req, 'Obrisao/la dokument', d.title);
     return { ok: true };
   }
@@ -194,7 +197,8 @@ export class AdminController {
   async media(@UploadedFile() file: Express.Multer.File) {
     if (!file) throw new BadRequestException('Slika nije priložena (najviše 5 MB)');
     if (!IMG_TYPES.includes(file.mimetype)) throw new BadRequestException('Dozvoljeni formati: JPG, PNG, WEBP');
-    const m = await this.db.insert('media', { id: id(), fileName: utf8Name(file.originalname), mimeType: file.mimetype, size: file.size, data: file.buffer }, `"id"`);
+    const stored = await this.files.put('mediji', file.buffer, file.mimetype);
+    const m = await this.db.insert('media', { id: id(), fileName: utf8Name(file.originalname), mimeType: file.mimetype, size: file.size, ...stored }, `"id"`);
     return { id: m.id, url: `/api/media/${m.id}` };
   }
 

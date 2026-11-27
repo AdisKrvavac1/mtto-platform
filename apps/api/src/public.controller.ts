@@ -1,5 +1,6 @@
 import { Controller, Get, NotFoundException, Param, Query, Res } from '@nestjs/common';
 import type { Response } from 'express';
+import { FileStore } from './storage';
 import { Db, Where } from './db';
 import { toInt } from './util';
 
@@ -9,7 +10,7 @@ const PUBLISHED = `"status" IN ('OBJAVLJENO','ZAKAZANO') AND "publishedAt" <= no
 
 @Controller()
 export class PublicController {
-  constructor(private db: Db) {}
+  constructor(private db: Db, private files: FileStore) {}
 
   @Get('health')
   async health() {
@@ -50,20 +51,22 @@ export class PublicController {
 
   @Get('documents/:id/file')
   async file(@Param('id') docId: string, @Res() res: Response) {
-    const doc = await this.db.one(`UPDATE documents SET "downloads"="downloads"+1 WHERE "id"=$1 RETURNING "fileName","mimeType","data"`, [docId]);
+    const doc = await this.db.one(`UPDATE documents SET "downloads"="downloads"+1 WHERE "id"=$1 RETURNING "fileName","mimeType","data","storageKey"`, [docId]);
     if (!doc) throw new NotFoundException();
     res.setHeader('Content-Type', doc.mimeType);
     res.setHeader('Content-Disposition', `inline; filename*=UTF-8''${encodeURIComponent(doc.fileName)}`);
-    res.send(doc.data);
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.send(await this.files.read(doc));
   }
 
   @Get('media/:id')
   async media(@Param('id') mediaId: string, @Res() res: Response) {
-    const m = await this.db.one(`SELECT "mimeType","data" FROM media WHERE "id"=$1`, [mediaId]);
+    const m = await this.db.one(`SELECT "mimeType","data","storageKey" FROM media WHERE "id"=$1`, [mediaId]);
     if (!m) throw new NotFoundException();
     res.setHeader('Content-Type', m.mimeType);
     res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-    res.send(m.data);
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.send(await this.files.read(m));
   }
 
   @Get('permits')

@@ -1,0 +1,36 @@
+# F1-07: mjesečni test vraćanja rezervne kopije (1. u mjesecu, 04:00 UTC) + ručno pokretanje.
+# Uzima najnoviju šifriranu kopiju iz skladišta, vraća je u praznu bazu i provjerava broj redova po tabeli.
+name: Test vraćanja kopije
+on:
+  schedule: [{ cron: '0 4 1 * *' }]
+  workflow_dispatch: {}
+permissions: { contents: read }
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    if: ${{ vars.BACKUP_ENABLED == 'true' }}
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env: { POSTGRES_USER: mtto, POSTGRES_PASSWORD: mtto, POSTGRES_DB: restore }
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run build -w apps/api
+      - name: Vrati najnoviju kopiju u praznu bazu
+        working-directory: apps/api
+        env:
+          BACKUP_PRIVATE_KEY: ${{ secrets.BACKUP_PRIVATE_KEY }}
+          S3_ENDPOINT: ${{ secrets.S3_ENDPOINT }}
+          S3_REGION: ${{ secrets.S3_REGION }}
+          S3_ACCESS_KEY_ID: ${{ secrets.BACKUP_READ_ACCESS_KEY_ID }}
+          S3_SECRET_ACCESS_KEY: ${{ secrets.BACKUP_READ_SECRET_ACCESS_KEY }}
+          BACKUP_BUCKET: ${{ secrets.BACKUP_BUCKET }}
+        run: node dist/backup.js restore s3:latest postgres://mtto:mtto@localhost:5432/restore | tee restore.log
+      - name: Sažetak
+        if: always()
+        run: { echo '### Test vraćanja kopije'; echo '```'; cat apps/api/restore.log 2>/dev/null; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
