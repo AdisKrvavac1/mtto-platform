@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { DeleteObjectCommand, GetObjectCommand, HeadBucketCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { createHash, randomUUID } from 'crypto';
 import { connect } from 'net';
 import { logJson } from './observability';
@@ -54,6 +54,15 @@ export function scanWithClamd(buf: Buffer, host = process.env.CLAMAV_HOST, port 
 
 @Injectable()
 export class FileStore {
+  /** Za /api/health: je li skladište (i bucket za kopije) dostupno. Bez tajni u odgovoru. */
+  async check(): Promise<{ driver: 's3' | 'db'; ok: boolean; backups?: boolean }> {
+    if (storageDriver() !== 's3') return { driver: 'db', ok: true };
+    const head = (b: string) => s3().send(new HeadBucketCommand({ Bucket: b })).then(() => true, () => false);
+    const ok = await head(bucket());
+    const bb = process.env.BACKUP_BUCKET;
+    return { driver: 's3', ok, ...(bb ? { backups: await head(bb) } : {}) };
+  }
+
   /** Provjerava i sprema datoteku; vraća polja za upis u red tabele. Zaražena datoteka se odbija. */
   async put(prefix: string, buf: Buffer, mimeType: string): Promise<Stored> {
     const sha256 = createHash('sha256').update(buf).digest('hex');

@@ -2,13 +2,14 @@ import { Controller, Get, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import { sql } from 'kysely';
 import { Db } from './db';
+import { FileStore } from './storage';
 
 const STARTED = Date.now();
 
 /** F1-06: provjera rada za Render health check i vanjski uptime monitor. Bez ličnih podataka. */
 @Controller('health')
 export class HealthController {
-  constructor(private db: Db) {}
+  constructor(private db: Db, private files: FileStore) {}
 
   @Get()
   async health(@Res() res: Response) {
@@ -22,6 +23,7 @@ export class HealthController {
         status: 'ok',
         db: { ok: true, latencyMs: Date.now() - t0 },
         migrations: rows.map((r) => r.id),
+        storage: await this.files.check(),
         geo: rows.some((r) => r.id === '0003_postgis'),
         version: (process.env.RENDER_GIT_COMMIT ?? 'local').slice(0, 7),
         uptimeS: Math.round((Date.now() - STARTED) / 1000),
