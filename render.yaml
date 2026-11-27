@@ -8,6 +8,8 @@ services:
     buildCommand: npm ci --include=dev && npm run build
     startCommand: node scripts/start.js
     healthCheckPath: /api/health
+    # F1-05: deploy samo kad CI na GitHubu prođe (testovi, tipovi, build, ranjivosti)
+    autoDeployTrigger: checksPass
     envVars:
       - key: NODE_VERSION
         value: "22"

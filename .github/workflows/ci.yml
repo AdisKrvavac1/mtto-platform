@@ -18,7 +18,7 @@ jobs:
     timeout-minutes: 20
     services:
       postgres:
-        image: postgres:16
+        image: postgis/postgis:16-3.4
         env:
           POSTGRES_USER: mtto
           POSTGRES_PASSWORD: mtto
@@ -39,8 +39,10 @@ jobs:
       - run: npm ci
       - name: API – build i testovi
         run: npm test -w apps/api
-      - name: API – migracije na praznoj bazi
-        run: node -e "const {Pool}=require('pg');const {migrate}=require('./apps/api/dist/migrations');const p=new Pool({connectionString:process.env.DATABASE_URL});migrate(p).then(()=>migrate(p)).then(()=>p.end())"
+      - name: API – migracije na praznoj bazi (dvaput, druga ne smije ništa mijenjati)
+        run: node -e "const {Pool}=require('pg');const {migrate}=require('./apps/api/dist/migrations');const p=new Pool({connectionString:process.env.DATABASE_URL});migrate(p).then(()=>migrate(p)).then(()=>p.query('SELECT count(*)::int n FROM schema_migrations')).then(r=>{console.log('migracija:',r.rows[0].n);if(r.rows[0].n<3)process.exit(1)}).then(()=>p.end())"
+      - name: API – tipovi baze su ažurni
+        run: npm run db:types -w apps/api -- --url "$DATABASE_URL" && git diff --exit-code apps/api/src/db-types.ts
       - name: Web – provjera tipova
         run: npx tsc --noEmit -p apps/web
       - name: Web – produkcijski build

@@ -5,6 +5,8 @@ import { Pool, PoolClient, types } from 'pg';
 types.setTypeParser(1082, (v: string) => v);
 import { randomUUID } from 'crypto';
 import { migrate } from './migrations';
+import { Kysely, PostgresDialect } from 'kysely';
+import type { DB } from './db-types';
 
 export { SCHEMA } from './schema';
 
@@ -21,6 +23,20 @@ export function makePool() {
 export class Db implements OnModuleDestroy {
   pool = makePool();
   private ready = migrate(this.pool);
+  private kysely = new Kysely<DB>({ dialect: new PostgresDialect({ pool: this.pool }) });
+
+  /** Upiti s provjerom tipova (ADR 0004). Tipovi se generišu iz baze: npm run db:types -w apps/api. */
+  async k(): Promise<Kysely<DB>> {
+    await this.ready;
+    return this.kysely;
+  }
+
+  /** Da li je PostGIS aktivan (migracija 0003 primijenjena). */
+  async geoEnabled(): Promise<boolean> {
+    await this.ready;
+    const r = await this.pool.query(`SELECT 1 FROM schema_migrations WHERE "id"='0003_postgis'`);
+    return r.rowCount === 1;
+  }
 
   async q<T = any>(text: string, params: any[] = []): Promise<T[]> {
     await this.ready;

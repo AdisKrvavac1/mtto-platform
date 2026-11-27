@@ -1,15 +1,17 @@
 import { Pool } from 'pg';
 import { m0001_baseline } from './0001_baseline';
 import { m0002_mfa } from './0002_mfa';
+import { m0003_postgis } from './0003_postgis';
 
 /**
  * Verzionisane migracije baze (ADR 0002).
  * Svaka migracija se izvršava jednom, u transakciji, i bilježi u schema_migrations.
  * Nove promjene sheme idu ISKLJUČIVO kao nova datoteka s narednim brojem; postojeće se ne mijenjaju.
  */
-export type Migration = { id: string; up: string };
+/** optional: migracija koja može javiti MTTO_SKIP (npr. nedostaje proširenje baze) — tada se preskače bez greške. */
+export type Migration = { id: string; up: string; optional?: boolean };
 
-export const MIGRATIONS: Migration[] = [m0001_baseline, m0002_mfa];
+export const MIGRATIONS: Migration[] = [m0001_baseline, m0002_mfa, m0003_postgis];
 
 const LOCK_KEY = 72_031_001; // pg_advisory_lock: sprječava da dvije instance migriraju istovremeno
 
@@ -29,6 +31,8 @@ export async function migrate(pool: Pool, log: (m: string) => void = (m) => cons
         log(`primijenjena ${m.id}`);
       } catch (e) {
         await c.query('ROLLBACK');
+        const msg = (e as Error).message ?? '';
+        if (m.optional && msg.includes('MTTO_SKIP')) { log(`preskočena ${m.id}: ${msg.replace('MTTO_SKIP: ', '')}`); continue; }
         throw new Error(`Migracija ${m.id} nije uspjela: ${(e as Error).message}`);
       }
     }
