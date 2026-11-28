@@ -17,7 +17,7 @@ function Group({ title, items, id }: { title: string; items: LifeEventItem[]; id
         {items.map((e) => (
           <li key={e.slug}>
             <Link href={`/zivotne-situacije/${e.slug}`} className="group flex h-full gap-4 rounded-[12px] bg-white p-5 ring-1 ring-inset ring-[#e5e5e5] transition-shadow hover:shadow-[0_4px_8px_-2px_rgba(10,13,18,0.1)]">
-              <span aria-hidden className="material-symbols-outlined flex size-11 shrink-0 items-center justify-center rounded-[10px] bg-[var(--br-50)] text-[24px] text-[var(--br-700)]">{e.icon}</span>
+              <span aria-hidden className="flex size-11 shrink-0 items-center justify-center rounded-[10px] bg-[var(--br-50)] text-[var(--br-700)]"><span className="material-symbols-outlined !text-[24px] !leading-none">{e.icon}</span></span>
               <span className="min-w-0">
                 <span className="block text-[17px] font-semibold leading-6 text-[#171717] group-hover:text-[var(--br-700)]">{e.title}</span>
                 <span className="mt-1 block text-[14px] leading-5 text-[#525252]">{e.summary}</span>

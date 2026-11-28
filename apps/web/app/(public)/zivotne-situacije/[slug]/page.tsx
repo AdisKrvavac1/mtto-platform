@@ -32,7 +32,7 @@ export default async function LifeEventPage({ params }: { params: Promise<{ slug
       <Container>
         <nav aria-label="Putanja" className="text-[14px] text-[#737373]"><Link href="/" className="hover:text-[#171717]">Naslovna</Link> / <Link href="/zivotne-situacije" className="hover:text-[#171717]">Životne situacije</Link> / <Link href={`/zivotne-situacije#${e.audience === 'PRIVREDA' ? 'privreda' : 'gradjani'}`} className="hover:text-[#171717]">{AUDIENCE[e.audience]}</Link></nav>
         <div className="mt-6 flex items-start gap-5">
-          <span aria-hidden className="material-symbols-outlined hidden size-14 shrink-0 items-center justify-center rounded-[14px] bg-[var(--br-50)] text-[30px] text-[var(--br-700)] sm:flex">{e.icon}</span>
+          <span aria-hidden className="hidden size-14 shrink-0 items-center justify-center rounded-[14px] bg-[var(--br-50)] text-[var(--br-700)] sm:flex"><span className="material-symbols-outlined !text-[30px] !leading-none">{e.icon}</span></span>
           <div>
             <h1 className="text-[30px] font-semibold leading-tight tracking-[-0.02em] text-[#171717] md:text-[40px]">{e.title}</h1>
             <p className="mt-3 max-w-[720px] text-[18px] leading-7 text-[#525252]">{e.summary}</p>
@@ -65,7 +65,7 @@ export default async function LifeEventPage({ params }: { params: Promise<{ slug
             {e.related.length > 0 && (
               <div className="rounded-[12px] bg-white p-5 ring-1 ring-inset ring-[#e5e5e5]">
                 <p className="text-[14px] font-semibold text-[#171717]">Slične situacije</p>
-                <ul className="mt-3 space-y-2 text-[14px]">{e.related.map((r) => <li key={r.slug}><Link href={`/zivotne-situacije/${r.slug}`} className="flex items-center gap-2 font-medium text-[#404040] hover:text-[var(--br-700)]"><span aria-hidden className="material-symbols-outlined text-[18px] text-[#a3a3a3]">{r.icon}</span>{r.title}</Link></li>)}</ul>
+                <ul className="mt-3 space-y-2 text-[14px]">{e.related.map((r) => <li key={r.slug}><Link href={`/zivotne-situacije/${r.slug}`} className="flex items-center gap-2 font-medium text-[#404040] hover:text-[var(--br-700)]"><span aria-hidden className="material-symbols-outlined shrink-0 !text-[18px] !leading-none text-[#a3a3a3]">{r.icon}</span>{r.title}</Link></li>)}</ul>
               </div>
             )}
             <p className="text-[12px] text-[#737373]">Ažurirano {dateLong(e.updatedAt)}</p>
