@@ -43,7 +43,7 @@ test('predmeti: obrazac, prijem, status, dopuna i rješenje', { skip: !process.e
       const r = await pub.submit(form.slug, { data: JSON.stringify({ nazivObjekta: 'Hotel Test', lezaji: '20' }), applicantName: 'Ana Test', applicantEmail: 'ANA@example.org', consent: 'true' }, [pdf]);
       assert.match(r.number, /^MTTO-\d{4}-\d{5}$/);
       const r2 = await pub.submit(form.slug, { data: '{"nazivObjekta":"B"}', applicantName: 'Bob Test', applicantPhone: '036 000 000', consent: 'true' });
-      assert.equal(Number(r2.number.slice(-5)), Number(r.number.slice(-5)) + 1, 'brojevi idu redom');
+      assert.ok(Number(r2.number.slice(-5)) > Number(r.number.slice(-5)), 'brojevi rastu (drugi testovi mogu paralelno dobiti broj između)');
       await assert.rejects(pub.submit(form.slug, { data: '{}' }, [{ buffer: Buffer.from('MZ'), originalname: 'x.exe' } as any]), /obavezno|PDF/);
 
       await assert.rejects(pub.status({ number: r.number, code: 'AAAA-AAAA' }), /nije pronađen/);
