@@ -20,7 +20,7 @@ export const NAV: Nav[] = [
   { label: 'Vijesti', href: '/vijesti', match: ['/vijesti'] },
   { label: 'O nama', href: '/o-nama', match: ['/o-nama'] },
   {
-    label: 'E-usluge i registri', match: ['/e-usluge', '/registri', '/zivotne-situacije'],
+    label: 'E-usluge i registri', match: ['/e-usluge', '/registri', '/zivotne-situacije', '/transparentnost'],
     groups: [
       { title: 'E-usluge', items: [
         { href: '/zivotne-situacije', label: 'Životne situacije', desc: 'Šta vam treba, korak po korak.', icon: Compass03 },
@@ -28,6 +28,7 @@ export const NAV: Nav[] = [
         { href: '/e-usluge/obrasci', label: 'Elektronski zahtjevi', desc: 'Podnesite zahtjev i pratite status predmeta.', icon: Edit05 },
         { href: '/javni-pozivi', label: 'Javni pozivi', desc: 'Otvoreni pozivi, rokovi i online prijava.', icon: Ticket01 },
         { href: '/propisi', label: 'Propisi i obrasci', desc: 'Zakoni, pravilnici i obrasci zahtjeva.', icon: File06 },
+        { href: '/transparentnost', label: 'Transparentnost', desc: 'Budžet, nabavke i pristup informacijama.', icon: Scales02 },
       ] },
       { title: 'Registri', items: [
         { href: '/registri', label: 'Svi registri', desc: 'Pretraga, CSV i otvoreni podaci.', icon: Database01 },

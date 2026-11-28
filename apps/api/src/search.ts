@@ -42,6 +42,7 @@ export const PAGES: { url: string; title: string; body: string; sector?: string 
   { url: '/mapa', title: 'GIS karta', body: 'karta, lokacije, dozvole, objekti, zaštićena područja', sector: undefined },
   { url: '/o-nama', title: 'O Ministarstvu', body: 'ministar, kontakt, adresa, telefon, e-mail, sektori, organizacija, radno vrijeme ministarstva', sector: undefined },
   { url: '/vijesti', title: 'Vijesti', body: 'novosti, saopćenja, obavještenja, aktuelnosti', sector: undefined },
+  { url: '/transparentnost', title: 'Transparentnost i pristup informacijama', body: 'budžet ministarstva, javne nabavke, ugovori, izvještaji o radu, zahtjev za pristup informacijama, ZOSPI, službenik za informisanje, indeks-registar', sector: undefined },
   { url: '/zivotne-situacije', title: 'Životne situacije', body: 'šta mi treba, kako da, korak po korak, vodič, upute za građane i privredu', sector: undefined },
 ];
 
