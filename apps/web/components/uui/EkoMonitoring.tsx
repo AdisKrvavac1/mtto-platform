@@ -38,7 +38,7 @@ export default function EkoMonitoring({ risk, title = 'Eko-monitoring uživo', i
               {rivers.map((r) => <RiverFlow key={r.key} r={r} />)}
               {rivers.length === 0 && <p className="text-[14px] text-[var(--br-200)]">Model protoka trenutno nije dostupan.</p>}
             </div>
-            {risk.air?.error && <p className="mt-3 text-[12px] text-[var(--br-200)]">Podaci o zraku trenutno nisu dostupni.</p>}
+            <p className="mt-3 text-[14px]"><Link href="/zastita-okolisa/kvalitet-zraka" className="font-semibold text-white underline decoration-white/40 underline-offset-4 hover:decoration-white">Kvalitet zraka po općinama, pragovi i prognoza</Link></p>
           </div>
           <div className="flex flex-col rounded-[16px] bg-white p-5 shadow-[0_24px_48px_-12px_rgba(10,13,18,0.25)] md:p-6">
             <div className="flex items-center justify-between gap-3"><span className="flex items-center gap-3"><FeaturedIcon icon={Bell01} tone="success" size="md" /><span className="text-[18px] font-semibold text-[#171717]">Građanski eko-alarm</span></span><Badge tone="success">Prijava 24/7</Badge></div>

@@ -8,15 +8,16 @@ const PROD = process.env.NODE_ENV === 'production';
  * - Puna politika (skripte, stilovi, slike, konekcije) ide prvo kao Report-Only: preglednik ne blokira ništa,
  *   samo javlja kršenja na /api/csp-report. Kad izvještaji budu čisti, prelazi u obaveznu.
  */
-const GOOGLE = 'https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.gstatic.com';
+// F2-21: karte (MapLibre): OpenFreeMap vektor, rezerva OSM / CARTO raster, sloj EFFIS
+const TILES = 'https://tiles.openfreemap.org https://tile.openstreetmap.org https://*.basemaps.cartocdn.com https://maps.effis.emergency.copernicus.eu';
 const CSP_ENFORCED = ["frame-ancestors 'none'", "object-src 'none'", "base-uri 'self'", "form-action 'self'", ...(PROD ? ['upgrade-insecure-requests'] : [])].join('; ');
 const CSP_REPORT_ONLY = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline' ${GOOGLE}${PROD ? '' : " 'unsafe-eval'"}`,
+  `script-src 'self' 'unsafe-inline'${PROD ? '' : " 'unsafe-eval'"}`,
   `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
   "img-src 'self' data: blob: https:",
   "font-src 'self' data: https://fonts.gstatic.com",
-  `connect-src 'self' ${GOOGLE} https://maps.effis.emergency.copernicus.eu${PROD ? '' : ' ws: http://localhost:*'}`,
+  `connect-src 'self' ${TILES}${PROD ? '' : ' ws: http://localhost:*'}`,
   "worker-src 'self' blob:",
   "frame-src 'none'",
   "frame-ancestors 'none'",

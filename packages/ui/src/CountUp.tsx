@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 /** Broji od 0 do vrijednosti kad element uđe u prozor (jednom). Podržava "4.401 km²", "24 h", "1.250". */
 export default function CountUp({ value, duration = 1400 }: { value: string | number; duration?: number }) {
   const str = String(value);
-  const m = str.match(/^([\d.]+)(.*)$/);
+  // samo cijeli broj s tačkama hiljada (ne datum „11.06.2026.“ ni redni broj „3.“)
+  const m = str.match(/^(\d{1,3}(?:\.\d{3})+|\d+)(?![\d.])(.*)$/);
   const target = m ? parseInt(m[1].replace(/\./g, ''), 10) : NaN;
   const suffix = m ? m[2] : '';
   const ref = useRef<HTMLSpanElement>(null);
@@ -31,5 +32,5 @@ export default function CountUp({ value, duration = 1400 }: { value: string | nu
   }, [target, duration]);
 
   if (Number.isNaN(target)) return <>{str}</>;
-  return <span ref={ref} className="tabular-nums">{n === null ? str : `${n.toLocaleString('bs-BA')}${suffix}`}</span>;
+  return <span ref={ref} className="tabular-nums">{n === null ? str : `${String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.')}${suffix}`}</span>;
 }

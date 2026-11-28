@@ -23,7 +23,7 @@ export default function SiteFooter() {
           <div>
             <h4 className="font-title-md text-title-md text-primary mb-space-md font-bold">Brzi pristup</h4>
             <ul className="space-y-space-xs font-body-sm text-body-sm text-on-surface-variant">
-              <li><Link className="hover:text-on-surface" href="/vijesti?type=JAVNI_POZIV">Javni pozivi</Link></li>
+              <li><Link className="hover:text-on-surface" href="/javni-pozivi">Javni pozivi</Link></li>
               <li><Link className="hover:text-on-surface" href="/propisi">Propisi i obrasci</Link></li>
               <li><Link className="hover:text-on-surface" href="/registri/ugostiteljski-objekti">Kategorizirani objekti</Link></li>
               <li><Link className="hover:text-on-surface" href="/mapa">Interaktivna mapa</Link></li>

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 // U sessionStorage je samo ime i uloga korisnika za prikaz, bez ikakvog tajnog podatka.
 const USER = 'mtto_cms_user';
 
-export type Module = 'kontrolna' | 'objave' | 'dokumenti' | 'mediji' | 'registri' | 'eko' | 'uvoz' | 'korisnici' | 'dnevnik' | 'predmeti';
+export type Module = 'kontrolna' | 'objave' | 'dokumenti' | 'mediji' | 'registri' | 'eko' | 'uvoz' | 'korisnici' | 'dnevnik' | 'predmeti' | 'pozivi';
 export type Action = 'read' | 'write' | 'delete' | 'publish';
 export type CmsUser = { id: string; name: string; email: string; role: string; roleLabel?: string; permissions?: Partial<Record<Module, Action[]>>; sectors?: string[]; mfaEnabled?: boolean };
 export type Sector = { id: string; key: string; name: string; active: boolean; sort: number };

@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/maplibre-worker.mjs",
     "dev": "next dev -p 3000",
+    "prebuild": "node scripts/maplibre-worker.mjs",
     "build": "next build",
     "start": "next start -p ${PORT:-3000}"
   },
@@ -25,8 +27,7 @@
     "@tiptap/starter-kit": "^3.35.1",
     "@untitledui/icons": "^0.0.23",
     "altcha": "^3.7.0",
-    "leaflet": "^1.9.4",
-    "leaflet.gridlayer.googlemutant": "^0.16.0",
+    "maplibre-gl": "^6.20.0",
     "marked": "^15.0.0",
     "material-symbols": "^0.49.0",
     "next": "15.5.29",
@@ -37,7 +38,6 @@
   "devDependencies": {
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/forms": "^0.5.9",
-    "@types/leaflet": "^1.9.15",
     "@types/node": "^22.10.0",
     "@types/react": "^19.0.0",
     "@types/sanitize-html": "^2.13.0",

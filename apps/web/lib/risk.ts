@@ -4,7 +4,9 @@ export type Warning = { region: string; event: string; level: number; color: str
 export type River = { key: string; name: string; lat: number; lng: number; days: string[]; discharge: (number | null)[]; max: (number | null)[]; todayIndex: number; status: 'NORMALNO' | 'POVISENO' | 'VISOKO' | 'NEPOZNATO'; ratio: number | null };
 export type Landslide = { id: string; name: string; municipality: string; lat: number; lng: number; status: 'AKTIVNO' | 'PRACENJE' | 'SANIRANO'; risk: number; description: string; source: string; isDemo: boolean; updatedAt: string };
 export type PublicReport = { id: string; code: string; kind: string; kindLabel: string; municipality: string; location: string; lat: number | null; lng: number | null; description: string; status: string; createdAt: string; updatedAt?: string; publicNote?: string; photos?: string[] };
-type Feed<T> = { items: T[]; updatedAt: string; error: string | null };
+type Feed<T> = { items: T[]; updatedAt: string; error: string | null; stale?: boolean };
+/** Izvor je stvarno nedostupan tek kad nema svježih podataka (greška uz zadnje uspješne podatke se samo označi). */
+export const down = (f: { error: string | null; stale?: boolean }) => !!f.error && f.stale !== false;
 export type Air = { key: string; name: string; aqi: number | null; pm25: number | null; pm10: number | null; o3: number | null; time: string | null };
 /** Europski AQI (EEA) razredi */
 export function aqiClass(v: number | null): { label: string; tone: 'success' | 'warning' | 'error' | 'gray' } {

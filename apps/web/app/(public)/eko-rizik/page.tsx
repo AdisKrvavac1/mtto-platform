@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { apiSafe } from '@/lib/api';
-import { EMPTY, LEVEL, LS_STATUS, REPORT_STATUS, WARN_COLOR, fireConfidence, fireTime, fmtTime, peakForecast, type RiskSummary } from '@/lib/risk';
+import { EMPTY, LEVEL, LS_STATUS, REPORT_STATUS, WARN_COLOR, fireConfidence, fireTime, fmtTime, peakForecast, type RiskSummary, down } from '@/lib/risk';
 import RiverChart from '@/components/risk/RiverChart';
 import RiskStatus from '@/components/risk/RiskStatus';
 import RiverFlow from '@/components/risk/RiverFlow';
@@ -14,10 +14,10 @@ export const metadata = { title: 'Eko-rizik HNK – požari, poplave i klizišta
 
 const LV_TONE = { 1: 'success', 2: 'warning', 3: 'error' } as const;
 
-const SourceNote = ({ err, at, src }: { err: string | null; at: string; src: string }) => (
+const SourceNote = ({ err, at, src, stale }: { err: string | null; at: string; src: string; stale?: boolean }) => (
   <p className="flex items-center gap-1.5 text-[14px] leading-5 text-[#737373]">
-    {err ? <CloudOff size={16} className="text-[#d92d20]" /> : <RefreshCw01 size={16} className="text-[#079455]" />}
-    {err ? `${src}: izvor trenutno nedostupan` : `${src} · osvježeno ${fmtTime(at)}`}
+    {err || stale ? <CloudOff size={16} className={err ? 'text-[#d92d20]' : 'text-[#dc6803]'} /> : <RefreshCw01 size={16} className="text-[#079455]" />}
+    {err && stale ? `${src}: izvor trenutno ne odgovara${at ? `, zadnji podaci ${fmtTime(at)}` : ''}` : err ? `${src} · podaci od ${fmtTime(at)}, osvježavanje u toku` : stale ? `${src} · podaci od ${fmtTime(at)} (zastarjeli)` : `${src} · osvježeno ${fmtTime(at)}`}
   </p>
 );
 
@@ -78,8 +78,8 @@ export default async function EkoRizikPage() {
       {/* KPI */}
       <Section tone="gray" className="!py-12 md:!py-16">
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          <Kpi icon={ThermometerWarm} label="Satelitska žarišta (72 h)" value={d.fires.error ? '—' : String(fires.length)} sub={d.fires.error ? 'NASA FIRMS nedostupan' : `${d.fires.last24h} u zadnja 24 sata`} tone={fires.length ? 'error' : 'gray'} />
-          <Kpi icon={CloudRaining01} label="Meteo upozorenja" value={d.warnings.error ? '—' : String(warn.length)} sub={warn[0] ? `${warn[0].event} · ${warn[0].region}` : 'Nema aktivnih upozorenja'} tone={warn.some((w) => w.level >= 3) ? 'error' : warn.length ? 'warning' : 'gray'} />
+          <Kpi icon={ThermometerWarm} label="Satelitska žarišta (72 h)" value={down(d.fires) ? '—' : String(fires.length)} sub={down(d.fires) ? 'NASA FIRMS nedostupan' : `${d.fires.last24h} u zadnja 24 sata`} tone={fires.length ? 'error' : 'gray'} />
+          <Kpi icon={CloudRaining01} label="Meteo upozorenja" value={down(d.warnings) ? '—' : String(warn.length)} sub={warn[0] ? `${warn[0].event} · ${warn[0].region}` : 'Nema aktivnih upozorenja'} tone={warn.some((w) => w.level >= 3) ? 'error' : warn.length ? 'warning' : 'gray'} />
           <Kpi icon={Waves} label="Neretva kod Mostara" value={mostar ? `${Math.round(mostar.discharge[mostar.todayIndex] ?? 0)} m³/s` : '—'} sub={mostar ? `Vrh prognoze ${peakForecast(mostar)} m³/s (10 dana)` : 'Model GloFAS'} tone={mostar?.status === 'VISOKO' ? 'error' : mostar?.status === 'POVISENO' ? 'warning' : 'gray'} />
           <Kpi icon={LayersThree01} label="Klizišta u registru" value={String(d.landslides.length)} sub={`${activeLs} aktivno ili u praćenju`} tone={activeLs ? 'warning' : 'gray'} />
         </div>
@@ -99,8 +99,8 @@ export default async function EkoRizikPage() {
             <div className="mt-8 flex flex-col gap-3">
               {warn.length === 0 && (
                 <Card className="flex items-center gap-3 p-4">
-                  {d.warnings.error ? <CloudOff size={20} className="text-[#a3a3a3]" /> : <CheckCircle size={20} className="text-[#079455]" />}
-                  <p className="text-[14px] text-[#525252]">{d.warnings.error ? 'Upozorenja trenutno nije moguće preuzeti. Provjerite meteoalarm.org.' : 'Za regije Mostar, Livno i Trebinje trenutno nema aktivnih upozorenja.'}</p>
+                  {down(d.warnings) ? <CloudOff size={20} className="text-[#a3a3a3]" /> : <CheckCircle size={20} className="text-[#079455]" />}
+                  <p className="text-[14px] text-[#525252]">{down(d.warnings) ? 'Upozorenja trenutno nije moguće preuzeti. Provjerite meteoalarm.org.' : 'Za regije Mostar, Livno i Trebinje trenutno nema aktivnih upozorenja.'}</p>
                 </Card>
               )}
               {warn.slice(0, 5).map((w, i) => <Warn key={i} w={w} />)}
@@ -110,7 +110,7 @@ export default async function EkoRizikPage() {
                   <div className="flex flex-col gap-3 pt-2">{warn.slice(5).map((w, i) => <Warn key={i} w={w} />)}</div>
                 </details>
               )}
-              <SourceNote err={d.warnings.error} at={d.warnings.updatedAt} src="Meteoalarm" />
+              <SourceNote err={d.warnings.error} stale={d.warnings.stale} at={d.warnings.updatedAt} src="Meteoalarm" />
             </div>
           </div>
           <div className="lg:col-span-7">
@@ -120,7 +120,7 @@ export default async function EkoRizikPage() {
               {d.rivers.items.length === 0 && <p className="text-[14px] text-[#525252]">Model protoka trenutno nije dostupan.</p>}
             </div>
             <p className="mt-4 text-[14px] leading-5 text-[#737373]">Vrijednosti su procjena hidrološkog modela GloFAS (rezolucija ~5 km), a ne mjerenja vodomjernih stanica. Status se računa u odnosu na protok iz zadnjih 60 dana. Službene informacije o vodostajima daju FHMZ i Agencija za vodno područje Jadranskog mora.</p>
-            <div className="mt-2"><SourceNote err={d.rivers.error} at={d.rivers.updatedAt} src="GloFAS" /></div>
+            <div className="mt-2"><SourceNote err={d.rivers.error} stale={d.rivers.stale} at={d.rivers.updatedAt} src="GloFAS" /></div>
           </div>
         </div>
       </Section>
@@ -128,9 +128,9 @@ export default async function EkoRizikPage() {
       {/* Žarišta + klizišta */}
       <Section>
         <div className="grid gap-6 lg:grid-cols-2">
-          <ListCard icon={ThermometerWarm} title="Satelitska žarišta" meta="VIIRS 375 m" footer={<SourceNote err={d.fires.error} at={d.fires.updatedAt} src="NASA FIRMS" />}>
+          <ListCard icon={ThermometerWarm} title="Satelitska žarišta" meta="VIIRS 375 m" footer={<SourceNote err={d.fires.error} stale={d.fires.stale} at={d.fires.updatedAt} src="NASA FIRMS" />}>
             {fires.length === 0 ? (
-              <p className="px-6 py-5 text-[14px] text-[#525252]">{d.fires.error ? 'Podaci NASA FIRMS trenutno nisu dostupni.' : 'U posljednja 72 sata sateliti nisu zabilježili toplotne anomalije na području kantona.'}</p>
+              <p className="px-6 py-5 text-[14px] text-[#525252]">{down(d.fires) ? 'Podaci NASA FIRMS trenutno nisu dostupni.' : 'U posljednja 72 sata sateliti nisu zabilježili toplotne anomalije na području kantona.'}</p>
             ) : (
               <ul className="divide-y divide-[#e5e5e5]">
                 {fires.slice(0, 8).map((f, i) => (

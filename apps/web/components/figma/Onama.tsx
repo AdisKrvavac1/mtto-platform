@@ -232,7 +232,7 @@ export function OnamaBody({ map }: { map: ReactNode }) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-[16px]">
           {[
             { href: '/propisi?docType=OBRAZAC#pravna-tablica', icon: 'description', bg: 'bg-[#ecfdf5] text-[#006c4a]', t: 'Obrasci i zahtjevi', s: 'Okolišne dozvole, kategorizacija, ispiti' },
-            { href: '/vijesti?type=JAVNI_POZIV', icon: 'campaign', bg: 'bg-[#fffbeb] text-[#6e3900]', t: 'Javni pozivi i natječaji', s: 'Poticaji za turizam i eko-projekte' },
+            { href: '/javni-pozivi', icon: 'campaign', bg: 'bg-[#fffbeb] text-[#6e3900]', t: 'Javni pozivi i natječaji', s: 'Poticaji za turizam i eko-projekte' },
             { href: '/eko-rizik/prijava', icon: 'report', bg: 'bg-[#dce9ff] text-[#002042]', t: 'Eko-alarm: prijava onečišćenja', s: 'Dojava ekološkog incidenta' },
           ].map((l) => (
             <a key={l.t} href={l.href} className="bg-white drop-shadow-[0px_1px_1px_rgba(0,0,0,0.05)] hover:drop-shadow-[0px_4px_8px_rgba(0,0,0,0.08)] flex gap-[16px] items-center p-[16px] rounded-[8px]">

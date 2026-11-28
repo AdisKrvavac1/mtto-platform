@@ -46,7 +46,7 @@ export function SiteFooter(props: any) {
               </div>
               <div className="flex flex-col gap-[8px] items-start relative min-w-0 max-w-full">
                 <div className="flex flex-col items-start relative min-w-0 max-w-full">
-                  <a href="/vijesti?type=JAVNI_POZIV" className="hover:underline"><p className="font-pub font-normal min-w-0 max-w-full text-[#43474f] text-[13px] w-full leading-[20px]">{`Javni pozivi & tenderi`}</p></a>
+                  <a href="/javni-pozivi" className="hover:underline"><p className="font-pub font-normal min-w-0 max-w-full text-[#43474f] text-[13px] w-full leading-[20px]">{`Javni pozivi & tenderi`}</p></a>
                 </div>
                 <div className="flex flex-col items-start relative min-w-0 max-w-full">
                   <a href="/propisi" className="hover:underline"><p className="font-pub font-normal min-w-0 max-w-full text-[#43474f] text-[13px] w-full leading-[20px]">Službeni zakoni i obrasci</p></a>
@@ -155,7 +155,7 @@ export function SiteFooter(props: any) {
                 </div>
                 <div className="flex flex-col gap-[8px] items-start relative shrink-0 w-full">
                   <div className="flex flex-col items-start relative shrink-0">
-                    <a href="/vijesti?type=JAVNI_POZIV" className="hover:underline"><p className="font-pub font-normal text-[#43474f] text-[13px] w-full leading-[20px]">{`Javni pozivi & tenderi`}</p></a>
+                    <a href="/javni-pozivi" className="hover:underline"><p className="font-pub font-normal text-[#43474f] text-[13px] w-full leading-[20px]">{`Javni pozivi & tenderi`}</p></a>
                   </div>
                   <div className="flex flex-col items-start relative shrink-0">
                     <a href="/propisi" className="hover:underline"><p className="font-pub font-normal text-[#43474f] text-[13px] w-full leading-[20px]">Službeni zakoni i obrasci</p></a>

@@ -41,7 +41,7 @@ export default async function TurizamPage({ searchParams }: { searchParams: Prom
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Link href="/registri/ugostiteljski-objekti" className="inline-flex h-11 items-center justify-center gap-1.5 rounded-[8px] border-2 border-white/10 bg-[var(--br-600)] px-4 text-[16px] font-semibold text-white hover:bg-[var(--br-700)]"><Building07 size={20} />Istraži kategorizirane objekte</Link>
                 <Link href="/turisticki-vodici" className="inline-flex h-11 items-center justify-center gap-1.5 rounded-[8px] bg-white/10 px-4 text-[16px] font-semibold ring-1 ring-inset ring-white/25 backdrop-blur-md hover:bg-white/15"><Users01 size={20} />Ispit za vodiče</Link>
-                <Link href="/vijesti?type=JAVNI_POZIV" className="inline-flex h-11 items-center justify-center gap-1.5 rounded-[8px] bg-white/10 px-4 text-[16px] font-semibold ring-1 ring-inset ring-white/25 backdrop-blur-md hover:bg-white/15"><Ticket01 size={20} />Sufinanciranje i grantovi</Link>
+                <Link href="/javni-pozivi" className="inline-flex h-11 items-center justify-center gap-1.5 rounded-[8px] bg-white/10 px-4 text-[16px] font-semibold ring-1 ring-inset ring-white/25 backdrop-blur-md hover:bg-white/15"><Ticket01 size={20} />Sufinanciranje i grantovi</Link>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3 rounded-[16px] bg-white/10 p-3 ring-1 ring-inset ring-white/15 backdrop-blur-md">
@@ -61,7 +61,7 @@ export default async function TurizamPage({ searchParams }: { searchParams: Prom
       {/* BRZI LINKOVI */}
       <section className="border-b border-[#e5e5e5] bg-white">
         <Container className="grid gap-2 py-4 sm:grid-cols-2 lg:grid-cols-4">
-          {([[Ticket01, 'Javni natječaj', call ? (open ? 'Otvoren poziv' : 'Zatvoren') : 'Nema otvorenih', '/vijesti?type=JAVNI_POZIV', !!open], [File06, 'Zahtjev za kategorizaciju', 'Podnesite elektronski', '/e-usluge/obrasci/zahtjev-za-kategorizaciju', false], [Users01, 'Turističke zajednice', 'Upisnik i kontakti', '/registri/turisticke-zajednice', false], [Award01, 'Boravišna taksa', 'Prijava gostiju na prijava.ba', '/turizam-i-bastina/boravisna-taksa', false]] as const).map(([I, t, s, href, rip]) => (
+          {([[Ticket01, 'Javni natječaj', call ? (open ? 'Otvoren poziv' : 'Zatvoren') : 'Nema otvorenih', '/javni-pozivi', !!open], [File06, 'Zahtjev za kategorizaciju', 'Podnesite elektronski', '/e-usluge/obrasci/zahtjev-za-kategorizaciju', false], [Users01, 'Turističke zajednice', 'Upisnik i kontakti', '/registri/turisticke-zajednice', false], [Award01, 'Boravišna taksa', 'Prijava gostiju na prijava.ba', '/turizam-i-bastina/boravisna-taksa', false]] as const).map(([I, t, s, href, rip]) => (
             <Link key={t} href={href} className="group flex items-center gap-3 rounded-[12px] p-3 hover:bg-[#fafafa]"><FeaturedIcon icon={I} tone={rip ? 'success' : 'brand'} size="md" ripple={rip} /><span><b className="block text-[16px] font-semibold text-[#171717] group-hover:text-[var(--br-700)]">{t}</b><span className="text-[14px] text-[#525252]">{s}</span></span></Link>
           ))}
         </Container>

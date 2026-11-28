@@ -6,6 +6,7 @@ import { Avatar, Badge, Card, CardHeader, EmptyState, Field, MetricCard, PageTit
 import { Activity, AlertTriangle, Edit01, Eye, EyeOff, Globe01, LayersThree01, MarkerPin02, Plus, ReverseLeft, Save01, Trash01 } from '@untitledui/icons';
 import { LS_STATUS, REPORT_STATUS, fmtTime, type Landslide } from '@/lib/risk';
 import { ReportPhotos, ReportPublish } from '@/components/admin/EcoReportReview';
+import { AirImport, SourcesPanel } from '@/components/admin/SourcesPanel';
 
 const LocationPicker = dynamic(() => import('@/components/admin/LocationPicker'), { ssr: false, loading: () => <div className="h-[320px] rounded-lg bg-[#f5f5f5] animate-pulse" /> });
 
@@ -15,7 +16,7 @@ type Report = { id: string; code: string; kind: string; municipality: string; lo
 const BLANK = { id: '', name: '', municipality: 'Mostar', status: 'AKTIVNO', risk: 2, description: '', source: '', lat: null as number | null, lng: null as number | null };
 
 export default function RiskAdmin() {
-  const [tab, setTab] = useState<'prijave' | 'klizista'>('prijave');
+  const [tab, setTab] = useState<'prijave' | 'klizista' | 'izvori' | 'zrak'>('prijave');
   const [ls, setLs] = useState<Landslide[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
   const [f, setF] = useState(BLANK);
@@ -55,7 +56,7 @@ export default function RiskAdmin() {
 
   return (
     <>
-      <PageTitle kicker="Prijave građana i registar klizišta za javnu kartu rizika." crumbs={['Eko-rizik i prijave']} title="Eko-rizik i prijave">
+      <PageTitle kicker="Prijave građana, registar klizišta, izvori podataka i mjerenja kvaliteta zraka." crumbs={['Eko-rizik i prijave']} title="Eko-rizik i prijave">
         <a href="/eko-rizik/krizni" target="_blank" rel="noopener" className={btnSecondary}><Activity />Krizni prikaz</a>
         <a href="/eko-rizik" target="_blank" rel="noopener" className={btnSecondary}><Globe01 />Javni prikaz</a>
       </PageTitle>
@@ -68,7 +69,7 @@ export default function RiskAdmin() {
       </div>
 
       <div className="mt-8">
-        <Tabs value={tab} onChange={setTab} items={[{ value: 'prijave', label: 'Prijave građana', count: reports.length }, { value: 'klizista', label: 'Registar klizišta', count: ls.length }]} />
+        <Tabs value={tab} onChange={setTab} items={[{ value: 'prijave', label: 'Prijave građana', count: reports.length }, { value: 'klizista', label: 'Registar klizišta', count: ls.length }, { value: 'izvori', label: 'Izvori podataka' }, { value: 'zrak', label: 'Mjerenja stanica' }]} />
       </div>
 
       {tab === 'prijave' && (
@@ -137,6 +138,8 @@ export default function RiskAdmin() {
           </Card>
         </div>
       )}
+      {tab === 'izvori' && <SourcesPanel toast={toast} />}
+      {tab === 'zrak' && <AirImport toast={toast} />}
       {toast.node}
     </>
   );

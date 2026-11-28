@@ -221,7 +221,7 @@ export function OkolisBody(props: any) {
           <div className="bg-[#eef4fb] border-[#e2e8f0] border-b border-solid flex flex-col items-start pb-[25px] pt-[24px] px-4 md:px-8 xl:px-[48px] relative min-w-0 max-w-full w-full">
             <div className="relative min-w-0 max-w-full w-full">
               <div className="bg-clip-padding border-0 border-[transparent] border-solid flex flex-col lg:flex-row gap-[16px] items-start justify-center relative size-full flex-wrap">
-                <a href="/vijesti?type=JAVNI_POZIV" className="bg-white border border-[rgba(226,232,240,0.8)] border-solid drop-shadow-[0px_1px_1px_rgba(0,0,0,0.05)] flex gap-[14px] items-center p-[15px] relative rounded-[4px] w-full lg:w-auto lg:flex-[324_1_0%] min-w-0 flex-wrap">
+                <a href="/javni-pozivi" className="bg-white border border-[rgba(226,232,240,0.8)] border-solid drop-shadow-[0px_1px_1px_rgba(0,0,0,0.05)] flex gap-[14px] items-center p-[15px] relative rounded-[4px] w-full lg:w-auto lg:flex-[324_1_0%] min-w-0 flex-wrap">
                   <div className="bg-[#fffbeb] border border-[#fde68a] border-solid relative rounded-[4px] shrink-0 size-[44px]">
                     <div className="bg-clip-padding border-0 border-[transparent] border-solid flex items-center justify-center p-px relative size-full flex-wrap">
                       <span className="material-symbols-outlined shrink-0 leading-none text-tertiary-container" style={{ fontSize: 22 }}>gavel</span>

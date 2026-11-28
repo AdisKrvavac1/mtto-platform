@@ -15,7 +15,7 @@ import '@fontsource/roboto-condensed/700.css';
 import '@fontsource-variable/roboto-flex/index.css';
 import '@fontsource/roboto-mono/500.css';
 import 'material-symbols/outlined.css';
-import 'leaflet/dist/leaflet.css';
+import 'maplibre-gl/dist/maplibre-gl.css';
 import '@mtto/ui/tokens.css';
 import '@mtto/ui/styles.css';
 import './tokens.css';

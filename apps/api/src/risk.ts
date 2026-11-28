@@ -9,6 +9,8 @@ import { AuthGuard } from './auth';
 import { toFloat } from './util';
 import { Throttle } from '@nestjs/throttler';
 import { clientIp, THROTTLE_PUBLIC_FORM, verifyAltcha } from './security';
+import { SourceHub } from './sources';
+import { AirService } from './air';
 
 /* ───────────── Vanjski izvori (s keširanjem) ───────────── */
 
@@ -26,7 +28,10 @@ const STATIONS = [
 // Meteoalarm regije relevantne za HNK (EMMA_ID): Mostar, Livno (Prozor-Rama/Jablanica), Trebinje (Neum/Ravno)
 const MA_REGIONS: Record<string, string> = { BA008: 'Mostar', BA005: 'Livno', BA010: 'Trebinje' };
 
-type Cache<T> = { at: number; data: T; error?: string };
+type Cache<T> = { at: number; data: T; error?: string; stale?: boolean };
+const SOURCE_LABELS: Record<string, string> = { fires: 'NASA FIRMS (požari)', warnings: 'Meteoalarm (upozorenja FHMZ)', rivers: 'Copernicus GloFAS (rijeke)', air: 'Copernicus CAMS (kvalitet zraka)' };
+// Kad se podaci smatraju zastarjelim (šalje se upozorenje): požari i upozorenja 3 h, rijeke i zrak 12 h
+const STALE_MS: Record<string, number> = { fires: 3 * 3600_000, warnings: 3 * 3600_000, rivers: 12 * 3600_000, air: 12 * 3600_000 };
 
 async function getJson(url: string, timeout = 15000): Promise<any> {
   const r = await fetch(url, { headers: { 'User-Agent': UA, Accept: 'application/json' }, signal: AbortSignal.timeout(timeout) });
@@ -46,11 +51,12 @@ export type River = { key: string; name: string; lat: number; lng: number; days:
 @Injectable()
 export class RiskService implements OnModuleInit {
   private log = new Logger('Eko-rizik');
-  private cache: Record<string, Cache<any>> = {};
-  constructor(private db: Db) {}
+  private registered = new Set<string>();
+  constructor(private db: Db, private hub: SourceHub, private airSvc: AirService) {}
 
   /** Prazan registar klizišta dobija nekoliko jasno označenih primjera (demo), da se modul može prikazati. */
   async onModuleInit() {
+    this.registerSources();
     try {
       if ((await this.db.count(`SELECT count(*) n FROM landslides`)) > 0) return;
       const demo: [string, string, number, number, string, number, string][] = [
@@ -65,20 +71,21 @@ export class RiskService implements OnModuleInit {
     } catch (e: any) { this.log.warn(`seed klizišta: ${e?.message ?? e}`); }
   }
 
-  private async cached<T>(key: string, ttlMs: number, fn: () => Promise<T>, fallback: T): Promise<Cache<T>> {
-    if (process.env.RISK_FIXTURE === '1' && process.env.NODE_ENV !== 'production') return { at: Date.now(), data: fixture(key) as T };
-    const c = this.cache[key];
-    if (c && Date.now() - c.at < ttlMs) return c;
-    try {
-      const data = await fn();
-      this.cache[key] = { at: Date.now(), data };
-    } catch (e: any) {
-      this.log.warn(`${key}: ${e?.message ?? e}`);
-      // zadrži zadnje uspješne podatke, uz oznaku greške
-      this.cache[key] = { at: Date.now() - ttlMs + 120_000, data: c?.data ?? fallback, error: String(e?.message ?? e) };
+  /** F2-18: podaci se čitaju iz trajnog keša (source_cache); raspored ih osvježava u pozadini. */
+  private async cached<T>(key: string, _ttlMs: number, fn: () => Promise<T>, fallback: T): Promise<Cache<T>> {
+    if (!this.registered.has(key)) {
+      this.registered.add(key);
+      this.hub.register({ key, label: SOURCE_LABELS[key] ?? key, everyMs: _ttlMs, staleMs: STALE_MS[key] ?? _ttlMs * 6, fetch: fn, fallback });
     }
-    return this.cache[key];
+    if (this.registering) return null as any;
+    if (process.env.RISK_FIXTURE === '1' && process.env.NODE_ENV !== 'production') return { at: Date.now(), data: fixture(key) as T };
+    const st = await this.hub.get<T>(key);
+    return { at: st.okAt ? Date.parse(st.okAt) : Date.now(), data: st.data ?? fallback, error: st.error ?? undefined, stale: st.stale };
   }
+
+  /** Registruje sve izvore (raspored ih osvježava i prije prvog posjetioca). */
+  private registering = false;
+  registerSources() { this.registering = true; try { this.fires(); this.warnings(); this.rivers(); } finally { this.registering = false; } }
 
   /** NASA FIRMS – aktivna žarišta (VIIRS S-NPP + NOAA-20 + NOAA-21), zadnjih 3 dana */
   fires() {
@@ -173,23 +180,18 @@ export class RiskService implements OnModuleInit {
     }, []);
   }
 
-  /** Kvalitet zraka: Copernicus CAMS (Europski AQI, PM2.5, PM10, O3) putem Open-Meteo Air Quality API-ja. */
-  air() {
-    return this.cached<Air[]>('air', 30 * 60_000, async () => {
-      const j = await getJson(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${AIR_POINTS.map((p) => p.lat).join(',')}&longitude=${AIR_POINTS.map((p) => p.lng).join(',')}&current=european_aqi,pm2_5,pm10,ozone&timezone=Europe%2FSarajevo`);
-      const arr: any[] = Array.isArray(j) ? j : [j];
-      const r = (v: any) => (typeof v === 'number' ? Math.round(v) : null);
-      return AIR_POINTS.map((p, i) => { const c = arr[i]?.current ?? {}; return { key: p.key, name: p.name, aqi: r(c.european_aqi), pm25: r(c.pm2_5), pm10: r(c.pm10), o3: r(c.ozone), time: c.time ?? null }; });
-    }, []);
+  /** Kvalitet zraka: trenutne vrijednosti iz AirService (izvor „air“, F2-17). */
+  async air(): Promise<Cache<Air[]>> {
+    if (process.env.RISK_FIXTURE === '1' && process.env.NODE_ENV !== 'production') return { at: Date.now(), data: fixture('air') };
+    const st = await this.airSvc.state();
+    const data = (st.data?.points ?? []).filter((p: any) => AIR_SUMMARY.includes(p.key)).map((p: any) => ({ key: p.key, name: p.name, aqi: p.now?.aqi ?? null, pm25: p.now?.pm25 ?? null, pm10: p.now?.pm10 ?? null, o3: p.now?.o3 ?? null, time: p.now?.ts ?? null }));
+    return { at: st.okAt ? Date.parse(st.okAt) : Date.now(), data, error: st.error ?? undefined, stale: st.stale };
   }
 }
 
 export type Air = { key: string; name: string; aqi: number | null; pm25: number | null; pm10: number | null; o3: number | null; time: string | null };
-const AIR_POINTS = [
-  { key: 'mostar', name: 'Mostar', lat: 43.343, lng: 17.808 },
-  { key: 'konjic', name: 'Konjic', lat: 43.652, lng: 17.961 },
-  { key: 'capljina', name: 'Čapljina', lat: 43.121, lng: 17.684 },
-];
+const AIR_SUMMARY = ['mostar', 'konjic', 'capljina'];
+const AIR_POINTS = [{ key: 'mostar', name: 'Mostar' }, { key: 'konjic', name: 'Konjic' }, { key: 'capljina', name: 'Čapljina' }];
 
 /** Samo za lokalni razvoj (RISK_FIXTURE=1) – nikad u produkciji. */
 function fixture(key: string): any {
@@ -251,10 +253,10 @@ export class RiskController {
     const level = Math.max(maxWarn >= 4 ? 3 : maxWarn >= 2 ? 2 : 1, fires24 >= 10 ? 3 : fires24 > 0 ? 2 : 1, worstRiver?.status === 'VISOKO' ? 3 : worstRiver?.status === 'POVISENO' ? 2 : 1);
     return {
       generatedAt: new Date().toISOString(), today, level,
-      fires: { items: f.data, updatedAt: new Date(f.at).toISOString(), error: f.error ?? null, last24h: fires24 },
-      warnings: { items: w.data, updatedAt: new Date(w.at).toISOString(), error: w.error ?? null },
-      rivers: { items: r.data, updatedAt: new Date(r.at).toISOString(), error: r.error ?? null },
-      air: { items: a.data, updatedAt: new Date(a.at).toISOString(), error: a.error ?? null },
+      fires: { items: f.data, updatedAt: new Date(f.at).toISOString(), error: f.error ?? null, stale: !!f.stale, last24h: fires24 },
+      warnings: { items: w.data, updatedAt: new Date(w.at).toISOString(), error: w.error ?? null, stale: !!w.stale },
+      rivers: { items: r.data, updatedAt: new Date(r.at).toISOString(), error: r.error ?? null, stale: !!r.stale },
+      air: { items: a.data, updatedAt: new Date(a.at).toISOString(), error: a.error ?? null, stale: !!a.stale },
       landslides,
       reports: reports.map(publicReport),
       reportKinds: REPORT_KINDS,

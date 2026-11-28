@@ -18,4 +18,4 @@ Početni podaci (`apps/api/src/seed.ts`): stvarne objave i prilozi javnog poziva
 
 ## Render
 
-`render.yaml` kreira jedan web servis i PostgreSQL bazu. Lozinka za CMS (`ADMIN_PASSWORD`) generiše se automatski i vidi se u Render → Environment. Google Maps se uključuje postavljanjem `NEXT_PUBLIC_GOOGLE_MAPS_KEY` (bez ključa mapa koristi OpenStreetMap).
+`render.yaml` kreira jedan web servis i PostgreSQL bazu. Lozinka za CMS (`ADMIN_PASSWORD`) generiše se automatski i vidi se u Render → Environment. Karte koriste MapLibre i OpenStreetMap (OpenFreeMap vektorske pločice, rezerva OSM raster), bez API ključa (ADR 0019).

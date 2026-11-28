@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { MapPoint } from '@/lib/api';
-import { GOOGLE_MAPS_KEY, loadGoogleMaps, onGoogleAuthFailure } from '@/lib/googleMaps';
+import { createMap, esc, type Engine } from '@/lib/map';
 
 export const LAYERS: Record<MapPoint['layer'], { label: string; color: string; icon: string }> = {
   TURIZAM: { label: 'Turizam', color: '#00abeb', icon: 'travel_explore' },
@@ -10,21 +10,19 @@ export const LAYERS: Record<MapPoint['layer'], { label: string; color: string; i
   PROJEKT: { label: 'Projekti Ministarstva', color: '#eb851c', icon: 'flag' },
 };
 
-const GOOGLE_KEY = GOOGLE_MAPS_KEY;
-const CENTER = { lat: 43.33, lng: 17.8 };
+const CENTER: [number, number] = [17.8, 43.33];
 
 function pinSvg(color: string) {
-  return `data:image/svg+xml;utf8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="30" height="40" viewBox="0 0 30 40"><path d="M15 0C6.7 0 0 6.6 0 14.8 0 26 15 40 15 40s15-14 15-25.2C30 6.6 23.3 0 15 0z" fill="${color}"/><circle cx="15" cy="15" r="6" fill="#fff"/></svg>`)}`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="40" viewBox="0 0 30 40" aria-hidden="true"><path d="M15 0C6.7 0 0 6.6 0 14.8 0 26 15 40 15 40s15-14 15-25.2C30 6.6 23.3 0 15 0z" fill="${color}"/><circle cx="15" cy="15" r="6" fill="#fff"/></svg>`;
 }
 
 function popupHtml(p: MapPoint) {
-  const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
   const l = LAYERS[p.layer];
   return `<div style="font-family:Public Sans,system-ui;min-width:200px;max-width:260px">
-    <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:${l.color}">${l.label}</div>
+    <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:${l.color}">${esc(l.label)}</div>
     <div style="font-size:15px;font-weight:700;color:#002042;margin:2px 0 4px">${esc(p.name)}</div>
     <div style="font-size:13px;color:#43474f">${esc(p.description || '')}</div>
-    ${p.link ? `<a href="${esc(p.link)}" style="display:inline-block;margin-top:6px;font-size:13px;font-weight:700;color:#234696">Detalji →</a>` : ''}
+    ${p.link && /^(\/|https:\/\/)/.test(p.link) ? `<a href="${esc(p.link)}" style="display:inline-block;margin-top:6px;font-size:13px;font-weight:700;color:#234696">Detalji</a>` : ''}
   </div>`;
 }
 
@@ -32,73 +30,46 @@ export default function MapView({ points, height = 520, compact = false, fill = 
   const ref = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState<Record<string, boolean>>({ TURIZAM: true, ZASTICENO: true, DOZVOLA: true, PROJEKT: true });
   const [selected, setSelected] = useState<MapPoint | null>(null);
+  const [view, setView] = useState<'karta' | 'tabela'>('karta');
   const shown = useMemo(() => points.filter((p) => active[p.layer]), [points, active]);
   const mapRef = useRef<any>(null);
+  const mlRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
-  const [engine, setEngine] = useState<'google' | 'leaflet'>(GOOGLE_KEY ? 'google' : 'leaflet');
+  const [engine, setEngine] = useState<Engine>('vector');
   const [tick, setTick] = useState(0);
 
-  // inicijalizacija
+  // inicijalizacija (MapLibre; rezerva OSM raster)
   useEffect(() => {
     let cancelled = false;
-    let unsubAuth: (() => void) | undefined;
     if (!ref.current || mapRef.current) return;
-    if (engine === 'google') {
-      // Rezerva: ako Google ključ ne prođe (ograničenja, naplata) ili skripta ne stigne, prelazi se na OpenStreetMap.
-      const fallback = () => { if (cancelled) return; cancelled = true; mapRef.current = null; markersRef.current = []; if (ref.current) ref.current.innerHTML = ''; setEngine('leaflet'); };
-      const timer = window.setTimeout(() => { if (!mapRef.current) fallback(); }, 15000);
-      const init = () => {
-        window.clearTimeout(timer);
-        if (cancelled || !ref.current) return;
-        const g = (window as any).google;
-        mapRef.current = new g.maps.Map(ref.current, { center: CENTER, zoom: 9, mapTypeControl: false, streetViewControl: false, fullscreenControl: true });
-        mapRef.current.__info = new g.maps.InfoWindow();
-        setTick((t) => t + 1);
-      };
-      unsubAuth = onGoogleAuthFailure(fallback);
-      loadGoogleMaps().then(init).catch(fallback);
-    } else {
-      import('leaflet').then((L) => {
-        if (cancelled || !ref.current) return;
-        const map = L.map(ref.current, { scrollWheelZoom: false }).setView([CENTER.lat, CENTER.lng], 9);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 18 }).addTo(map);
-        mapRef.current = map;
-        mapRef.current.__L = L;
-        setTick((t) => t + 1);
-      });
-    }
-    return () => {
-      cancelled = true;
-      unsubAuth?.();
-    };
-  }, [engine]);
+    createMap(ref.current, { center: CENTER, zoom: 8.4, onEngine: setEngine, label: 'Karta lokacija Ministarstva' }).then(({ ml, map }) => {
+      if (cancelled) { map.remove(); return; }
+      mapRef.current = map; mlRef.current = ml;
+      setTick((t) => t + 1);
+    });
+    return () => { cancelled = true; mapRef.current?.remove(); mapRef.current = null; };
+  }, []);
 
   // markeri
   useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-    markersRef.current.forEach((m) => (engine === 'google' ? m.setMap(null) : m.remove()));
+    const map = mapRef.current, ml = mlRef.current;
+    if (!map || !ml) return;
+    markersRef.current.forEach((m) => m.remove());
     markersRef.current = [];
     for (const p of shown) {
-      const color = LAYERS[p.layer].color;
-      if (engine === 'google') {
-        const g = (window as any).google;
-        const m = new g.maps.Marker({ position: { lat: p.lat, lng: p.lng }, map, title: p.name, icon: { url: pinSvg(color), scaledSize: new g.maps.Size(30, 40) } });
-        m.addListener('click', () => {
-          map.__info.setContent(popupHtml(p));
-          map.__info.open({ anchor: m, map });
-          setSelected(p);
-        });
-        markersRef.current.push(m);
-      } else {
-        const L = map.__L;
-        const icon = L.icon({ iconUrl: pinSvg(color), iconSize: [30, 40], iconAnchor: [15, 40], popupAnchor: [0, -34] });
-        const m = L.marker([p.lat, p.lng], { icon, title: p.name }).addTo(map).bindPopup(popupHtml(p));
-        m.on('click', () => setSelected(p));
-        markersRef.current.push(m);
-      }
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'block cursor-pointer';
+      el.setAttribute('aria-label', `${LAYERS[p.layer].label}: ${p.name}`);
+      el.innerHTML = pinSvg(LAYERS[p.layer].color);
+      const popup = new ml.Popup({ offset: 30, maxWidth: '280px' }).setHTML(popupHtml(p));
+      const m = new ml.Marker({ element: el, anchor: 'bottom' }).setLngLat([p.lng, p.lat]).setPopup(popup).addTo(map);
+      el.addEventListener('click', () => setSelected(p));
+      markersRef.current.push(m);
     }
-  }, [shown, tick, engine]);
+  }, [shown, tick]);
+
+  useEffect(() => { if (view === 'karta') mapRef.current?.resize(); }, [view]);
 
   const counts = useMemo(() => {
     const c: Record<string, number> = {};
@@ -122,9 +93,11 @@ export default function MapView({ points, height = 520, compact = false, fill = 
             <span className="font-label-badge text-label-badge text-on-surface-variant">{counts[k] || 0}</span>
           </button>
         ))}
-        <span className="ml-auto font-label-badge text-label-badge text-on-surface-variant uppercase">{engine === 'google' ? 'Google Maps' : 'OpenStreetMap'} · {shown.length} lokacija</span>
+        <span className="ml-auto font-label-badge text-label-badge text-on-surface-variant uppercase">{engine === 'vector' ? 'OpenStreetMap' : 'OpenStreetMap (rezerva)'} · {shown.length} lokacija</span>
+        <ViewToggle view={view} onChange={setView} />
       </div>
-      <div className={`${compact ? '' : 'grid grid-cols-1 lg:grid-cols-12'} ${fill ? 'flex-1 min-h-[420px] flex flex-col' : ''}`}>
+      {view === 'tabela' && <PointsTable points={shown} />}
+      <div className={`${view === 'tabela' ? 'hidden' : ''} ${compact ? '' : 'grid grid-cols-1 lg:grid-cols-12'} ${fill ? 'flex-1 min-h-[420px] flex flex-col' : ''}`}>
         <div ref={ref} style={fill ? undefined : { height }} className={`${compact ? 'w-full' : 'lg:col-span-8 w-full z-0'} ${fill ? 'flex-1 min-h-[420px]' : ''}`} />
         {!compact && (
           <aside className="lg:col-span-4 border-t lg:border-t-0 lg:border-l border-slate-border p-space-md overflow-y-auto" style={{ maxHeight: height }}>
@@ -152,8 +125,7 @@ export default function MapView({ points, height = 520, compact = false, fill = 
                         setSelected(p);
                         const map = mapRef.current;
                         if (!map) return;
-                        if (engine === 'google') map.panTo({ lat: p.lat, lng: p.lng });
-                        else map.setView([p.lat, p.lng], 12);
+                        map.flyTo({ center: [p.lng, p.lat], zoom: 12 });
                       }}
                       className="w-full text-left flex items-start gap-space-sm p-space-sm rounded-lg hover:bg-surface-container-low"
                     >
@@ -170,6 +142,42 @@ export default function MapView({ points, height = 520, compact = false, fill = 
           </aside>
         )}
       </div>
+    </div>
+  );
+}
+
+/** Prebacivanje karta / tabela (tabela je pristupačna alternativa karti, F2-21). */
+export function ViewToggle({ view, onChange, dark = false }: { view: 'karta' | 'tabela'; onChange: (v: 'karta' | 'tabela') => void; dark?: boolean }) {
+  return (
+    <div role="group" aria-label="Prikaz" className={`inline-flex rounded-lg p-0.5 ring-1 ring-inset ${dark ? 'ring-white/20' : 'ring-slate-border'}`}>
+      {(['karta', 'tabela'] as const).map((v) => (
+        <button key={v} type="button" aria-pressed={view === v} onClick={() => onChange(v)}
+          className={`rounded-md px-3 py-1 text-[13px] font-semibold capitalize ${view === v ? (dark ? 'bg-white/15 text-white' : 'bg-surface-container-high text-primary') : dark ? 'text-white/70 hover:text-white' : 'text-on-surface-variant hover:text-primary'}`}>
+          {v === 'karta' ? 'Karta' : 'Tabela'}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function PointsTable({ points }: { points: MapPoint[] }) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[640px] text-left text-[14px]">
+        <caption className="sr-only">Lokacije prikazane na karti</caption>
+        <thead className="bg-surface-container-low text-[12px] font-semibold text-on-surface-variant"><tr><th className="px-4 py-3">Naziv</th><th className="px-4 py-3">Sloj</th><th className="px-4 py-3">Opis</th><th className="px-4 py-3">Koordinate</th></tr></thead>
+        <tbody className="divide-y divide-slate-border">
+          {points.map((p) => (
+            <tr key={`${p.layer}-${p.id}`}>
+              <td className="px-4 py-3 font-semibold text-primary">{p.link && /^(\/|https:\/\/)/.test(p.link) ? <a href={p.link} className="underline underline-offset-2">{p.name}</a> : p.name}</td>
+              <td className="px-4 py-3"><span className="inline-flex items-center gap-1.5"><span aria-hidden className="size-2.5 rounded-full" style={{ background: LAYERS[p.layer].color }} />{LAYERS[p.layer].label}</span></td>
+              <td className="px-4 py-3 text-on-surface-variant">{p.description}</td>
+              <td className="whitespace-nowrap px-4 py-3 tabular-nums text-on-surface-variant">{p.lat.toFixed(4)}° N, {p.lng.toFixed(4)}° E</td>
+            </tr>
+          ))}
+          {!points.length && <tr><td colSpan={4} className="px-4 py-6 text-on-surface-variant">Nema lokacija za odabrane slojeve.</td></tr>}
+        </tbody>
+      </table>
     </div>
   );
 }

@@ -20,3 +20,7 @@ Odluka se ne briše; kad se promijeni, piše se nova koja zamjenjuje staru.
 | [0013](0013-editor-blokovi-i-pregled.md) | Editor s blokovima (Tiptap) i link za pregled | Prihvaćena |
 | [0014](0014-dokumentacijski-centar.md) | Dokumentacijski centar: metapodaci, verzije, rokovi čuvanja | Prihvaćena |
 | [0015](0015-sektori-urednicki-proces.md) | Urednički proces po sektorima | Prihvaćena |
+| [0016](0016-registry-builder.md) | Registry builder: javni registri iz CMS-a | Prihvaćena |
+| [0017](0017-obrasci-i-predmeti.md) | Elektronski obrasci i predmeti (e-pisarnica) | Prihvaćena |
+| [0018](0018-sprint8-trgovina-inspekcija.md) | Trgovina, inspekcija i turističke informacije | Prihvaćena |
+| [0019](0019-sprint9-okolis-pozivi-karte.md) | Vanjski izvori, kvalitet zraka, javni pozivi, MapLibre karte | Prihvaćena |

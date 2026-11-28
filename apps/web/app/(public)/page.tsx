@@ -97,7 +97,7 @@ export default async function Home() {
   const realCall = callsRes.items[0];
   const calls: Call[] = [
     ...callsRes.items.slice(0, 1).map((c) => ({ href: `/vijesti/${c.slug}`, kind: 'Otvoreni poziv', tone: 'success' as const, title: c.title, text: c.excerpt ?? '', deadline: c.deadline ? dateShort(c.deadline) : null, file: c.attachmentCount ? `Dokumenti (${c.attachmentCount})` : 'Tekst poziva', demo: false, ripple: !c.deadline || new Date(c.deadline) > new Date() })),
-    { href: '/vijesti?type=JAVNI_POZIV', kind: 'Otvoreni poziv', tone: 'success', title: 'Izrada stručne podloge za zaštitu područja Plato Rujišta – Bijela', text: 'Studija izvodljivosti valorizacije endemskog bora munike i krškog staništa.', deadline: '15. 12. 2026.', file: 'PDF 2,4 MB', demo: true, ripple: true },
+    { href: '/javni-pozivi', kind: 'Otvoreni poziv', tone: 'success', title: 'Izrada stručne podloge za zaštitu područja Plato Rujišta – Bijela', text: 'Studija izvodljivosti valorizacije endemskog bora munike i krškog staništa.', deadline: '15. 12. 2026.', file: 'PDF 2,4 MB', demo: true, ripple: true },
     { href: '/zastita-okolisa', kind: 'Javna rasprava', tone: 'warning', title: 'Proglašenje zaštićenog staništa Vrtaljica, Konjic', text: 'Uvid u nacrt rješenja i elaborat o zaštiti rijetke flore i dolomitnih tala.', deadline: '10. 12. 2026.', file: 'PDF 1,8 MB', demo: true, ripple: true },
     { href: '/zastita-okolisa', kind: 'Strateški dokument', tone: 'brand', title: 'Plan upravljanja otpadom HNK 2025–2030 (javni uvid)', text: 'Građani i pravne osobe mogu dostaviti pisane primjedbe resornom povjerenstvu.', deadline: null, file: 'Komentiraj online', demo: true, ripple: false },
   ].slice(0, 3) as Call[];
@@ -142,7 +142,7 @@ export default async function Home() {
       {/* BRZE USLUGE */}
       <Container className="relative z-10 -mt-14">
         <div className="grid gap-2 rounded-[16px] bg-white p-3 ring-1 ring-inset ring-[#e5e5e5] shadow-[0_20px_24px_-4px_rgba(10,13,18,0.08),0_8px_8px_-4px_rgba(10,13,18,0.03)] sm:grid-cols-2 lg:grid-cols-4 md:p-4">
-          {([[Ticket01, 'Javni natječaji', 'Sufinanciranja i javne nabavke', '/vijesti?type=JAVNI_POZIV', openCalls.length ? `${openCalls.length} otvoren${openCalls.length === 1 ? '' : 'a'}` : null, 'success'], [File06, 'Obrasci i dozvole', 'Okolišne dozvole i zahtjevi', '/propisi?docType=OBRAZAC', null, ''], [Users01, 'Registar vodiča', 'Licencirani turistički vodiči', '/turisticki-vodici', 'Faza 2', 'gray'], [Calendar, 'Neradna nedjelja', 'Kalendar neradnih dana i izuzeci', '/trgovina#radno-vrijeme', null, '']] as const).map(([I, t, s, href, b, tone], k) => (
+          {([[Ticket01, 'Javni natječaji', 'Sufinanciranja i javne nabavke', '/javni-pozivi', openCalls.length ? `${openCalls.length} otvoren${openCalls.length === 1 ? '' : 'a'}` : null, 'success'], [File06, 'Obrasci i dozvole', 'Okolišne dozvole i zahtjevi', '/propisi?docType=OBRAZAC', null, ''], [Users01, 'Registar vodiča', 'Licencirani turistički vodiči', '/turisticki-vodici', 'Faza 2', 'gray'], [Calendar, 'Neradna nedjelja', 'Kalendar neradnih dana i izuzeci', '/trgovina#radno-vrijeme', null, '']] as const).map(([I, t, s, href, b, tone], k) => (
             <Link key={t} href={href} className="group flex gap-4 rounded-[12px] p-3 transition-colors hover:bg-[#fafafa] md:p-4">
               <FeaturedIcon icon={I} tone={k === 0 ? 'success' : 'brand'} size="md" ripple={k === 0 && openCalls.length > 0} />
               <span><span className="block text-[16px] font-semibold text-[#171717] group-hover:text-[var(--br-700)]">{t}</span><span className="block text-[14px] text-[#525252]">{s}</span>{b && <span className="mt-2 block"><Badge tone={tone as 'success' | 'gray'} dot={tone === 'success'}>{b}</Badge></span>}</span>
@@ -167,7 +167,7 @@ export default async function Home() {
               <Card className="overflow-hidden">
                 <div className="flex items-center justify-between border-b border-[#e5e5e5] px-5 py-4"><h3 className="text-[18px] font-semibold text-[#171717]">Natječaji i javni uvidi</h3><Badge tone="success" dot>Aktivno</Badge></div>
                 <ul className="divide-y divide-[#e5e5e5]">{calls.map((c) => <CallItem key={c.title} c={c} />)}</ul>
-                <div className="p-4"><Link href="/vijesti?type=JAVNI_POZIV" className="flex h-10 items-center justify-center rounded-[8px] bg-[var(--br-50)] text-[14px] font-semibold text-[var(--br-700)] hover:bg-[var(--br-100)]">Arhiva natječaja i odluka</Link></div>
+                <div className="p-4"><Link href="/javni-pozivi" className="flex h-10 items-center justify-center rounded-[8px] bg-[var(--br-50)] text-[14px] font-semibold text-[var(--br-700)] hover:bg-[var(--br-100)]">Arhiva natječaja i odluka</Link></div>
               </Card>
               <div className={`rounded-[16px] p-6 text-white ${GRAD}`}>
                 <p className="flex items-center gap-2 text-[18px] font-semibold"><Phone01 size={20} className="text-[var(--br-300)]" />Info-desk Ministarstva</p>

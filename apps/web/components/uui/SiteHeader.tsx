@@ -24,7 +24,7 @@ export const NAV: Nav[] = [
       { title: 'E-usluge', items: [
         { href: '/e-usluge', label: 'Centar e-usluga', desc: 'Registri, obrasci i javni uvidi na jednom mjestu.', icon: Globe02 },
         { href: '/e-usluge/obrasci', label: 'Elektronski zahtjevi', desc: 'Podnesite zahtjev i pratite status predmeta.', icon: Edit05 },
-        { href: '/vijesti?type=JAVNI_POZIV', label: 'Javni pozivi', desc: 'Otvoreni pozivi, rokovi i online prijava.', icon: Ticket01 },
+        { href: '/javni-pozivi', label: 'Javni pozivi', desc: 'Otvoreni pozivi, rokovi i online prijava.', icon: Ticket01 },
         { href: '/propisi', label: 'Propisi i obrasci', desc: 'Zakoni, pravilnici i obrasci zahtjeva.', icon: File06 },
       ] },
       { title: 'Registri', items: [
@@ -41,7 +41,7 @@ export const NAV: Nav[] = [
       { img: '/hero/mostar-m.jpg', title: 'Interaktivna GIS karta', text: 'Dozvole, objekti i zaštićena područja na jednoj karti.', href: '/mapa', cta: 'Otvori kartu' },
     ] },
   },
-  { label: 'Natječaji', href: '/vijesti?type=JAVNI_POZIV', match: [] },
+  { label: 'Natječaji', href: '/javni-pozivi', match: ['/javni-pozivi'] },
   { label: 'Propisi i obrasci', href: '/propisi', match: ['/propisi'] },
   { label: 'Trgovina', href: '/trgovina', match: ['/trgovina', '/inspekcija'] },
   {
@@ -74,6 +74,7 @@ export const NAV: Nav[] = [
       ] },
       { title: 'Rizici', items: [
         { href: '/eko-rizik', label: 'Eko-rizik HNK', desc: 'Požari, poplave, klizišta i kvalitet zraka.', icon: AlertTriangle },
+        { href: '/zastita-okolisa/kvalitet-zraka', label: 'Kvalitet zraka', desc: 'Indeks po općinama, pragovi i prognoza.', icon: Wind01 },
         { href: '/eko-rizik/prijava', label: 'Prijava incidenta', desc: 'Prijavite deponiju, požar ili zagađenje.', icon: MarkerPin04 },
         { href: '/mapa', label: 'GIS karta', desc: 'Dozvole i zaštićena područja na karti.', icon: Map01 },
       ] },
@@ -273,7 +274,7 @@ export default function SiteHeader({ info }: { info?: TopInfo }) {
           </ul>
           <div className="border-t border-[#e9eaeb] px-5 py-6">
             <ul className="grid grid-cols-2 gap-x-4 gap-y-3 text-[16px] leading-6 font-semibold text-[#535862]">
-              {[['Kontakt', '/o-nama#kontakt'], ['Eko-rizik uživo', '/eko-rizik'], ['GIS karta', '/mapa'], ['Pristup informacijama', '/o-nama#upit'], ['Natječaji', '/vijesti?type=JAVNI_POZIV'], ['Krizni prikaz', '/eko-rizik/krizni']].map(([l, h]) => <li key={l}><Link href={h} className="hover:text-[#181d27]">{l}</Link></li>)}
+              {[['Kontakt', '/o-nama#kontakt'], ['Eko-rizik uživo', '/eko-rizik'], ['GIS karta', '/mapa'], ['Pristup informacijama', '/o-nama#upit'], ['Natječaji', '/javni-pozivi'], ['Krizni prikaz', '/eko-rizik/krizni']].map(([l, h]) => <li key={l}><Link href={h} className="hover:text-[#181d27]">{l}</Link></li>)}
             </ul>
             <div className="mt-6 flex flex-col gap-3">
               <Link href="/eko-rizik/prijava" className={`flex h-11 items-center justify-center gap-2 rounded-[8px] text-[16px] font-semibold ${primary}`}><MarkerPin04 size={20} />Prijavi ekološki incident</Link>

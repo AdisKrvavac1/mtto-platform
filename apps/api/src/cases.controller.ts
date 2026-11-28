@@ -10,6 +10,7 @@ import {
   BadRequestException, Body, Controller, ForbiddenException, Get, NotFoundException, Param, Patch, Post, Query, Req, Res,
   UploadedFiles, UseGuards, UseInterceptors,
 } from '@nestjs/common';
+import { phase } from './calls.controller';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { Throttle } from '@nestjs/throttler';
 import type { Response } from 'express';
@@ -106,6 +107,8 @@ const publicForm = (f: Form) => ({
 export async function receiveCase(db: Db, files: FileStore, form: Form, input: {
   data: Record<string, any>; applicantName: string | null; applicantEmail?: string | null; applicantPhone?: string | null; attachments?: { buf: Buffer; name: string; type: string }[]; isDemo?: boolean;
   anonymous?: boolean;
+  /** F2-16: prijava na javni poziv */
+  callId?: string | null;
 }) {
   const r = route(form.routing, input.data);
   const code = newTrackingCode();
@@ -121,8 +124,8 @@ export async function receiveCase(db: Db, files: FileStore, form: Form, input: {
     const cid = id();
     const due = new Date(Date.now() + form.slaDays * 86400_000);
     await c.query(
-      `INSERT INTO cases ("id","number","formId","sector","data","applicantName","applicantEmail","applicantPhone","trackingHash","dueAt","isDemo","anonymous","routedTo") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
-      [cid, number, form.id, r?.sector ?? form.sector, JSON.stringify(input.data), input.applicantName, input.applicantEmail || null, input.applicantPhone || null, hashCode(code), due, !!input.isDemo, !!input.anonymous, r?.label ?? null],
+      `INSERT INTO cases ("id","number","formId","sector","data","applicantName","applicantEmail","applicantPhone","trackingHash","dueAt","isDemo","anonymous","routedTo","callId") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
+      [cid, number, form.id, r?.sector ?? form.sector, JSON.stringify(input.data), input.applicantName, input.applicantEmail || null, input.applicantPhone || null, hashCode(code), due, !!input.isDemo, !!input.anonymous, r?.label ?? null, input.callId ?? null],
     );
     await c.query(
       `INSERT INTO case_events ("id","caseId","kind","toStatus","note","public","actorName") VALUES ($1,$2,'PRIJEM','ZAPRIMLJEN',$3,true,'Portal')`,
@@ -155,14 +158,16 @@ export class PublicCasesController {
 
   @Get('forms')
   async forms() {
-    return (await this.db.q<Form>(`SELECT * FROM forms WHERE "active" ORDER BY "title"`)).map(publicForm);
+    // obrasci javnih poziva otvaraju se sa stranice poziva (F2-16)
+    return (await this.db.q<Form>(`SELECT * FROM forms f WHERE f."active" AND NOT EXISTS (SELECT 1 FROM calls c WHERE c."formId"=f."id") ORDER BY f."title"`)).map(publicForm);
   }
 
   @Get('forms/:slug')
   async form(@Param('slug') slug: string) {
     const f = await this.db.one<Form>(`SELECT * FROM forms WHERE "slug"=$1 AND "active"`, [slug]);
     if (!f) throw new NotFoundException('Obrazac nije pronađen.');
-    return publicForm(f);
+    const call = await this.db.one<any>(`SELECT "slug","title","opensAt","closesAt","published","resultsPublished" FROM calls WHERE "formId"=$1 AND "published" ORDER BY "closesAt" DESC LIMIT 1`, [f.id]);
+    return { ...publicForm(f), call: call ? { slug: call.slug, title: call.title, opensAt: call.opensAt, closesAt: call.closesAt, phase: phase(call) } : null };
   }
 
   @Post('forms/:slug/submit')
@@ -173,6 +178,13 @@ export class PublicCasesController {
     if (!(await verifyAltcha(b?.altcha))) throw new BadRequestException('Provjera da niste robot nije uspjela. Osvježite stranicu i pokušajte ponovo.');
     const form = await this.db.one<Form>(`SELECT * FROM forms WHERE "slug"=$1 AND "active"`, [slug]);
     if (!form) throw new NotFoundException('Obrazac nije pronađen ili više nije aktivan.');
+    // F2-16: obrazac javnog poziva prima prijave samo dok je poziv otvoren
+    const call = await this.db.one<{ id: string; title: string; opensAt: Date; closesAt: Date; published: boolean }>(`SELECT "id","title","opensAt","closesAt","published" FROM calls WHERE "formId"=$1 ORDER BY "closesAt" DESC LIMIT 1`, [form.id]);
+    if (call) {
+      const now = Date.now();
+      if (!call.published || now < new Date(call.opensAt).getTime()) throw new BadRequestException(`Javni poziv „${call.title}“ još nije otvoren za prijave.`);
+      if (now > new Date(call.closesAt).getTime()) throw new BadRequestException(`Rok za prijavu na javni poziv „${call.title}“ je istekao.`);
+    }
     let raw: Record<string, any> = {};
     try { raw = typeof b?.data === 'string' ? JSON.parse(b.data) : b?.data ?? {}; } catch { throw new BadRequestException('Neispravni podaci obrasca.'); }
     const { data, errors } = validateEntry(form.fields, raw);
@@ -191,7 +203,7 @@ export class PublicCasesController {
     if (form.attachments === 'NE' && up.length) throw new BadRequestException('Ovaj obrazac ne prima priloge.');
     if (form.attachments === 'OBAVEZNO' && !up.length) throw new BadRequestException(`Priložite dokumente: ${form.attachmentHint || 'prilog je obavezan'}.`);
     const r = await receiveCase(this.db, this.files, form, {
-      data, applicantName: anonymous ? null : name.slice(0, 160), applicantEmail: email.slice(0, 200) || null, applicantPhone: phone.slice(0, 40) || null, attachments: checkUploads(up), anonymous,
+      data, applicantName: anonymous ? null : name.slice(0, 160), applicantEmail: email.slice(0, 200) || null, applicantPhone: phone.slice(0, 40) || null, attachments: checkUploads(up), anonymous, callId: call?.id ?? null,
     });
     if (email) {
       await queueMail(this.db, {

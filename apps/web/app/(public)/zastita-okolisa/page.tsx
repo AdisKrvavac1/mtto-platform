@@ -6,7 +6,7 @@ import EkoMonitoring from '@/components/uui/EkoMonitoring';
 import ProtectedAreas from '@/components/uui/ProtectedAreas';
 import InquiryForm from '@/components/figma/InquiryForm';
 import { Badge, Button, Card, Container, CountUp, FeaturedIcon, GRAD, Head, TableCard, td, th } from '@/components/uui';
-import { AlertTriangle, ArrowRight, Clock, Download01, Edit05, File06, FileSearch02, Map01, MessageTextSquare01, SearchLg, ShieldTick, Ticket01, Waves } from '@untitledui/icons';
+import { AlertTriangle, ArrowRight, Clock, Download01, Edit05, File06, FileSearch02, Map01, MessageTextSquare01, SearchLg, ShieldTick, Ticket01, Waves, Wind01 } from '@untitledui/icons';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Zaštita okoliša' };
@@ -43,6 +43,7 @@ export default async function OkolisPage({ searchParams }: { searchParams: Promi
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Link href="#podrucja" className="inline-flex h-11 items-center justify-center gap-1.5 rounded-[8px] border-2 border-white/10 bg-[var(--br-600)] px-4 text-[16px] font-semibold hover:bg-[var(--br-700)]"><Map01 size={20} />Istraži zaštićena područja</Link>
                 <Link href="/eko-rizik" className="inline-flex h-11 items-center justify-center gap-1.5 rounded-[8px] bg-white/10 px-4 text-[16px] font-semibold ring-1 ring-inset ring-white/25 backdrop-blur-md hover:bg-white/15"><Waves size={20} />Eko-rizik uživo</Link>
+                <Link href="/zastita-okolisa/kvalitet-zraka" className="inline-flex h-11 items-center justify-center gap-1.5 rounded-[8px] bg-white/10 px-4 text-[16px] font-semibold ring-1 ring-inset ring-white/25 backdrop-blur-md hover:bg-white/15"><Wind01 size={20} />Kvalitet zraka</Link>
                 <Link href="#uvidi" className="inline-flex h-11 items-center justify-center gap-1.5 rounded-[8px] bg-white/10 px-4 text-[16px] font-semibold ring-1 ring-inset ring-white/25 backdrop-blur-md hover:bg-white/15"><MessageTextSquare01 size={20} />Aktivni javni uvidi</Link>
               </div>
             </div>
@@ -63,7 +64,7 @@ export default async function OkolisPage({ searchParams }: { searchParams: Promi
       {/* BRZI LINKOVI */}
       <section className="border-b border-[#e5e5e5] bg-white">
         <Container className="grid gap-2 py-4 sm:grid-cols-2 lg:grid-cols-4">
-          {([[Ticket01, 'Javni pozivi', 'Eko-fond i sufinanciranje', '/vijesti?type=JAVNI_POZIV', !!openCall], [File06, 'Obrasci i dozvole', 'Zahtjevi i PDF obrasci', '/propisi?docType=OBRAZAC', false], [FileSearch02, 'Registar dozvola', `${stats.permits} izdanih dozvola`, '/registri/okolisne-dozvole', false], [AlertTriangle, 'Eko-inspekcija', 'Građanski alarm i prijave', '/eko-rizik/prijava', false]] as const).map(([I, t, s, href, rip]) => (
+          {([[Ticket01, 'Javni pozivi', 'Eko-fond i sufinanciranje', '/javni-pozivi', !!openCall], [File06, 'Obrasci i dozvole', 'Zahtjevi i PDF obrasci', '/propisi?docType=OBRAZAC', false], [FileSearch02, 'Registar dozvola', `${stats.permits} izdanih dozvola`, '/registri/okolisne-dozvole', false], [AlertTriangle, 'Eko-inspekcija', 'Građanski alarm i prijave', '/eko-rizik/prijava', false]] as const).map(([I, t, s, href, rip]) => (
             <Link key={t} href={href} className="group flex items-center gap-3 rounded-[12px] p-3 hover:bg-[#fafafa]"><FeaturedIcon icon={I} tone={rip ? 'success' : 'brand'} size="md" ripple={rip} /><span><b className="block text-[16px] font-semibold text-[#171717] group-hover:text-[var(--br-700)]">{t}</b><span className="text-[14px] text-[#525252]">{s}</span></span></Link>
           ))}
         </Container>

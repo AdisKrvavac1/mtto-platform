@@ -44,7 +44,7 @@ export default async function ArticleView({ post, preview = false }: { post: Art
         <Container className="flex flex-wrap items-center justify-between gap-3 py-3">
           <nav aria-label="Putanja" className="flex flex-wrap items-center gap-2 text-[14px] font-medium text-[#525252]">
             <Link href="/" className="hover:text-[#262626]">Naslovna</Link><span className="text-[#d4d4d4]">/</span>
-            <Link href={isCall ? '/vijesti?type=JAVNI_POZIV' : '/vijesti'} className="hover:text-[#262626]">{isCall ? 'Javni pozivi' : 'Vijesti'}</Link><span className="text-[#d4d4d4]">/</span>
+            <Link href={isCall ? '/javni-pozivi' : '/vijesti'} className="hover:text-[#262626]">{isCall ? 'Javni pozivi' : 'Vijesti'}</Link><span className="text-[#d4d4d4]">/</span>
             <span className="max-w-[360px] truncate font-semibold text-[var(--br-700)]">{post.title}</span>
           </nav>
           <span className="flex items-center gap-1.5 text-[12px] font-semibold text-[var(--gr-700)]"><ShieldTick size={16} />Službeni glasnik HNK · objava Ministarstva</span>
@@ -129,7 +129,7 @@ export default async function ArticleView({ post, preview = false }: { post: Art
           <aside className="flex flex-col gap-5 lg:sticky lg:top-40 lg:self-start">
             {calls.length > 0 && (
               <Card className="p-5">
-                <div className="flex items-center justify-between"><h2 className="text-[16px] font-semibold text-[#171717]">Povezani natječaji</h2><Link href="/vijesti?type=JAVNI_POZIV" className="text-[14px] font-semibold text-[var(--br-700)]">Svi pozivi</Link></div>
+                <div className="flex items-center justify-between"><h2 className="text-[16px] font-semibold text-[#171717]">Povezani natječaji</h2><Link href="/javni-pozivi" className="text-[14px] font-semibold text-[var(--br-700)]">Svi pozivi</Link></div>
                 <ul className="mt-4 flex flex-col gap-3">
                   {calls.map((c) => { const d = daysUntil(c.deadline); const o = d === null || d >= 0; return (
                     <li key={c.id}><Link href={`/vijesti/${c.slug}`} className="group block rounded-[10px] bg-[#fafafa] p-3 ring-1 ring-inset ring-[#e5e5e5] hover:ring-[var(--br-300)]">

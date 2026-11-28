@@ -28,6 +28,8 @@ export type PublicForm = {
   slug: string; title: string; description: string; sector: string | null; fields: RegField[]; slaDays: number;
   attachments: 'NE' | 'OPCIONO' | 'OBAVEZNO'; attachmentHint: string; legalBasis: string; isDemo: boolean;
   allowAnonymous?: boolean; protectIdentity?: boolean;
+  /** F2-16: obrazac javnog poziva */
+  call?: { slug: string; title: string; opensAt: string; closesAt: string; phase: string } | null;
 };
 export type Route = { field: string; equals: string; sector: string | null; label: string };
 export type CmsForm = PublicForm & { id: string; active: boolean; updatedAt: string; caseCount?: number; openCount?: number; routing?: Route[] };

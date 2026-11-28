@@ -53,7 +53,7 @@ export function TurizamBody(props: any) {
                             </div>
                           </div>
                         </a>
-                        <a href="/vijesti?type=JAVNI_POZIV" className="bg-[#0d3460] border border-[#1e4a7a] border-solid flex gap-[8px] items-center px-[21px] py-[11px] relative rounded-[12px] w-full lg:w-auto lg:flex-[207_1_0%] min-w-0 flex-wrap">
+                        <a href="/javni-pozivi" className="bg-[#0d3460] border border-[#1e4a7a] border-solid flex gap-[8px] items-center px-[21px] py-[11px] relative rounded-[12px] w-full lg:w-auto lg:flex-[207_1_0%] min-w-0 flex-wrap">
                           <span className="material-symbols-outlined shrink-0 leading-none text-primary" style={{ fontSize: 20 }}>edit_note</span>
                           <div className="relative min-w-0 max-w-full">
                             <div className="bg-clip-padding border-0 border-[transparent] border-solid flex flex-col items-start relative size-full">
@@ -217,7 +217,7 @@ export function TurizamBody(props: any) {
           <div className="bg-[#f1f5f9] border-[#e2e8f0] border-b border-solid flex flex-col items-start pb-[17px] pt-[16px] relative min-w-0 max-w-full w-full">
             <div className="relative min-w-0 max-w-full w-full">
               <div className="bg-clip-padding border-0 border-[transparent] border-solid flex flex-col lg:flex-row gap-[12px] items-start justify-center px-4 md:px-8 xl:px-[48px] relative size-full flex-wrap">
-                <a href="/vijesti?type=JAVNI_POZIV" className="bg-white border border-[#e2e8f0] border-solid drop-shadow-[0px_1px_1px_rgba(0,0,0,0.05)] flex gap-[12px] items-center p-[15px] relative rounded-[2px] w-full lg:w-auto lg:flex-[327_1_0%] min-w-0 flex-wrap">
+                <a href="/javni-pozivi" className="bg-white border border-[#e2e8f0] border-solid drop-shadow-[0px_1px_1px_rgba(0,0,0,0.05)] flex gap-[12px] items-center p-[15px] relative rounded-[2px] w-full lg:w-auto lg:flex-[327_1_0%] min-w-0 flex-wrap">
                   <div className="bg-[#fff7ed] relative rounded-[2px] shrink-0 size-[40px]">
                     <div className="bg-clip-padding border-0 border-[transparent] border-solid flex items-center justify-center relative size-full flex-wrap">
                       <span className="material-symbols-outlined shrink-0 leading-none text-tertiary-container" style={{ fontSize: 22 }}>gavel</span>

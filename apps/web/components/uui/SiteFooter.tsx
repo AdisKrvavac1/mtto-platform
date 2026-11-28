@@ -4,7 +4,7 @@ import { Clock, Mail01, MarkerPin02, Phone01 } from '@untitledui/icons';
 
 const COLS: { title: string; links: [string, string][] }[] = [
   { title: 'Resori i područja', links: [['Unutarnja trgovina', '/trgovina'], ['Turizam i ugostiteljstvo', '/turizam-i-bastina'], ['Zaštita okoliša i prirode', '/zastita-okolisa'], ['Okolišne dozvole', '/registri/okolisne-dozvole'], ['Eko-rizik HNK', '/eko-rizik']] },
-  { title: 'Brzi pristup', links: [['Javni pozivi i natječaji', '/vijesti?type=JAVNI_POZIV'], ['Propisi i obrasci', '/propisi'], ['Turistički vodiči', '/turisticki-vodici'], ['Eko-alarm prijava incidenta', '/eko-rizik/prijava'], ['Slobodan pristup informacijama', '/o-nama#upit']] },
+  { title: 'Brzi pristup', links: [['Javni pozivi i natječaji', '/javni-pozivi'], ['Propisi i obrasci', '/propisi'], ['Turistički vodiči', '/turisticki-vodici'], ['Eko-alarm prijava incidenta', '/eko-rizik/prijava'], ['Slobodan pristup informacijama', '/o-nama#upit']] },
 ];
 
 export default function SiteFooter() {

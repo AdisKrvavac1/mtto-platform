@@ -23,7 +23,23 @@ export type JsonPrimitive = boolean | number | string | null;
 
 export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
 
+export type Numeric = ColumnType<string, number | string, number | string>;
+
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
+
+export interface AirReadings {
+  aqi: number | null;
+  co: number | null;
+  importedBy: string | null;
+  no2: number | null;
+  o3: number | null;
+  pm10: number | null;
+  pm25: number | null;
+  point: string;
+  so2: number | null;
+  source: string;
+  ts: Timestamp;
+}
 
 export interface AuditLog {
   action: string;
@@ -41,6 +57,45 @@ export interface AuditLog {
   tenantId: Generated<string>;
   userId: string | null;
   userName: string;
+}
+
+export interface CallAwards {
+  amount: Numeric;
+  beneficiary: string;
+  beneficiaryType: Generated<string>;
+  callId: string;
+  caseId: string | null;
+  createdAt: Generated<Timestamp>;
+  id: string;
+  municipality: string | null;
+  position: Generated<number>;
+  project: Generated<string>;
+  tenantId: Generated<string>;
+}
+
+export interface Calls {
+  body: Generated<string>;
+  budget: Numeric | null;
+  closesAt: Timestamp;
+  contact: Generated<string>;
+  createdAt: Generated<Timestamp>;
+  documents: Generated<Json>;
+  eligibility: Generated<string>;
+  formId: string | null;
+  id: string;
+  isDemo: Generated<boolean>;
+  legalBasis: Generated<string>;
+  maxAmount: Numeric | null;
+  opensAt: Timestamp;
+  published: Generated<boolean>;
+  resultsNote: Generated<string>;
+  resultsPublished: Generated<boolean>;
+  sector: string | null;
+  slug: string;
+  summary: Generated<string>;
+  tenantId: Generated<string>;
+  title: string;
+  updatedAt: Generated<Timestamp>;
 }
 
 export interface CaseCounters {
@@ -85,6 +140,7 @@ export interface Cases {
   applicantName: string | null;
   applicantPhone: string | null;
   assigneeId: string | null;
+  callId: string | null;
   closedAt: Timestamp | null;
   createdAt: Generated<Timestamp>;
   data: Generated<Json>;
@@ -405,6 +461,16 @@ export interface Sectors {
   tenantId: Generated<string>;
 }
 
+export interface SourceCache {
+  alertedAt: Timestamp | null;
+  checkedAt: Timestamp | null;
+  data: Generated<Json>;
+  error: string | null;
+  failures: Generated<number>;
+  key: string;
+  okAt: Timestamp | null;
+}
+
 export interface Tenants {
   active: Generated<boolean>;
   createdAt: Generated<Timestamp>;
@@ -441,7 +507,10 @@ export interface Users {
 }
 
 export interface DB {
+  air_readings: AirReadings;
   audit_log: AuditLog;
+  call_awards: CallAwards;
+  calls: Calls;
   case_counters: CaseCounters;
   case_events: CaseEvents;
   case_files: CaseFiles;
@@ -463,6 +532,7 @@ export interface DB {
   registry_entries: RegistryEntries;
   schema_migrations: SchemaMigrations;
   sectors: Sectors;
+  source_cache: SourceCache;
   tenants: Tenants;
   users: Users;
 }

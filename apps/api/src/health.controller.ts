@@ -4,13 +4,14 @@ import { sql } from 'kysely';
 import { Db, currentTenant } from './db';
 import { FileStore } from './storage';
 import { mailConfigured } from './mail';
+import { SourceHub } from './sources';
 
 const STARTED = Date.now();
 
 /** F1-06: provjera rada za Render health check i vanjski uptime monitor. Bez ličnih podataka. */
 @Controller('health')
 export class HealthController {
-  constructor(private db: Db, private files: FileStore) {}
+  constructor(private db: Db, private files: FileStore, private hub: SourceHub) {}
 
   @Get()
   async health(@Res() res: Response) {
@@ -27,6 +28,7 @@ export class HealthController {
         storage: await this.files.check(),
         tenant: currentTenant(),
         mail: { configured: mailConfigured(), ...(await this.db.system(() => this.db.one<{ waiting: number; failed: number }>(`SELECT count(*) FILTER (WHERE "status"='CEKA')::int "waiting", count(*) FILTER (WHERE "status"='NEUSPJELO')::int "failed" FROM mail_outbox`)).catch(() => null)) },
+        sources: await this.hub.all().then((l) => l.map((s) => ({ key: s.key, ok: !s.error, stale: s.stale, okAt: s.okAt }))).catch(() => null),
         geo: rows.some((r) => r.id === '0003_postgis'),
         version: (process.env.RENDER_GIT_COMMIT ?? 'local').slice(0, 7),
         uptimeS: Math.round((Date.now() - STARTED) / 1000),

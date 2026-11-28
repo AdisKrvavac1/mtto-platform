@@ -47,7 +47,8 @@
 .prose-mtto strong { color: #0F172A; }
 .prose-mtto blockquote { border-left: 3px solid #234696; padding-left: 1rem; color: #444b5d; }
 
-.leaflet-container { font-family: var(--font-sans), system-ui, sans-serif; }
+.maplibregl-map { font-family: var(--font-sans), system-ui, sans-serif; }
+.maplibregl-popup-content { border-radius: 8px; padding: 12px 14px; box-shadow: 0 8px 24px -6px rgba(10,13,18,0.25); }
 
 /* Figma tipografija članka (9:15067) */
 .prose-figma { font-family: 'Public Sans', system-ui, sans-serif; color: #43474f; font-size: 15px; line-height: 24px; }
@@ -66,5 +67,5 @@
 .prose-figma th, .prose-figma td { border-bottom: 1px solid #e5eeff; padding: 8px; text-align: left; }
 @media (max-width: 767px) { .prose-figma h2 { font-size: 20px; line-height: 26px; } }
 
-/* Leaflet panei imaju z-index 400–1000; zatvori ih u vlastiti sloj da ne prelaze preko menija i headera. */
-.leaflet-container { isolation: isolate; z-index: 0; }
+/* Karta u vlastitom sloju, da kontrole i oblačići ne prelaze preko menija i headera. */
+.maplibregl-map { isolation: isolate; z-index: 0; }

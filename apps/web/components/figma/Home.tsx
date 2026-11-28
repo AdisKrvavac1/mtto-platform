@@ -197,7 +197,7 @@ export function HomeBody(props: any) {
 <div className="relative min-w-0 max-w-full w-full">
         <div className="relative bg-white flex flex-col lg:flex-row gap-[16px] items-start justify-center mx-4 md:mx-0 md:ml-[32px] p-[16px] md:mr-[32px] rounded-[8px] -mt-[32px] flex-wrap">
           <div className="absolute bg-[rgba(255,255,255,0)] inset-0 rounded-[8px] shadow-[0px_20px_25px_-5px_rgba(0,0,0,0.1),0px_8px_10px_-6px_rgba(0,0,0,0.1)] w-full lg:w-auto lg:flex-[1376_1_0%] min-w-0" />
-          <a href="/vijesti?type=JAVNI_POZIV" className="bg-[#eff4ff] flex flex-col gap-[16px] items-start p-[12px] relative rounded-[4px] w-full lg:w-auto lg:flex-[324_1_0%] min-w-0">
+          <a href="/javni-pozivi" className="bg-[#eff4ff] flex flex-col gap-[16px] items-start p-[12px] relative rounded-[4px] w-full lg:w-auto lg:flex-[324_1_0%] min-w-0">
             <div className="flex gap-[16px] items-start relative min-w-0 max-w-full w-full flex-wrap">
               <div className="bg-[#006c4a] flex items-center justify-center relative rounded-[4px] shrink-0 size-[48px] flex-wrap">
                 <span className="material-symbols-outlined shrink-0 leading-none text-tertiary-container" style={{ fontSize: 25 }}>gavel</span>
@@ -317,7 +317,7 @@ export function HomeBody(props: any) {
               {props.calls}
               
               
-              <a href="/vijesti?type=JAVNI_POZIV" className="bg-[#dce9ff] flex flex-col items-center py-[10px] relative rounded-[4px] min-w-0 max-w-full w-full">
+              <a href="/javni-pozivi" className="bg-[#dce9ff] flex flex-col items-center py-[10px] relative rounded-[4px] min-w-0 max-w-full w-full">
                 <p className="font-robflex font-semibold not-italic min-w-0 max-w-full text-[#002042] text-[14px] text-center tracking-[0.14px] leading-[20px]">Arhiva svih natječaja i odluka (2018–2025)</p>
               </a>
             </div>
@@ -1032,7 +1032,7 @@ export function HomeBody(props: any) {
 <div className="flex flex-col items-start relative shrink-0 w-full">
         <div className="bg-white flex flex-col gap-[16px] items-center p-[16px] relative rounded-[8px] shrink-0 w-full">
           <div className="flex gap-[16px] items-start relative shrink-0 w-full">
-            <a href="/vijesti?type=JAVNI_POZIV" className="bg-[#eff4ff] drop-shadow-[0px_4px_3px_rgba(0,0,0,0.1),0px_2px_2px_rgba(0,0,0,0.1)] flex flex-[1_0_0] flex-col gap-[16px] items-start min-w-px p-[12px] relative rounded-[4px]">
+            <a href="/javni-pozivi" className="bg-[#eff4ff] drop-shadow-[0px_4px_3px_rgba(0,0,0,0.1),0px_2px_2px_rgba(0,0,0,0.1)] flex flex-[1_0_0] flex-col gap-[16px] items-start min-w-px p-[12px] relative rounded-[4px]">
               <div className="flex flex-col gap-[8px] items-start relative shrink-0 w-full">
                 <div className="bg-[#006c4a] flex items-center justify-center relative rounded-[4px] shrink-0 size-[32px]">
                   <span className="material-symbols-outlined shrink-0 leading-none text-tertiary-container" style={{ fontSize: 25 }}>gavel</span>
@@ -1159,7 +1159,7 @@ export function HomeBody(props: any) {
               {props.calls}
               
               
-              <a href="/vijesti?type=JAVNI_POZIV" className="bg-[#dce9ff] flex flex-col items-center py-[10px] relative rounded-[4px] shrink-0 w-full">
+              <a href="/javni-pozivi" className="bg-[#dce9ff] flex flex-col items-center py-[10px] relative rounded-[4px] shrink-0 w-full">
                 <p className="font-robflex font-semibold not-italic text-[#002042] text-[14px] text-center tracking-[0.14px] leading-[20px]">Arhiva svih natječaja i odluka (2018–2025)</p>
               </a>
             </div>

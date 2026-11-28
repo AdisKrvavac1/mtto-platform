@@ -31,8 +31,6 @@ services:
         value: Urednik MTTO
       - key: ADMIN_PASSWORD
         generateValue: true
-      - key: NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-        sync: false
 
 databases:
   - name: mtto-db

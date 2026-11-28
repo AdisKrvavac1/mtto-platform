@@ -7,7 +7,7 @@ const NAV = [
   { href: '/', label: 'Naslovna' },
   { href: '/o-nama', label: 'O nama' },
   { href: '/vijesti', label: 'Vijesti' },
-  { href: '/vijesti?type=JAVNI_POZIV', label: 'Javni pozivi' },
+  { href: '/javni-pozivi', label: 'Javni pozivi' },
   { href: '/propisi', label: 'Propisi i obrasci' },
   { href: '/registri/okolisne-dozvole', label: 'Registar dozvola' },
   { href: '/registri/ugostiteljski-objekti', label: 'Ugostiteljski objekti' },

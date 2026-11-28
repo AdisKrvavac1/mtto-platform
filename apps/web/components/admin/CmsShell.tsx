@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { can, getUser, isSignedIn, logout, refreshUser, type CmsUser, type Module } from '@/lib/adminApi';
-import { AlertTriangle, Announcement01, BarChartSquare02, Building07, ClockRewind, Folder, Image01, Inbox01, LinkExternal01, LogOut01, Map01, Menu02, SearchLg, Database01, ShieldTick, Users01, XClose } from '@untitledui/icons';
+import { AlertTriangle, Announcement01, BarChartSquare02, Building07, ClockRewind, Folder, Image01, Inbox01, LinkExternal01, LogOut01, Map01, Menu02, SearchLg, Database01, ShieldTick, Users01, XClose, Ticket01 } from '@untitledui/icons';
 
 type Icon = React.FC<React.SVGProps<SVGSVGElement> & { size?: number }>;
 type Item = { href: string; label: string; icon: Icon; f2?: boolean; perm?: Module };
@@ -27,6 +27,7 @@ const NAV: { group?: string; items: Item[] }[] = [
       { href: '/admin/resorni-odjeli', label: 'Resorni odjeli', icon: Building07, f2: true },
       { href: '/admin/korisnici', label: 'Korisnici i dnevnik', icon: Users01, perm: 'korisnici' },
       { href: '/admin/predmeti', label: 'E-pisarnica', icon: Inbox01, perm: 'predmeti' },
+      { href: '/admin/pozivi', label: 'Javni pozivi', icon: Ticket01, perm: 'pozivi' },
     ],
   },
 ];

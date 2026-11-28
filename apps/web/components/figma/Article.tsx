@@ -22,7 +22,7 @@ export function ArticleBody(props: any) {
                   <p className="font-pub font-normal min-w-0 max-w-full text-[#43474f] text-[13px] leading-[20px]">Vijesti i obavijesti</p>
                 </a>
                 <span className="material-symbols-outlined shrink-0 leading-none text-outline" style={{ fontSize: 8 }}>chevron_right</span>
-                <a href="/vijesti?type=JAVNI_POZIV" className="flex flex-col items-start relative min-w-0 max-w-full">
+                <a href="/javni-pozivi" className="flex flex-col items-start relative min-w-0 max-w-full">
                   <p className="font-pub font-normal min-w-0 max-w-full text-[#43474f] text-[13px] leading-[20px]">{props.crumbType}</p>
                 </a>
                 <span className="material-symbols-outlined shrink-0 leading-none text-outline" style={{ fontSize: 8 }}>chevron_right</span>
@@ -194,7 +194,7 @@ export function ArticleBody(props: any) {
                         <p className="font-pub font-semibold min-w-0 max-w-full text-[#062343] text-[18px] leading-[26px]">{props.relatedTitle}</p>
                       </div>
                     </div>
-                    <a href="/vijesti?type=JAVNI_POZIV" className="flex flex-col items-start relative min-w-0 max-w-full">
+                    <a href="/javni-pozivi" className="flex flex-col items-start relative min-w-0 max-w-full">
                       <p className="font-pub font-semibold min-w-0 max-w-full text-[#006c4a] text-[13px] leading-[20px]">Svi pozivi</p>
                     </a>
                   </div>
@@ -462,7 +462,7 @@ export function ArticleBody(props: any) {
                     <p className="font-pub font-semibold text-[#062343] text-[18px] leading-[26px]">{props.relatedTitle}</p>
                   </div>
                 </div>
-                <a href="/vijesti?type=JAVNI_POZIV" className="flex flex-col items-start relative shrink-0">
+                <a href="/javni-pozivi" className="flex flex-col items-start relative shrink-0">
                   <p className="font-pub font-semibold text-[#006c4a] text-[13px] leading-[20px]">Svi pozivi</p>
                 </a>
               </div>

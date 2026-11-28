@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import RiverChart from './RiverChart';
-import { LEVEL, LS_STATUS, WARN_COLOR, fireConfidence, fireTime, fmtTime, type RiskSummary } from '@/lib/risk';
+import { LEVEL, LS_STATUS, WARN_COLOR, fireConfidence, fireTime, fmtTime, type RiskSummary, down } from '@/lib/risk';
 
 const RiskMap = dynamic(() => import('./RiskMap'), { ssr: false, loading: () => <div className="h-full min-h-[420px] bg-white/5 animate-pulse rounded-[8px]" /> });
 const REFRESH = 5 * 60_000;
@@ -52,8 +52,8 @@ export default function CrisisBoard({ initial }: { initial: RiskSummary }) {
         <div className="xl:col-span-8 flex flex-col gap-[16px]">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-[12px]">
             {[
-              ['local_fire_department', 'Žarišta 24 h', d.fires.error ? '—' : d.fires.last24h, d.fires.last24h ? 'text-[#ff8a73]' : ''],
-              ['thunderstorm', 'Upozorenja', d.warnings.error ? '—' : d.warnings.items.length, d.warnings.items.length ? 'text-[#fadc12]' : ''],
+              ['local_fire_department', 'Žarišta 24 h', down(d.fires) ? '—' : d.fires.last24h, d.fires.last24h ? 'text-[#ff8a73]' : ''],
+              ['thunderstorm', 'Upozorenja', down(d.warnings) ? '—' : d.warnings.items.length, d.warnings.items.length ? 'text-[#fadc12]' : ''],
               ['water', 'Rijeke povišeno', d.rivers.items.filter((r) => r.status === 'POVISENO' || r.status === 'VISOKO').length, ''],
               ['landslide', 'Aktivna klizišta', active.length, active.length ? 'text-[#ffb870]' : ''],
             ].map(([i, l, v, c]) => (
@@ -69,7 +69,7 @@ export default function CrisisBoard({ initial }: { initial: RiskSummary }) {
         <aside className="xl:col-span-4 flex flex-col gap-[16px]">
           <section className="bg-white/5 rounded-[8px] p-[16px] flex flex-col gap-[8px]">
             <h2 className="font-pub font-bold text-[16px] flex items-center gap-[8px]"><Icon n="thunderstorm" s={18} />Meteo upozorenja</h2>
-            {d.warnings.items.length === 0 && <p className="text-white/70 font-pub text-[14px]">{d.warnings.error ? 'Izvor nedostupan.' : 'Nema aktivnih upozorenja.'}</p>}
+            {d.warnings.items.length === 0 && <p className="text-white/70 font-pub text-[14px]">{down(d.warnings) ? 'Izvor nedostupan.' : 'Nema aktivnih upozorenja.'}</p>}
             {d.warnings.items.slice(0, 5).map((w, i) => (
               <div key={i} className="border-l-[5px] pl-[10px] py-[2px]" style={{ borderColor: WARN_COLOR[w.color] ?? '#fadc12' }}>
                 <p className="font-pub font-semibold text-[14px]">{w.event} · {w.region}</p>
@@ -79,7 +79,7 @@ export default function CrisisBoard({ initial }: { initial: RiskSummary }) {
           </section>
           <section className="bg-white/5 rounded-[8px] p-[16px] flex flex-col gap-[8px]">
             <h2 className="font-pub font-bold text-[16px] flex items-center gap-[8px]"><Icon n="local_fire_department" s={18} />Zadnja žarišta</h2>
-            {d.fires.items.length === 0 && <p className="text-white/70 font-pub text-[14px]">{d.fires.error ? 'Izvor nedostupan.' : 'Nema detekcija u 72 h.'}</p>}
+            {d.fires.items.length === 0 && <p className="text-white/70 font-pub text-[14px]">{down(d.fires) ? 'Izvor nedostupan.' : 'Nema detekcija u 72 h.'}</p>}
             {d.fires.items.slice(0, 5).map((f, i) => (
               <p key={i} className="font-rob text-[13px] flex justify-between gap-2"><span>{fireTime(f)}</span><span className="text-white/60">{f.lat.toFixed(2)}, {f.lng.toFixed(2)} · {fireConfidence(f.confidence)}</span></p>
             ))}
