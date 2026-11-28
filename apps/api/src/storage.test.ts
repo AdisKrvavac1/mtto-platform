@@ -28,3 +28,19 @@ test('antivirus: čista datoteka prolazi, EICAR se otkriva, bez servera nema ske
   assert.equal(await scanWithClamd(Buffer.from('x'), undefined), 'NIJE_SKENIRANO');
   assert.equal(await scanWithClamd(Buffer.from('x'), '127.0.0.1', 1), 'NIJE_SKENIRANO');
 });
+
+/** Vraćanje kopije: roditeljske tabele prije podređenih, i za tabele dodane poslije (obrasci, predmeti, registri). */
+test('kopija: redoslijed vraćanja prati strane ključeve', { skip: !process.env.DATABASE_URL }, async () => {
+  const { Pool } = await import('pg');
+  const { parentsFirst } = await import('./backup');
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  try {
+    const ts = (await pool.query(`SELECT table_name t FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE' AND table_name NOT IN ('spatial_ref_sys','schema_migrations')`)).rows.map((r: any) => r.t);
+    const order = await parentsFirst(pool, ts);
+    assert.equal(order.length, ts.length);
+    const at = (t: string) => order.indexOf(t);
+    for (const [parent, child] of [['tenants', 'users'], ['forms', 'cases'], ['cases', 'case_events'], ['cases', 'case_files'], ['users', 'cases'], ['registries', 'registry_entries'], ['posts', 'post_versions'], ['documents', 'document_versions']]) {
+      if (at(parent) >= 0 && at(child) >= 0) assert.ok(at(parent) < at(child), `${parent} prije ${child}`);
+    }
+  } finally { await pool.end(); }
+});

@@ -40,6 +40,30 @@ async function tables(pool: Pool | PoolClient): Promise<string[]> {
   return r.rows.map((x) => x.table_name);
 }
 
+/**
+ * Tabele poredane tako da svaka dolazi poslije tabela na koje upućuje stranim ključem
+ * (npr. forms prije cases, cases prije case_events). Samoreference se zanemaruju.
+ */
+export async function parentsFirst(c: Pool | PoolClient, ts: string[]): Promise<string[]> {
+  const fk = await c.query<{ child: string; parent: string }>(`SELECT DISTINCT cl.relname child, pr.relname parent FROM pg_constraint k
+    JOIN pg_class cl ON cl.oid=k.conrelid JOIN pg_class pr ON pr.oid=k.confrelid JOIN pg_namespace n ON n.oid=cl.relnamespace
+    WHERE k.contype='f' AND n.nspname='public' AND cl.relname<>pr.relname`);
+  const deps = new Map<string, Set<string>>(ts.map((t) => [t, new Set<string>()]));
+  for (const r of fk.rows) if (deps.has(r.child) && deps.has(r.parent)) deps.get(r.child)!.add(r.parent);
+  const out: string[] = [];
+  const state = new Map<string, number>(); // 1 = u obradi, 2 = gotovo
+  const visit = (t: string) => {
+    if (state.get(t) === 2) return;
+    if (state.get(t) === 1) throw new Error(`Kružna zavisnost tabela pri vraćanju kopije: ${t}`);
+    state.set(t, 1);
+    for (const p of [...deps.get(t)!].sort()) visit(p);
+    state.set(t, 2);
+    out.push(t);
+  };
+  for (const t of [...ts].sort()) visit(t);
+  return out;
+}
+
 /** Pravi šifriranu kopiju cijele baze. */
 export async function createBackup(db: Pool, publicKeyPem: string): Promise<{ file: Buffer; header: Omit<Header, 'key' | 'iv' | 'tag'> }> {
   // jedna konekcija s app.tenant='*': kopija obuhvata sve institucije (RLS)
@@ -101,8 +125,8 @@ export async function restoreBackup(file: Buffer, privateKeyPem: string, target:
     await c.query('BEGIN');
     const ts = Object.keys(header.counts);
     if (ts.length) await c.query(`TRUNCATE ${ts.map((t) => `"${t}"`).join(',')} CASCADE`);
-    // redoslijed: roditeljske tabele prije onih koje ih referenciraju
-    const order = ['tenants', 'users', 'posts', 'permits', 'facilities', 'documents', 'eco_reports', ...ts];
+    // redoslijed: roditeljske tabele prije onih koje ih referenciraju (iz stranih ključeva u bazi)
+    const order = await parentsFirst(c, ts);
     const byTable = new Map<string, any[]>();
     for (const l of lines) { const { t, r } = JSON.parse(l); (byTable.get(t) ?? byTable.set(t, []).get(t)!).push(r); }
     for (const t of [...new Set(order)].filter((x) => byTable.has(x))) {
