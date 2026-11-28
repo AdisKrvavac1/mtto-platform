@@ -25,11 +25,9 @@ Status: prihvaćena (F2-06, F2-07, F2-08, F2-10). F2-09 (analitika) odgođena do
 - Izvještaji o radu su dokumenti vrste „Izvještaj“.
 
 ## F2-06 Jezici
-- Jezici: bs (izvornik), hr, sr (latinica), sr-Cyrl, en.
-- Adrese s prefiksom (`/en/…`, `/hr`, `/sr-cyrl/…`) obrađuje middleware: skida prefiks, prenosi jezik u zaglavlju i pamti ga u kolačiću, pa obični linkovi ostaju na izabranom jeziku. `<html lang>` prati jezik.
-- Sučelje (zaglavlje, meni, podnožje) ima rječnik. Za hr i sr navedene su samo riječi koje se razlikuju; ostalo je zajedničko.
-- Sadržaj se piše jednom, na bosanskom, i čitljiv je na hr i sr. Objave imaju prijevod na engleski (`translations.en`) koji se uređuje u CMS-u prekidačem jezika. Bez prijevoda engleska stranica prikazuje izvornik uz napomenu. Tabela `life_events` ima istu kolonu za kasnije.
-- Ćirilica se izvodi automatski iz latinice: sučelje na serveru, sadržaj u pregledniku (TreeWalker + MutationObserver).
-  - Latinicom ostaju: polja za unos, kod, karte, `translate="no"`, kratice, riječi s brojevima ili q/w/x/y, složenice s velikim slovom unutar riječi, adrese.
-  - Poznato ograničenje: riječi gdje „nj“ ili „lj“ nisu jedno slovo (npr. Konjuh) preslovljavaju se pogrešno.
+- Jezici: bs (izvornik), hr, en. Srpski i ćirilica su uklonjeni odlukom naručioca 28. 11. 2026. Stare adrese `/sr/…` i `/sr-cyrl/…` trajno se preusmjeravaju na stranicu bez prefiksa.
+- Adrese s prefiksom (`/en/…`, `/hr/…`, `/bs/…`) obrađuje middleware: skida prefiks, prenosi jezik u zaglavlju i pamti ga u kolačiću, pa obični linkovi ostaju na izabranom jeziku. `<html lang>` prati jezik.
+- Prekidač jezika i aktivna stavka menija rade s putanjom bez prefiksa. Ranija greška: na `/en/vijesti` prekidač je vodio na `/hr/en/vijesti`, što je davalo 404.
+- Sučelje (zaglavlje, meni, podnožje) ima rječnik. Za hr su navedene samo riječi koje se razlikuju.
+- Sadržaj se piše jednom, na bosanskom. Objave imaju prijevod na engleski (`translations.en`) koji se uređuje u CMS-u prekidačem jezika. Bez prijevoda engleska stranica prikazuje izvornik uz napomenu. Tabela `life_events` ima istu kolonu za kasnije.
 - Nije urađeno u ovom sprintu: prijevod teksta pojedinih stranica (osim zaglavlja i podnožja) i `hreflang` oznake po stranici.

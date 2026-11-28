@@ -1,6 +1,5 @@
 import SiteHeader, { type TopInfo } from '@/components/uui/SiteHeader';
 import SiteFooter from '@/components/uui/SiteFooter';
-import { Cyrillic } from '@/components/site/Cyrillic';
 import { apiSafe } from '@/lib/api';
 import { t } from '@/lib/i18n';
 import { getLang } from '@/lib/lang.server';
@@ -17,7 +16,6 @@ export default async function PublicLayout({ children }: { children: React.React
       <SiteHeader info={info} lang={lang} />
       <main id="sadrzaj" className="w-full bg-white overflow-x-clip">{children}</main>
       <SiteFooter lang={lang} />
-      {lang === 'sr-Cyrl' && <Cyrillic />}
     </div>
   );
 }

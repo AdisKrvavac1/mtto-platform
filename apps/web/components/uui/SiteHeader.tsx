@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { SearchBox } from '@/components/site/SearchBox';
 import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { LANGS, translator, type Lang } from '@/lib/i18n';
+import { LANGS, stripLang, translator, type Lang } from '@/lib/i18n';
 import {
   AlertTriangle, ArrowRight, ChevronRight, File06, Building07, CheckVerified01, ChevronDown, Clock, FileSearch02, Globe02, Image01, Map01, MarkerPin04, Menu02, Phone01,
   Scales02, ShoppingCart01, Compass03, Calendar, LineChartUp01, Sun, Ticket01, Trash03, User01, Users01, Waves, Wind01, XClose, Building02, Mail01, Edit05, Database01,
@@ -162,7 +162,7 @@ const AQI_RING = { success: 'bg-[var(--gr-500)]/15 text-[var(--gr-200)] ring-[va
 const LVL = { 1: ['bg-[var(--gr-400)]', 'uobičajeno stanje'], 2: ['bg-[#f79009]', 'pojačan oprez'], 3: ['bg-[#f04438]', 'visok rizik'] } as const;
 
 function Langs({ lang }: { lang: Lang }) {
-  const path = usePathname();
+  const path = stripLang(usePathname());
   return (
     <span className="flex items-center rounded-[6px] bg-white/10 p-0.5 text-[12px] font-semibold" role="group" aria-label={translator(lang)('Jezik')}>
       {LANGS.map((l) => (
@@ -183,7 +183,7 @@ function localizeNav(nav: Nav[], tr: (s: string) => string): Nav[] {
 }
 
 export default function SiteHeader({ info, lang = 'bs' }: { info?: TopInfo; lang?: Lang }) {
-  const path = usePathname();
+  const path = stripLang(usePathname());
   const tr = useMemo(() => translator(lang), [lang]);
   const nav = useMemo(() => localizeNav(NAV, tr), [tr]);
   const [open, setOpen] = useState(false);
