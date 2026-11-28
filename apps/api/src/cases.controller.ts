@@ -36,22 +36,26 @@ const STATUS_MAIL: Record<string, string> = {
   DOPUNA: 'Za nastavak obrade potrebna je dopuna zahtjeva. Dopunu dostavljate na stranici za praćenje statusa, brojem predmeta i kodom s potvrde.',
   RIJESEN: 'Vaš zahtjev je riješen.',
   ODBIJEN: 'Vaš zahtjev je odbijen.',
+  PROSLIJEDJEN: 'Vaša prijava nije u nadležnosti Ministarstva i proslijeđena je nadležnom organu.',
 };
 
 export const CASE_STATUS: Record<string, string> = {
   ZAPRIMLJEN: 'Zaprimljen', U_OBRADI: 'U obradi', DOPUNA: 'Čeka dopunu', RIJESEN: 'Riješen', ODBIJEN: 'Odbijen',
+  PROSLIJEDJEN: 'Proslijeđen nadležnom organu',
 };
 const OPEN = ['ZAPRIMLJEN', 'U_OBRADI', 'DOPUNA'];
 /** Dozvoljeni prelazi. Zatvoren predmet se ponovo otvara samo uz obrazloženje. */
 const NEXT: Record<string, string[]> = {
-  ZAPRIMLJEN: ['U_OBRADI', 'DOPUNA', 'RIJESEN', 'ODBIJEN'],
-  U_OBRADI: ['DOPUNA', 'RIJESEN', 'ODBIJEN'],
-  DOPUNA: ['U_OBRADI', 'RIJESEN', 'ODBIJEN'],
+  ZAPRIMLJEN: ['U_OBRADI', 'DOPUNA', 'RIJESEN', 'ODBIJEN', 'PROSLIJEDJEN'],
+  U_OBRADI: ['DOPUNA', 'RIJESEN', 'ODBIJEN', 'PROSLIJEDJEN'],
+  DOPUNA: ['U_OBRADI', 'RIJESEN', 'ODBIJEN', 'PROSLIJEDJEN'],
   RIJESEN: ['U_OBRADI'],
   ODBIJEN: ['U_OBRADI'],
+  PROSLIJEDJEN: ['U_OBRADI'],
 };
 /** Prelaz za koji podnosilac mora dobiti poruku (šta dopuniti, ishod, razlog). */
-const NEEDS_MESSAGE = ['DOPUNA', 'RIJESEN', 'ODBIJEN'];
+const NEEDS_MESSAGE = ['DOPUNA', 'RIJESEN', 'ODBIJEN', 'PROSLIJEDJEN'];
+const CLOSED = ['RIJESEN', 'ODBIJEN', 'PROSLIJEDJEN'];
 
 const MAX_FILE = 5 * 1024 * 1024;
 const MAX_FILES = 5;
@@ -72,9 +76,22 @@ export function sniffAttachment(b: Buffer): string | null {
 export type Form = {
   id: string; slug: string; title: string; description: string; sector: string | null; fields: Field[]; slaDays: number;
   attachments: 'NE' | 'OPCIONO' | 'OBAVEZNO'; attachmentHint: string; legalBasis: string; active: boolean; isDemo: boolean; updatedAt: string;
+  /** F2-19: prijava bez imena i kontakta (praćenje samo brojem i kodom) */
+  allowAnonymous: boolean;
+  /** F2-19: identitet podnosioca skriven u CMS-u; otkriva se uz razlog i upis u dnevnik */
+  protectIdentity: boolean;
+  /** F2-12: usmjeravanje na sektor/inspekciju po vrijednosti polja; prvo pravilo koje odgovara, '*' = svako */
+  routing: Route[];
 };
+export type Route = { field: string; equals: string; sector: string | null; label: string };
+
+/** Prvo pravilo koje odgovara podacima prijave. */
+export function route(rules: Route[] = [], data: Record<string, any>): Route | null {
+  return rules.find((r) => r.equals === '*' || String(data[r.field] ?? '') === r.equals) ?? null;
+}
 type Case = {
-  id: string; number: string; formId: string; sector: string | null; status: string; data: Record<string, any>; applicantName: string;
+  id: string; number: string; formId: string; sector: string | null; status: string; data: Record<string, any>; applicantName: string | null;
+  anonymous: boolean; routedTo: string | null;
   applicantEmail: string | null; applicantPhone: string | null; trackingHash: string; assigneeId: string | null; receivedAt: string; dueAt: string;
   closedAt: string | null; isDemo: boolean; updatedAt: string;
 };
@@ -82,12 +99,15 @@ type Case = {
 const publicForm = (f: Form) => ({
   slug: f.slug, title: f.title, description: f.description, sector: f.sector, fields: f.fields, slaDays: f.slaDays,
   attachments: f.attachments, attachmentHint: f.attachmentHint, legalBasis: f.legalBasis, isDemo: f.isDemo,
+  allowAnonymous: f.allowAnonymous, protectIdentity: f.protectIdentity,
 });
 
 /** Prijem predmeta: broj, rok, prvi događaj i prilozi u jednoj transakciji. */
 export async function receiveCase(db: Db, files: FileStore, form: Form, input: {
-  data: Record<string, any>; applicantName: string; applicantEmail?: string | null; applicantPhone?: string | null; attachments?: { buf: Buffer; name: string; type: string }[]; isDemo?: boolean;
+  data: Record<string, any>; applicantName: string | null; applicantEmail?: string | null; applicantPhone?: string | null; attachments?: { buf: Buffer; name: string; type: string }[]; isDemo?: boolean;
+  anonymous?: boolean;
 }) {
+  const r = route(form.routing, input.data);
   const code = newTrackingCode();
   const stored: { a: { buf: Buffer; name: string; type: string }; s: Stored }[] = [];
   for (const a of input.attachments ?? []) stored.push({ a, s: await files.put('predmeti', a.buf, a.type) });
@@ -101,12 +121,12 @@ export async function receiveCase(db: Db, files: FileStore, form: Form, input: {
     const cid = id();
     const due = new Date(Date.now() + form.slaDays * 86400_000);
     await c.query(
-      `INSERT INTO cases ("id","number","formId","sector","data","applicantName","applicantEmail","applicantPhone","trackingHash","dueAt","isDemo") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
-      [cid, number, form.id, form.sector, JSON.stringify(input.data), input.applicantName, input.applicantEmail || null, input.applicantPhone || null, hashCode(code), due, !!input.isDemo],
+      `INSERT INTO cases ("id","number","formId","sector","data","applicantName","applicantEmail","applicantPhone","trackingHash","dueAt","isDemo","anonymous","routedTo") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
+      [cid, number, form.id, r?.sector ?? form.sector, JSON.stringify(input.data), input.applicantName, input.applicantEmail || null, input.applicantPhone || null, hashCode(code), due, !!input.isDemo, !!input.anonymous, r?.label ?? null],
     );
     await c.query(
       `INSERT INTO case_events ("id","caseId","kind","toStatus","note","public","actorName") VALUES ($1,$2,'PRIJEM','ZAPRIMLJEN',$3,true,'Portal')`,
-      [id(), cid, `Zahtjev zaprimljen elektronski. Rok za rješavanje: ${form.slaDays} dana.`],
+      [id(), cid, `Zahtjev zaprimljen elektronski. Rok za rješavanje: ${form.slaDays} dana.${r ? ` Upućeno: ${r.label}.` : ''}`],
     );
     for (const { a, s } of stored) {
       await c.query(
@@ -156,18 +176,22 @@ export class PublicCasesController {
     let raw: Record<string, any> = {};
     try { raw = typeof b?.data === 'string' ? JSON.parse(b.data) : b?.data ?? {}; } catch { throw new BadRequestException('Neispravni podaci obrasca.'); }
     const { data, errors } = validateEntry(form.fields, raw);
-    const name = String(b?.applicantName ?? '').trim();
-    const email = String(b?.applicantEmail ?? '').trim().toLowerCase();
-    const phone = String(b?.applicantPhone ?? '').trim();
-    if (name.length < 3) errors.push({ field: 'applicantName', label: 'Ime i prezime / naziv', message: 'obavezno polje' });
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push({ field: 'applicantEmail', label: 'E-mail', message: 'neispravan e-mail' });
-    if (!email && !phone) errors.push({ field: 'applicantEmail', label: 'Kontakt', message: 'unesite e-mail ili telefon' });
-    if (b?.consent !== 'true' && b?.consent !== true) errors.push({ field: 'consent', label: 'Saglasnost', message: 'potrebna je saglasnost za obradu podataka' });
+    // F2-19: anonimna prijava ne čuva ime ni kontakt (ni ako su poslani)
+    const anonymous = form.allowAnonymous && (b?.anonymous === 'true' || b?.anonymous === true);
+    const name = anonymous ? '' : String(b?.applicantName ?? '').trim();
+    const email = anonymous ? '' : String(b?.applicantEmail ?? '').trim().toLowerCase();
+    const phone = anonymous ? '' : String(b?.applicantPhone ?? '').trim();
+    if (!anonymous) {
+      if (name.length < 3) errors.push({ field: 'applicantName', label: 'Ime i prezime / naziv', message: 'obavezno polje' });
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push({ field: 'applicantEmail', label: 'E-mail', message: 'neispravan e-mail' });
+      if (!email && !phone) errors.push({ field: 'applicantEmail', label: 'Kontakt', message: 'unesite e-mail ili telefon' });
+      if (b?.consent !== 'true' && b?.consent !== true) errors.push({ field: 'consent', label: 'Saglasnost', message: 'potrebna je saglasnost za obradu podataka' });
+    }
     if (errors.length) throw new BadRequestException({ statusCode: 400, code: 'INVALID_FORM', message: errors.map((e) => `${e.label}: ${e.message}`).join('; '), errors });
     if (form.attachments === 'NE' && up.length) throw new BadRequestException('Ovaj obrazac ne prima priloge.');
     if (form.attachments === 'OBAVEZNO' && !up.length) throw new BadRequestException(`Priložite dokumente: ${form.attachmentHint || 'prilog je obavezan'}.`);
     const r = await receiveCase(this.db, this.files, form, {
-      data, applicantName: name.slice(0, 160), applicantEmail: email.slice(0, 200) || null, applicantPhone: phone.slice(0, 40) || null, attachments: checkUploads(up),
+      data, applicantName: anonymous ? null : name.slice(0, 160), applicantEmail: email.slice(0, 200) || null, applicantPhone: phone.slice(0, 40) || null, attachments: checkUploads(up), anonymous,
     });
     if (email) {
       await queueMail(this.db, {
@@ -182,7 +206,7 @@ export class PublicCasesController {
         ].join('\n'),
       });
     }
-    return { number: r.number, code: r.code, dueAt: r.dueAt, form: form.title, emailQueued: !!email };
+    return { number: r.number, code: r.code, dueAt: r.dueAt, form: form.title, emailQueued: !!email, anonymous };
   }
 
   private async find(number: unknown, code: unknown) {
@@ -266,6 +290,15 @@ export class CasesController {
     if (b.attachmentHint !== undefined) d.attachmentHint = String(b.attachmentHint).slice(0, 500);
     if (b.sector !== undefined) d.sector = b.sector ? String(b.sector) : null;
     if (b.active !== undefined) d.active = !!b.active;
+    if (b.allowAnonymous !== undefined) d.allowAnonymous = !!b.allowAnonymous;
+    if (b.protectIdentity !== undefined) d.protectIdentity = !!b.protectIdentity;
+    if (b.routing !== undefined) {
+      if (!Array.isArray(b.routing) || b.routing.length > 30) throw new BadRequestException('Pravila usmjeravanja nisu ispravna.');
+      d.routing = JSON.stringify(b.routing.map((r: any) => ({
+        field: String(r?.field ?? '').slice(0, 40), equals: String(r?.equals ?? '*').slice(0, 200) || '*',
+        sector: r?.sector ? String(r.sector).slice(0, 80) : null, label: String(r?.label ?? '').trim().slice(0, 120),
+      })).filter((r: Route) => r.label && (r.equals === '*' || r.field)));
+    }
     if (b.slaDays !== undefined) { const n = toInt(b.slaDays, 0); if (n < 1 || n > 365) throw new BadRequestException('Rok mora biti od 1 do 365 dana.'); d.slaDays = n; }
     if (b.attachments !== undefined) { if (!['NE', 'OPCIONO', 'OBAVEZNO'].includes(b.attachments)) throw new BadRequestException('Neispravna postavka priloga.'); d.attachments = b.attachments; }
     if (b.fields !== undefined || isNew) {
@@ -301,20 +334,23 @@ export class CasesController {
   async cases(@Query() q: any, @Req() req: any) {
     const w = new Where();
     if (q.status === 'OTVORENI' || !q.status) w.add(`c."status" = ANY(?)`, OPEN);
+    else if (q.status === 'ZATVORENI') w.add(`c."status" = ANY(?)`, CLOSED);
     else if (q.status !== 'SVI') w.add(`c."status"=?`, String(q.status));
     if (q.form) w.add(`c."formId"=?`, String(q.form));
     if (q.mine === '1') w.add(`c."assigneeId"=?`, req.user.sub);
     if (q.overdue === '1') w.add(`c."dueAt" < now() AND c."status" = ANY(?)`, OPEN);
     if (q.sectors === '1' && req.user.role !== 'ADMIN' && req.user.sectors?.length) w.add(`(c."sector" IS NULL OR c."sector" = ANY(?))`, req.user.sectors);
-    if (q.q) { const s = `%${String(q.q).slice(0, 100)}%`; w.add(`(c."number" ILIKE ? OR c."applicantName" ILIKE ? OR c."data"::text ILIKE ?)`, s, s, s); }
+    if (q.q) { const s = `%${String(q.q).slice(0, 100)}%`; w.add(`(c."number" ILIKE ? OR (NOT f."protectIdentity" AND c."applicantName" ILIKE ?) OR c."data"::text ILIKE ?)`, s, s, s); }
     const limit = Math.min(toInt(q.limit, 50), 200), page = toInt(q.page, 1);
     const [items, total, counts] = await Promise.all([
-      this.db.q(`SELECT c."id",c."number",c."status",c."sector",c."applicantName",c."receivedAt",c."dueAt",c."closedAt",c."assigneeId",c."isDemo",c."updatedAt",
+      this.db.q(`SELECT c."id",c."number",c."status",c."sector",
+          CASE WHEN c."anonymous" THEN 'Anonimna prijava' WHEN f."protectIdentity" THEN 'Zaštićen identitet' ELSE c."applicantName" END "applicantName",
+          c."anonymous", f."protectIdentity", c."routedTo",c."receivedAt",c."dueAt",c."closedAt",c."assigneeId",c."isDemo",c."updatedAt",
           f."title" "formTitle", u."name" "assigneeName",
           (SELECT max(e."createdAt") FROM case_events e WHERE e."caseId"=c."id" AND e."kind"='DOPUNA_PODNOSIOCA') "lastSupplementAt"
         FROM cases c JOIN forms f ON f."id"=c."formId" LEFT JOIN users u ON u."id"=c."assigneeId" ${w.sql}
         ORDER BY (c."status" = ANY('{ZAPRIMLJEN,U_OBRADI,DOPUNA}')) DESC, c."dueAt" ASC LIMIT ${limit} OFFSET ${(page - 1) * limit}`, w.params),
-      this.db.count(`SELECT count(*) n FROM cases c ${w.sql}`, w.params),
+      this.db.count(`SELECT count(*) n FROM cases c JOIN forms f ON f."id"=c."formId" ${w.sql}`, w.params),
       this.db.q<{ status: string; n: number }>(`SELECT "status", count(*)::int n FROM cases GROUP BY 1`),
     ]);
     const overdue = await this.db.count(`SELECT count(*) n FROM cases WHERE "dueAt" < now() AND "status" = ANY($1)`, [OPEN]);
@@ -338,7 +374,23 @@ export class CasesController {
       this.db.q(`SELECT "id","fileName","mimeType","size","scanStatus","source","createdAt" FROM case_files WHERE "caseId"=$1 ORDER BY "createdAt"`, [cid]),
       k.assigneeId ? this.db.one(`SELECT "id","name" FROM users WHERE "id"=$1`, [k.assigneeId]) : null,
     ]);
-    return { ...rest, form, events, files, assignee };
+    // F2-19: zaštićen identitet se ne šalje u CMS dok ga referent ne otkrije (uz razlog, u dnevnik)
+    const masked = !!form?.protectIdentity && !k.anonymous;
+    const who = masked ? { applicantName: null, applicantEmail: null, applicantPhone: null, identityMasked: true, hasEmail: !!k.applicantEmail, hasPhone: !!k.applicantPhone } : { identityMasked: false };
+    return { ...rest, ...who, form, events, files, assignee };
+  }
+
+  @Post('cases/:id/reveal')
+  @Can('predmeti', 'write')
+  async reveal(@Param('id') cid: string, @Body() b: any, @Req() req: any) {
+    const k = await this.load(cid);
+    assertScope(req.user, k.sector, 'predmete');
+    if (k.anonymous) throw new BadRequestException('Prijava je anonimna: identitet nije sačuvan.');
+    const reason = String(b?.reason ?? '').trim();
+    if (reason.length < 10) throw new BadRequestException('Navedite razlog otkrivanja identiteta (najmanje 10 znakova).');
+    await this.event(k, req, { kind: 'IDENTITET', note: `Identitet podnosioca otkriven. Razlog: ${reason.slice(0, 500)}` });
+    await this.audit.log(req, { action: 'Otkrio/la identitet podnosioca prijave', entity: 'predmeti', entityId: cid, target: `${k.number}: ${reason.slice(0, 200)}` });
+    return { applicantName: k.applicantName, applicantEmail: k.applicantEmail, applicantPhone: k.applicantPhone };
   }
 
   /** Referenti koji mogu preuzeti predmet (pravo predmeti:write, aktivni). */
@@ -369,7 +421,7 @@ export class CasesController {
       const since = await this.db.one<{ at: string }>(`SELECT max("createdAt") "at" FROM case_events WHERE "caseId"=$1 AND "toStatus"='DOPUNA'`, [cid]);
       if (since?.at) d.dueAt = new Date(new Date(k.dueAt).getTime() + (Date.now() - new Date(since.at).getTime()));
     }
-    if (['RIJESEN', 'ODBIJEN'].includes(to)) d.closedAt = new Date();
+    if (CLOSED.includes(to)) d.closedAt = new Date();
     if (OPEN.includes(to)) d.closedAt = null;
     if (!k.assigneeId && to === 'U_OBRADI') d.assigneeId = req.user.sub;
     const updated = await this.db.update<Case>('cases', cid, d, true);
@@ -411,7 +463,7 @@ export class CasesController {
       const u = await this.db.one<{ email: string }>(`SELECT "email" FROM users WHERE "id"=$1`, [uid]);
       if (u) await queueMail(this.db, {
         to: u.email, ref: k.id, subject: `Dodijeljen Vam je predmet ${k.number}`,
-        text: [`${name},`, '', `${req.user.name} Vam je dodijelio/la predmet ${k.number} (podnosilac: ${k.applicantName}).`, `Rok: ${fmtDate(k.dueAt)}`, '', `Predmet: ${site()}/admin/predmeti/${k.id}`, footer()].join('\n'),
+        text: [`${name},`, '', `${req.user.name} Vam je dodijelio/la predmet ${k.number}.`, `Rok: ${fmtDate(k.dueAt)}`, '', `Predmet: ${site()}/admin/predmeti/${k.id}`, footer()].join('\n'),
       });
     }
     await this.audit.log(req, { action: 'Dodijelio/la predmet', entity: 'predmeti', entityId: cid, target: `${k.number} → ${name}` });

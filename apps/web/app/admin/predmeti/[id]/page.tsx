@@ -12,7 +12,8 @@ import { Attachment01, File06, Mail01, MessageChatSquare, Phone01, UploadCloud02
 
 type Ev = { id: string; kind: string; fromStatus: CaseStatus | null; toStatus: CaseStatus | null; note: string; public: boolean; actorName: string; createdAt: string };
 type CaseFull = {
-  id: string; number: string; status: CaseStatus; sector: string | null; data: Record<string, any>; applicantName: string; applicantEmail: string | null; applicantPhone: string | null;
+  id: string; number: string; status: CaseStatus; sector: string | null; data: Record<string, any>; applicantName: string | null; applicantEmail: string | null; applicantPhone: string | null;
+  anonymous: boolean; routedTo: string | null; identityMasked: boolean; hasEmail?: boolean; hasPhone?: boolean;
   assigneeId: string | null; receivedAt: string; dueAt: string; closedAt: string | null; isDemo: boolean;
   form: { title: string; fields: RegField[]; slaDays: number; legalBasis: string } | null; events: Ev[];
   files: { id: string; fileName: string; mimeType: string; size: number; scanStatus: string; source: string; createdAt: string }[];
@@ -20,11 +21,12 @@ type CaseFull = {
 };
 type Person = { id: string; name: string; role: string; sectors: string[] };
 
-const KIND: Record<string, string> = { PRIJEM: 'Prijem', STATUS: 'Status', DODJELA: 'Dodjela', BILJESKA: 'Interna bilješka', PRILOG: 'Prilog službenika', DOPUNA_PODNOSIOCA: 'Dopuna podnosioca' };
+const KIND: Record<string, string> = { PRIJEM: 'Prijem', STATUS: 'Status', DODJELA: 'Dodjela', BILJESKA: 'Interna bilješka', PRILOG: 'Prilog službenika', DOPUNA_PODNOSIOCA: 'Dopuna podnosioca', IDENTITET: 'Otkriven identitet' };
 const PLACEHOLDER: Partial<Record<CaseStatus, string>> = {
   DOPUNA: 'Šta podnosilac treba dostaviti i do kada (vidi se pri praćenju statusa).',
   RIJESEN: 'Ishod i naredni korak za podnosioca, npr. broj rješenja i gdje ga preuzeti.',
   ODBIJEN: 'Razlog odbijanja i pravna pouka.',
+  PROSLIJEDJEN: 'Kome je prijava proslijeđena (naziv organa) i kako ga podnosilac može kontaktirati.',
   U_OBRADI: 'Neobavezno: poruka podnosiocu.',
 };
 
@@ -38,6 +40,14 @@ export default function CasePage() {
   const [message, setMessage] = useState('');
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
+  const [revealing, setRevealing] = useState(false);
+  const [reason, setReason] = useState('');
+  const [who, setWho] = useState<{ applicantName: string | null; applicantEmail: string | null; applicantPhone: string | null } | null>(null);
+  async function reveal(e: React.FormEvent) {
+    e.preventDefault(); setBusy(true);
+    try { setWho(await adminFetch(`/admin/cases/${id}/reveal`, { method: 'POST', body: JSON.stringify({ reason }) })); setRevealing(false); toast.ok('Identitet otkriven; upisano u dnevnik'); adminFetch<CaseFull>(`/admin/cases/${id}`).then(setK); }
+    catch (x: any) { toast.err(x.message); } finally { setBusy(false); }
+  }
   const fileIn = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -59,8 +69,8 @@ export default function CasePage() {
 
   return (
     <>
-      <PageTitle kicker={k.form?.title ?? 'Obrazac'} crumbs={['E-pisarnica', k.number]} title={k.number}
-        badge={<><Badge tone={st.tone} dot>{st.label}</Badge>{k.isDemo && <Badge tone="warning">Demo</Badge>}</>} />
+      <PageTitle kicker={`${k.form?.title ?? 'Obrazac'}${k.routedTo ? ` · upućeno: ${k.routedTo}` : ''}`} crumbs={['E-pisarnica', k.number]} title={k.number}
+        badge={<><Badge tone={st.tone} dot>{st.label}</Badge>{k.anonymous && <Badge tone="gray">Anonimna</Badge>}{k.identityMasked && <Badge tone="blue">Zaštićen identitet</Badge>}{k.isDemo && <Badge tone="warning">Demo</Badge>}</>} />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-6">
@@ -166,9 +176,30 @@ export default function CasePage() {
           <Card>
             <CardHeader title="Podnosilac" />
             <div className="space-y-2 px-6 pb-6 text-[14px] text-[#404040]">
-              <p className="font-medium text-[#171717]">{k.applicantName}</p>
-              {k.applicantEmail && <p className="flex items-center gap-2"><Mail01 size={16} className="text-[#a3a3a3]" /><a className="hover:underline" href={`mailto:${k.applicantEmail}?subject=${encodeURIComponent(`Predmet ${k.number}`)}`}>{k.applicantEmail}</a></p>}
-              {k.applicantPhone && <p className="flex items-center gap-2"><Phone01 size={16} className="text-[#a3a3a3]" /><a className="hover:underline" href={`tel:${k.applicantPhone.replace(/\s/g, '')}`}>{k.applicantPhone}</a></p>}
+              {k.anonymous ? (
+                <p>Anonimna prijava: ime i kontakt nisu sačuvani. Podnosilac prati predmet brojem i kodom i tamo vidi javne poruke.</p>
+              ) : k.identityMasked && !who ? (
+                <>
+                  <p>Identitet podnosioca je zaštićen. Otkriva se samo kad je nužno za postupak; razlog se upisuje u historiju predmeta i dnevnik.</p>
+                  <p className="text-[#737373]">Kontakt: {[k.hasEmail && 'e-mail', k.hasPhone && 'telefon'].filter(Boolean).join(' i ') || 'nema'} · obavještenja o statusu idu automatski</p>
+                  {editable && !revealing && <button type="button" className={btnSecondary} onClick={() => setRevealing(true)}>Prikaži identitet</button>}
+                  {revealing && (
+                    <form onSubmit={reveal} className="space-y-3 pt-1">
+                      <Field label="Razlog otkrivanja" required><textarea className={input} rows={3} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="npr. potrebna izjava podnosioca kao svjedoka u prekršajnom postupku" /></Field>
+                      <div className="flex justify-end gap-2"><button type="button" className={btnSecondary} onClick={() => setRevealing(false)}>Odustani</button><button className={btnPrimary} disabled={busy || reason.trim().length < 10}>Otkrij i upiši</button></div>
+                    </form>
+                  )}
+                </>
+              ) : (
+                <>
+                  {(() => { const p = who ?? k; return (<>
+                    <p className="font-medium text-[#171717]">{p.applicantName}</p>
+                    {p.applicantEmail && <p className="flex items-center gap-2"><Mail01 size={16} className="text-[#a3a3a3]" /><a className="hover:underline" href={`mailto:${p.applicantEmail}?subject=${encodeURIComponent(`Predmet ${k.number}`)}`}>{p.applicantEmail}</a></p>}
+                    {p.applicantPhone && <p className="flex items-center gap-2"><Phone01 size={16} className="text-[#a3a3a3]" /><a className="hover:underline" href={`tel:${p.applicantPhone.replace(/\s/g, '')}`}>{p.applicantPhone}</a></p>}
+                  </>); })()}
+                  {who && <p className="text-[12px] text-[#b54708]">Otkriveno uz razlog; ne dijelite podatke izvan postupka.</p>}
+                </>
+              )}
               <p className="flex items-center gap-2 text-[#737373]"><Attachment01 size={16} className="text-[#a3a3a3]" />{k.files.filter((f) => f.source === 'PODNOSILAC').length} priloga podnosioca</p>
             </div>
           </Card>

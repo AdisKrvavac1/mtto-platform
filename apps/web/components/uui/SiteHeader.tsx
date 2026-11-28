@@ -32,6 +32,7 @@ export const NAV: Nav[] = [
         { href: '/registri/okolisne-dozvole', label: 'Okolišne dozvole', desc: 'Javni registar izdatih dozvola.', icon: FileSearch02 },
         { href: '/registri/ugostiteljski-objekti', label: 'Ugostiteljski objekti', desc: 'Kategorizirani smještaj, izvoz u CSV.', icon: Building07 },
         { href: '/turisticki-vodici', label: 'Turistički vodiči', desc: 'Stručni ispit i licenciranje.', icon: Users01 },
+        { href: '/registri/turisticke-zajednice', label: 'Turističke zajednice', desc: 'Upisnik i kontakti.', icon: Building07 },
         { href: '/registri/upravljanje-otpadom', label: 'Upravljanje otpadom', desc: 'Registar operatera otpada.', icon: Trash03, badge: 'Faza 2' },
       ] },
     ],
@@ -42,7 +43,7 @@ export const NAV: Nav[] = [
   },
   { label: 'Natječaji', href: '/vijesti?type=JAVNI_POZIV', match: [] },
   { label: 'Propisi i obrasci', href: '/propisi', match: ['/propisi'] },
-  { label: 'Trgovina', href: '/trgovina', match: ['/trgovina'] },
+  { label: 'Trgovina', href: '/trgovina', match: ['/trgovina', '/inspekcija'] },
   {
     label: 'Turizam i baština', match: ['/turizam-i-bastina', '/turisticki-vodici', '/foto-albumi'],
     groups: [
@@ -50,6 +51,7 @@ export const NAV: Nav[] = [
         { href: '/turizam-i-bastina', label: 'Turizam i baština', desc: 'Destinacija HNK, UNESCO baština i poticaji.', icon: Sun },
         { href: '/turisticki-vodici', label: 'Turistički vodiči', desc: 'Ispit, licence i registar vodiča.', icon: Users01 },
         { href: '/registri/ugostiteljski-objekti', label: 'Ugostiteljski objekti', desc: 'Kategorizacija smještaja.', icon: Building07 },
+        { href: '/turizam-i-bastina/boravisna-taksa', label: 'Boravišna taksa', desc: 'Prijava gostiju na prijava.ba.', icon: File06 },
       ] },
       { title: 'Baština i priroda', items: [
         { href: '/foto-albumi/hutovo-blato', label: 'Foto albumi', desc: 'Galerije zaštićenih područja.', icon: Image01 },

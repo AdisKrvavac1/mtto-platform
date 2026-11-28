@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { upcoming } from '@/lib/nonworking';
 import { Badge, Card, Container, CountUp, Faq, FeaturedIcon, GRAD, HB1, HB2, Head, PageHero } from '@/components/uui';
 import {
   AlertTriangle, Bell01, Building07, Calendar, CheckCircle, Clock, File06, FileCheck02, LineChartUp01,
@@ -87,9 +88,10 @@ const LOCAL = [
   [Tag01, 'Maslinovo ulje', 'Južna Hercegovina i Neum'], [CheckCircle, 'Ljekovito bilje', 'Kadulja, smilje i vrisak'],
 ] as const;
 
-export default function TrgovinaPage() {
-  const { sundays, holidays, left } = calendar();
-  const next = sundays[0];
+export default async function TrgovinaPage() {
+  const { left } = calendar();
+  // F2-11: praznici iz registra „neradni-dani“ (CMS), nedjelje po zakonu
+  const next = (await upcoming(120)).slice(0, 6);
   const first = totals[0], last = totals[totals.length - 1];
   const change = ((last - first) / first) * 100;
 
@@ -99,7 +101,7 @@ export default function TrgovinaPage() {
         crumbs={[{ label: 'Naslovna', href: '/' }, { label: 'Trgovina' }]}
         eyebrow="Sektor za trgovinu"
         title="Trgovina i zaštita potrošača"
-        actions={<><Link href="#radno-vrijeme" className={HB1}><Calendar size={20} />Rade li trgovine u nedjelju?</Link><Link href="#potrosaci" className={HB2}><AlertTriangle size={20} />Prijavi nepravilnost</Link></>}
+        actions={<><Link href="/trgovina/neradni-dani" className={HB1}><Calendar size={20} />Rade li trgovine u nedjelju?</Link><Link href="/e-usluge/prijava-inspekciji" className={HB2}><AlertTriangle size={20} />Prijavi nepravilnost</Link></>}
         stats={[
           { label: 'Neradnih nedjelja do kraja godine', value: String(left), icon: Calendar },
           { label: 'Proizvoda u potrošačkoj korpi', value: String(BASKET.length), sub: 'Demo podaci', icon: ShoppingCart01 },
@@ -131,23 +133,22 @@ export default function TrgovinaPage() {
               <p className="mt-2 text-[14px] leading-5 text-[var(--br-100)]">Zakon o unutrašnjoj trgovini FBiH („Sl. novine FBiH”, br. 87/2024): prodajni objekti nedjeljom su zatvoreni, uz zakonom propisane izuzetke. Primjena od 17. 11. 2024.</p>
               <div className="mt-auto flex flex-wrap gap-2 pt-4"><Badge tone="success">Federalni propis</Badge></div>
             </div>
-            {([[ShoppingCart01, 'Prodajni objekti', 'Nedjeljom zatvoreni, osim izuzetaka propisanih zakonom.', null], [CheckCircle, 'Zakonski izuzeci', 'Popis izuzetaka i rad za praznike objavljuje Ministarstvo.', 'Provjeriti s Ministarstvom'], [AlertTriangle, 'Rad protivno propisu', 'Otvoren objekt nedjeljom prijavite tržišnoj inspekciji.', null]] as const).map(([I, t, s, note]) => (
+            {([[ShoppingCart01, 'Prodajni objekti', 'Nedjeljom zatvoreni, osim izuzetaka propisanih zakonom.', null], [CheckCircle, 'Zakonski izuzeci', 'Popis izuzetaka i rad za praznike objavljuje Ministarstvo.', null], [AlertTriangle, 'Rad protivno propisu', 'Otvoren objekt nedjeljom prijavite tržišnoj inspekciji.', null]] as const).map(([I, t, s, note]) => (
               <Card key={t} className="uui-lift flex flex-col p-6"><FeaturedIcon icon={I} tone="brand" size="lg" ripple={false} /><p className="mt-5 text-[18px] font-semibold text-[#171717]">{t}</p><p className="mt-2 text-[14px] leading-5 text-[#525252]">{s}</p>{note && <div className="mt-auto pt-4"><Badge tone="gray">{note}</Badge></div>}</Card>
             ))}
           </div>
           <Card className="flex flex-col p-6">
-            <div className="flex items-center justify-between gap-2"><h3 className="text-[18px] font-semibold text-[#171717]">Kalendar neradnih dana</h3><Badge tone="warning">Demo</Badge></div>
+            <div className="flex items-center justify-between gap-2"><h3 className="text-[18px] font-semibold text-[#171717]">Kalendar neradnih dana</h3><Link href="/trgovina/neradni-dani#kalendar" className="text-[14px] font-semibold text-[var(--br-700)] hover:underline">Cijeli kalendar</Link></div>
             <p className="mt-1 text-[14px] text-[#525252]">Naredne nedjelje i državni praznici.</p>
             <ul className="mt-4 flex flex-1 flex-col justify-between divide-y divide-[#e5e5e5]">
-              {[...sundays.map((s) => [s, 'Neradna nedjelja', false] as const), ...holidays.map(([h, n]) => [h, n, true] as const)]
-                .sort((a, b) => a[0].getTime() - b[0].getTime()).slice(0, 6).map(([dt, n, hol]) => (
+              {next.map((x) => [new Date(`${x.date}T12:00:00`), x.name, x.kind !== 'Nedjelja'] as const).map(([dt, n, hol]) => (
                   <li key={dt.toISOString() + n} className="flex items-center gap-4 py-2.5">
                     <span className={`flex size-12 shrink-0 flex-col items-center justify-center rounded-[10px] ring-1 ring-inset ${hol ? 'bg-[var(--gr-50)] text-[var(--gr-700)] ring-[var(--gr-200)]' : 'bg-[var(--br-50)] text-[var(--br-700)] ring-[var(--br-200)]'}`}><b className="text-[18px] leading-5">{dt.getDate()}</b><span className="text-[11px] leading-3 font-semibold">{dt.getMonth() + 1}.</span></span>
                     <span className="min-w-0"><b className="block text-[14px] font-semibold text-[#171717]">{n}</b><span className="text-[14px] capitalize text-[#525252]">{DAYS[dt.getDay()]}, {fmt(dt)}</span></span>
                   </li>
                 ))}
             </ul>
-            <p className="mt-4 text-[12px] text-[#737373]">Kalendar praznika i radno vrijeme za praznike potvrđuje Ministarstvo.</p>
+            <a href="/trgovina/neradni-dani.ics" className="mt-4 text-[14px] font-semibold text-[var(--br-700)] hover:underline">Dodaj u svoj kalendar (.ics)</a>
           </Card>
           </div>
         </Container>
@@ -223,7 +224,7 @@ export default function TrgovinaPage() {
               <p className="mt-2 text-[14px] text-[#525252]">Pogrešne cijene, račun koji nije izdan ili rad protivno propisima prijavite inspekciji.</p>
               <p className="mt-5 text-[14px] font-semibold text-[#171717]">Božana Babić, inspekcija</p>
               <a href="tel:+38736552103" className="mt-3 inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-[8px] bg-[var(--br-600)] px-4 text-[16px] font-semibold text-white hover:bg-[var(--br-700)]"><Phone size={20} />036 552 103</a>
-              <button disabled className="mt-2 inline-flex h-11 w-full cursor-not-allowed items-center justify-center gap-1.5 rounded-[8px] bg-white px-4 text-[16px] font-semibold text-[#a3a3a3] ring-1 ring-inset ring-[#e5e5e5]">Online prijava · Faza 2</button>
+              <Link href="/e-usluge/prijava-inspekciji" className="mt-2 inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-[8px] bg-white px-4 text-[16px] font-semibold text-[#404040] ring-1 ring-inset ring-[#d4d4d4] hover:bg-[#fafafa]"><ShieldTick size={20} />Prijavi online, i anonimno</Link>
             </Card>
             <div className={`rounded-[16px] p-6 text-white ${GRAD}`} id="mapa-nedjelja">
               <Badge tone="gray">Faza 2</Badge>

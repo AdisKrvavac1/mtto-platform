@@ -33,8 +33,8 @@ export default function FieldsEditor({ fields, setFields, locked, flags }: { fie
           <li key={f._id} className="px-4 py-3 md:px-6">
             <div className="flex flex-wrap items-center gap-2 md:flex-nowrap">
               <span className="w-6 shrink-0 text-right text-[14px] tabular-nums text-[#a3a3a3]">{i + 1}</span>
-              <input aria-label={`Naziv polja ${i + 1}`} className={`${input} min-w-[180px] flex-1`} value={f.label} disabled={locked} required onChange={(e) => upd(f._id, { label: e.target.value })} placeholder="Naziv polja" />
-              <select aria-label={`Vrsta polja ${i + 1}`} className={`${input} w-[170px] shrink-0`} value={f.type} disabled={locked} onChange={(e) => upd(f._id, { type: e.target.value as any, _open: e.target.value === 'select' ? true : f._open })}>
+              <input aria-label={`Naziv polja ${i + 1}`} className={`${input} !w-auto min-w-[180px] flex-1`} value={f.label} disabled={locked} required onChange={(e) => upd(f._id, { label: e.target.value })} placeholder="Naziv polja" />
+              <select aria-label={`Vrsta polja ${i + 1}`} className={`${input} !w-[170px] shrink-0`} value={f.type} disabled={locked} onChange={(e) => upd(f._id, { type: e.target.value as any, _open: e.target.value === 'select' ? true : f._open })}>
                 {FIELD_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
               </select>
               <div className="flex shrink-0 items-center">

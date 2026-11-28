@@ -9,9 +9,9 @@ import { dateShort } from '@/lib/format';
 import { Badge, Card, EmptyState, MetricCard, PageTitle, Tabs, btnSecondary, input, td, th, tr, useToast } from '@/components/admin/ui';
 import { File06, Inbox01, SearchLg } from '@untitledui/icons';
 
-type Item = { id: string; number: string; status: CaseStatus; applicantName: string; receivedAt: string; dueAt: string; closedAt: string | null; formTitle: string; assigneeName: string | null; isDemo: boolean; lastSupplementAt: string | null; updatedAt: string };
+type Item = { id: string; number: string; status: CaseStatus; applicantName: string; routedTo: string | null; anonymous: boolean; protectIdentity: boolean; receivedAt: string; dueAt: string; closedAt: string | null; formTitle: string; assigneeName: string | null; isDemo: boolean; lastSupplementAt: string | null; updatedAt: string };
 type Res = { items: Item[]; total: number; counts: Partial<Record<CaseStatus, number>>; overdue: number };
-type Tab = 'OTVORENI' | 'MOJI' | 'ROK' | 'RIJESEN' | 'ODBIJEN' | 'SVI';
+type Tab = 'OTVORENI' | 'MOJI' | 'ROK' | 'ZATVORENI' | 'SVI';
 
 export default function CasesInbox() {
   const toast = useToast();
@@ -46,7 +46,7 @@ export default function CasesInbox() {
         <MetricCard title="Novi (zaprimljeni)" value={c.ZAPRIMLJEN ?? 0} footer="Čekaju referenta" />
         <MetricCard title="U obradi" value={c.U_OBRADI ?? 0} footer={`${c.DOPUNA ?? 0} čeka dopunu`} />
         <MetricCard title="Rok istekao" value={res?.overdue ?? 0} footer={res?.overdue ? <span className="text-[#b42318]">Potrebna hitna obrada</span> : 'Svi u roku'} />
-        <MetricCard title="Riješeno" value={(c.RIJESEN ?? 0) + (c.ODBIJEN ?? 0)} footer={`${c.ODBIJEN ?? 0} odbijeno`} />
+        <MetricCard title="Zatvoreno" value={(c.RIJESEN ?? 0) + (c.ODBIJEN ?? 0) + (c.PROSLIJEDJEN ?? 0)} footer={`${c.ODBIJEN ?? 0} odbijeno · ${c.PROSLIJEDJEN ?? 0} proslijeđeno`} />
       </div>
 
       <div className="mb-4">
@@ -54,8 +54,7 @@ export default function CasesInbox() {
           { value: 'OTVORENI', label: 'Otvoreni', count: open },
           { value: 'MOJI', label: 'Moji' },
           { value: 'ROK', label: 'Rok istekao', count: res?.overdue },
-          { value: 'RIJESEN', label: 'Riješeni' },
-          { value: 'ODBIJEN', label: 'Odbijeni' },
+          { value: 'ZATVORENI', label: 'Zatvoreni' },
           { value: 'SVI', label: 'Svi' },
         ]} />
       </div>
@@ -82,9 +81,9 @@ export default function CasesInbox() {
                     <td className={`${td} min-w-[260px]`}>
                       <Link href={`/admin/predmeti/${i.id}`} className="font-medium text-[#171717] hover:underline">{i.number}</Link>
                       {i.isDemo && <Badge tone="warning" className="ml-2">Demo</Badge>}
-                      <p className="text-[14px] text-[#737373]">{i.formTitle}</p>
+                      <p className="text-[14px] text-[#737373]">{i.formTitle}{i.routedTo ? ` · ${i.routedTo}` : ''}</p>
                     </td>
-                    <td className={td}>{i.applicantName}</td>
+                    <td className={`${td} ${i.anonymous || i.protectIdentity ? 'italic text-[#737373]' : ''}`}>{i.applicantName}</td>
                     <td className={`${td} whitespace-nowrap`}>
                       <Badge tone={CASE_STATUS[i.status].tone} dot>{CASE_STATUS[i.status].label}</Badge>
                       {i.status === 'DOPUNA' && i.lastSupplementAt && <p className="mt-1 text-[12px] font-medium text-[#067647]">Dopuna stigla {dateShort(i.lastSupplementAt)}</p>}

@@ -80,8 +80,9 @@ export interface CaseFiles {
 }
 
 export interface Cases {
+  anonymous: Generated<boolean>;
   applicantEmail: string | null;
-  applicantName: string;
+  applicantName: string | null;
   applicantPhone: string | null;
   assigneeId: string | null;
   closedAt: Timestamp | null;
@@ -93,6 +94,7 @@ export interface Cases {
   isDemo: Generated<boolean>;
   number: string;
   receivedAt: Generated<Timestamp>;
+  routedTo: string | null;
   sector: string | null;
   status: Generated<string>;
   tenantId: Generated<string>;
@@ -212,6 +214,7 @@ export interface Facilities {
 
 export interface Forms {
   active: Generated<boolean>;
+  allowAnonymous: Generated<boolean>;
   attachmentHint: Generated<string>;
   attachments: Generated<string>;
   createdAt: Generated<Timestamp>;
@@ -220,6 +223,8 @@ export interface Forms {
   id: string;
   isDemo: Generated<boolean>;
   legalBasis: Generated<string>;
+  protectIdentity: Generated<boolean>;
+  routing: Generated<Json>;
   sector: string | null;
   slaDays: Generated<number>;
   slug: string;

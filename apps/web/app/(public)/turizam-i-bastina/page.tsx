@@ -61,7 +61,7 @@ export default async function TurizamPage({ searchParams }: { searchParams: Prom
       {/* BRZI LINKOVI */}
       <section className="border-b border-[#e5e5e5] bg-white">
         <Container className="grid gap-2 py-4 sm:grid-cols-2 lg:grid-cols-4">
-          {([[Ticket01, 'Javni natječaj', call ? (open ? 'Otvoren poziv' : 'Zatvoren') : 'Nema otvorenih', '/vijesti?type=JAVNI_POZIV', !!open], [File06, 'Obrasci i dozvole', 'Zahtjevi za kategorizaciju', '/propisi?docType=OBRAZAC', false], [Users01, 'Registar vodiča', 'Ispit i licence (Faza 2)', '/turisticki-vodici', false], [Award01, 'Standardi i ocjene', 'Kategorizacija objekata', '/registri/ugostiteljski-objekti', false]] as const).map(([I, t, s, href, rip]) => (
+          {([[Ticket01, 'Javni natječaj', call ? (open ? 'Otvoren poziv' : 'Zatvoren') : 'Nema otvorenih', '/vijesti?type=JAVNI_POZIV', !!open], [File06, 'Zahtjev za kategorizaciju', 'Podnesite elektronski', '/e-usluge/obrasci/zahtjev-za-kategorizaciju', false], [Users01, 'Turističke zajednice', 'Upisnik i kontakti', '/registri/turisticke-zajednice', false], [Award01, 'Boravišna taksa', 'Prijava gostiju na prijava.ba', '/turizam-i-bastina/boravisna-taksa', false]] as const).map(([I, t, s, href, rip]) => (
             <Link key={t} href={href} className="group flex items-center gap-3 rounded-[12px] p-3 hover:bg-[#fafafa]"><FeaturedIcon icon={I} tone={rip ? 'success' : 'brand'} size="md" ripple={rip} /><span><b className="block text-[16px] font-semibold text-[#171717] group-hover:text-[var(--br-700)]">{t}</b><span className="text-[14px] text-[#525252]">{s}</span></span></Link>
           ))}
         </Container>
@@ -165,7 +165,7 @@ export default async function TurizamPage({ searchParams }: { searchParams: Prom
         <Container>
           <Head k="Vodič za iznajmljivače" t="Kako legalno registrirati smještajni objekat" s="Jedinstveni postupak sufinanciranja i kategorizacije objekata kroz tri koraka." action={<Button href="/propisi" variant="secondary" icon={Download01}>Brošura postupka (PDF)</Button>} />
           <div className="mt-10 grid gap-6 md:grid-cols-3">
-            {[['Priprema dokumentacije', 'Pribavite dokaz o vlasništvu, urbanističku saglasnost i upotrebnu dozvolu za objekat.', 'Potrebno: dokaz o vlasništvu'], ['Podnošenje zahtjeva', 'Ispunjen obrazac zahtjeva za kategorizaciju predaje se na protokol Ministarstva.', 'Gdje: pisarnica MTTO ili e-protokol (Faza 2)'], ['Očevid i izdavanje rješenja', 'Komisija vrši očevid i utvrđuje kategoriju; rješenje se upisuje u javni registar.', 'Rok: rješenje u zakonskom roku']].map(([t, d, n], i) => (
+            {[['Priprema dokumentacije', 'Pribavite dokaz o vlasništvu, urbanističku saglasnost i upotrebnu dozvolu za objekat.', 'Potrebno: dokaz o vlasništvu'], ['Podnošenje zahtjeva', 'Ispunjen obrazac zahtjeva za kategorizaciju predaje se na protokol Ministarstva.', 'Gdje: pisarnica MTTO ili elektronski zahtjev na portalu'], ['Očevid i izdavanje rješenja', 'Komisija vrši očevid i utvrđuje kategoriju; rješenje se upisuje u javni registar.', 'Rok: rješenje u zakonskom roku']].map(([t, d, n], i) => (
               <Card key={t} className="uui-lift p-6">
                 <span className="flex size-10 items-center justify-center rounded-[8px] bg-[#062343] text-[16px] font-semibold text-white">{i + 1}</span>
                 <h3 className="mt-5 text-[18px] font-semibold text-[#171717]">{t}</h3><p className="mt-2 text-[14px] text-[#525252]">{d}</p>

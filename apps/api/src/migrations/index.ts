@@ -6,6 +6,7 @@ import { m0009_sectors } from './0009_sectors';
 import { m0010_registries } from './0010_registries';
 import { m0011_forms_cases } from './0011_forms_cases';
 import { m0012_mail_outbox } from './0012_mail_outbox';
+import { m0013_sprint8 } from './0013_sprint8';
 import { m0008_document_center } from './0008_document_center';
 import { m0007_post_workflow } from './0007_post_workflow';
 import { m0006_tenants } from './0006_tenants';
@@ -20,7 +21,7 @@ import { m0004_file_storage } from './0004_file_storage';
 /** optional: migracija koja može javiti MTTO_SKIP (npr. nedostaje proširenje baze) — tada se preskače bez greške. */
 export type Migration = { id: string; up: string; optional?: boolean };
 
-export const MIGRATIONS: Migration[] = [m0001_baseline, m0002_mfa, m0003_postgis, m0004_file_storage, m0005_rbac_audit, m0006_tenants, m0007_post_workflow, m0008_document_center, m0009_sectors, m0010_registries, m0011_forms_cases, m0012_mail_outbox];
+export const MIGRATIONS: Migration[] = [m0001_baseline, m0002_mfa, m0003_postgis, m0004_file_storage, m0005_rbac_audit, m0006_tenants, m0007_post_workflow, m0008_document_center, m0009_sectors, m0010_registries, m0011_forms_cases, m0012_mail_outbox, m0013_sprint8];
 
 const LOCK_KEY = 72_031_001; // pg_advisory_lock: sprječava da dvije instance migriraju istovremeno
 

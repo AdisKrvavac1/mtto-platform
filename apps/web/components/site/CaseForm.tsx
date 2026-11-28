@@ -72,7 +72,7 @@ function Control({ f, err }: { f: RegField; err?: string }) {
   }
 }
 
-type Done = { number: string; code: string; dueAt: string; form: string; emailQueued?: boolean };
+type Done = { number: string; code: string; dueAt: string; form: string; emailQueued?: boolean; anonymous?: boolean };
 
 export default function CaseForm({ form }: { form: PublicForm }) {
   const [files, setFiles] = useState<File[]>([]);
@@ -81,6 +81,7 @@ export default function CaseForm({ form }: { form: PublicForm }) {
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<Done | null>(null);
   const [copied, setCopied] = useState(false);
+  const [anon, setAnon] = useState(false);
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -92,8 +93,9 @@ export default function CaseForm({ form }: { form: PublicForm }) {
     for (const f of form.fields) { const v = fd.get(f.key); if (v != null && v !== '') data[f.key] = String(v); }
     const body = new FormData();
     body.append('data', JSON.stringify(data));
-    for (const k of ['applicantName', 'applicantEmail', 'applicantPhone', 'altcha', 'website']) { const v = fd.get(k); if (v) body.append(k, String(v)); }
-    body.append('consent', fd.get('consent') ? 'true' : 'false');
+    for (const k of [...(anon ? [] : ['applicantName', 'applicantEmail', 'applicantPhone']), 'altcha', 'website']) { const v = fd.get(k); if (v) body.append(k, String(v)); }
+    if (anon) body.append('anonymous', 'true');
+    else body.append('consent', fd.get('consent') ? 'true' : 'false');
     files.forEach((f) => body.append('files', f, f.name));
     setBusy(true);
     try {
@@ -114,7 +116,7 @@ export default function CaseForm({ form }: { form: PublicForm }) {
     <div className="rounded-[16px] bg-white p-6 ring-1 ring-inset ring-[#e5e5e5] md:p-10 print:ring-0" role="status">
       <span className="flex size-12 items-center justify-center rounded-full bg-[#dcfae6] text-[#079455] ring-8 ring-[#ecfdf3] print:hidden"><CheckCircle size={24} /></span>
       <h2 className="mt-6 text-[24px] font-semibold leading-8 text-[#171717]">Zahtjev je zaprimljen</h2>
-      <p className="mt-2 text-[16px] text-[#525252]">{done.form}. Sačuvajte ili odštampajte ovu potvrdu: broj predmeta i kod trebaju vam za praćenje statusa i dopunu.{done.emailQueued && ' Istu potvrdu šaljemo i na vaš e-mail, kao i obavijesti o promjeni statusa.'}</p>
+      <p className="mt-2 text-[16px] text-[#525252]">{done.form}. Sačuvajte ili odštampajte ovu potvrdu: broj predmeta i kod trebaju vam za praćenje statusa i dopunu.{done.emailQueued && ' Istu potvrdu šaljemo i na vaš e-mail, kao i obavijesti o promjeni statusa.'}{done.anonymous && ' Prijava je anonimna: ovo je jedini način da pratite njen ishod, jer nemamo vaš kontakt.'}</p>
       <dl className="mt-6 grid gap-4 sm:grid-cols-3">
         <div className="rounded-[12px] bg-[#fafafa] p-4 ring-1 ring-inset ring-[#e5e5e5]"><dt className="text-[14px] text-[#525252]">Broj predmeta</dt><dd className="mt-1 font-mono text-[20px] font-semibold text-[#171717]">{done.number}</dd></div>
         <div className="rounded-[12px] bg-[#fafafa] p-4 ring-1 ring-inset ring-[#e5e5e5]"><dt className="text-[14px] text-[#525252]">Kod za praćenje</dt><dd className="mt-1 font-mono text-[20px] font-semibold text-[#171717]">{done.code}</dd></div>
@@ -144,7 +146,22 @@ export default function CaseForm({ form }: { form: PublicForm }) {
 
       {form.attachments !== 'NE' && <FilePicker files={files} setFiles={setFiles} required={form.attachments === 'OBAVEZNO'} hint={form.attachmentHint} />}
 
-      <div className="border-t border-[#e5e5e5] pt-8"><fieldset className="grid gap-5 md:grid-cols-2">
+      <div className="border-t border-[#e5e5e5] pt-8">
+        {form.allowAnonymous && (
+          <fieldset className="mb-6">
+            <legend className="mb-3 text-[18px] font-semibold text-[#171717]">Kako prijavljujete</legend>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {([[false, 'S imenom i kontaktom', form.protectIdentity ? 'Službenik vas može kontaktirati. Vaš identitet je zaštićen: vidi ga samo kad je nužno, uz razlog upisan u evidenciju.' : 'Službenik vas može kontaktirati i obavijestiti o ishodu.'], [true, 'Anonimno', 'Bez imena i kontakta. Ishod pratite samo brojem i kodom; ne možemo vas pitati za dodatne podatke.']] as const).map(([v, t, d]) => (
+                <label key={t} className={`flex cursor-pointer gap-3 rounded-[12px] p-4 ring-1 ring-inset ${anon === v ? 'bg-[var(--br-50)] ring-[var(--br-300)]' : 'ring-[#e5e5e5]'}`}>
+                  <input type="radio" name="mode" className="mt-1 accent-[var(--br-600)]" checked={anon === v} onChange={() => setAnon(v)} />
+                  <span><span className="block text-[16px] font-medium text-[#171717]">{t}</span><span className="block text-[14px] text-[#525252]">{d}</span></span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        )}
+        <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
+        {!anon && (<fieldset className="grid gap-5 md:grid-cols-2">
         <legend className="mb-4 text-[18px] font-semibold text-[#171717]">Podnosilac</legend>
         <div className="md:col-span-2">
           <label htmlFor="applicantName" className={labelCls}>Ime i prezime ili naziv pravnog lica<span className="text-[var(--br-600)]">*</span></label>
@@ -160,12 +177,12 @@ export default function CaseForm({ form }: { form: PublicForm }) {
           <label htmlFor="applicantPhone" className={labelCls}>Telefon</label>
           <input id="applicantPhone" name="applicantPhone" type="tel" autoComplete="tel" className={`${fieldCls} mt-1.5 h-11`} />
         </div>
-        <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
         <label className="flex items-start gap-3 text-[14px] text-[#404040] md:col-span-2">
           <input type="checkbox" name="consent" required className="mt-0.5 size-4 accent-[var(--br-600)]" />
           <span>Saglasan/na sam da Ministarstvo obrađuje navedene lične podatke isključivo radi rješavanja ovog zahtjeva. {errs.consent && <span className="block text-[#d92d20]">{errs.consent}</span>}</span>
         </label>
-      </fieldset></div>
+      </fieldset>)}
+      </div>
 
       <div className="flex flex-col gap-4 border-t border-[#e5e5e5] pt-6 md:flex-row md:items-center md:justify-between">
         <HumanCheck />

@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { adminFetch, useSectors } from '@/lib/adminApi';
-import type { CmsForm } from '@/lib/cases';
+import type { CmsForm, Route } from '@/lib/cases';
 import FieldsEditor, { type Draft, type Flag, draft, toFields } from '@/components/admin/FieldsEditor';
 import { Badge, Card, CardHeader, Field, btnPrimary, btnTertiary, input, useToast } from '@/components/admin/ui';
 
@@ -16,7 +16,10 @@ export default function FormSettings({ form, canPublish, onSaved }: { form?: Cms
   const [s, setS] = useState({
     title: form?.title ?? '', description: form?.description ?? '', legalBasis: form?.legalBasis ?? '', sector: form?.sector ?? '',
     slaDays: form?.slaDays ?? 30, attachments: form?.attachments ?? 'OPCIONO', attachmentHint: form?.attachmentHint ?? '', active: form?.active ?? false,
+    allowAnonymous: form?.allowAnonymous ?? false, protectIdentity: form?.protectIdentity ?? false,
   });
+  const [routing, setRouting] = useState<Route[]>(form?.routing ?? []);
+  const updRoute = (i: number, p: Partial<Route>) => setRouting((rs) => rs.map((r, j) => (j === i ? { ...r, ...p } : r)));
   const [fields, setFields] = useState<Draft[]>(() => form?.fields.map((f) => draft(f, true)) ?? [draft({ key: '', label: '', type: 'text', required: true }, false)]);
   const [busy, setBusy] = useState(false);
   const locked = !canPublish;
@@ -26,7 +29,7 @@ export default function FormSettings({ form, canPublish, onSaved }: { form?: Cms
     e.preventDefault();
     setBusy(true);
     try {
-      const body = JSON.stringify({ ...s, sector: s.sector || null, fields: toFields(fields) });
+      const body = JSON.stringify({ ...s, sector: s.sector || null, fields: toFields(fields), routing });
       const f = form ? await adminFetch<CmsForm>(`/admin/forms/${form.id}`, { method: 'PATCH', body }) : await adminFetch<CmsForm>('/admin/forms', { method: 'POST', body });
       toast.ok(form ? 'Obrazac spremljen' : 'Obrazac kreiran');
       if (form) { setFields(f.fields.map((x) => draft(x, true))); onSaved?.(f); } else router.push(`/admin/predmeti/obrasci/${f.id}`);
@@ -49,6 +52,39 @@ export default function FormSettings({ form, canPublish, onSaved }: { form?: Cms
             <input type="checkbox" className="mt-0.5 size-4 accent-[#7f56d9]" checked={s.active} disabled={locked} onChange={(e) => set('active', e.target.checked)} />
             <span><span className="font-medium">Aktivan na portalu</span><span className="block text-[#525252]">Građani mogu podnositi zahtjev. Isključite kad se obrazac mijenja ili postupak više ne vodi elektronski.</span></span>
           </label>
+        </div>
+      </Card>
+      <Card>
+        <CardHeader title="Prijave i usmjeravanje" description="Za prijave inspekciji i slične obrasce: anonimnost, zaštita identiteta i kome predmet ide." />
+        <div className="space-y-5 p-6">
+          <div className="grid gap-3 md:grid-cols-2">
+            <label className="flex items-start gap-3 text-[14px] text-[#404040]">
+              <input type="checkbox" className="mt-0.5 size-4 accent-[#7f56d9]" checked={s.allowAnonymous} disabled={locked} onChange={(e) => set('allowAnonymous', e.target.checked)} />
+              <span><span className="font-medium">Dozvoli anonimnu prijavu</span><span className="block text-[#525252]">Bez imena i kontakta; praćenje samo brojem i kodom.</span></span>
+            </label>
+            <label className="flex items-start gap-3 text-[14px] text-[#404040]">
+              <input type="checkbox" className="mt-0.5 size-4 accent-[#7f56d9]" checked={s.protectIdentity} disabled={locked} onChange={(e) => set('protectIdentity', e.target.checked)} />
+              <span><span className="font-medium">Zaštiti identitet podnosioca</span><span className="block text-[#525252]">Ime i kontakt skriveni u e-pisarnici; otkrivaju se uz razlog, upisano u dnevnik.</span></span>
+            </label>
+          </div>
+          <div>
+            <p className="text-[14px] font-medium text-[#404040]">Usmjeravanje</p>
+            <p className="mt-1 text-[14px] text-[#525252]">Prvo pravilo koje odgovara određuje sektor predmeta i oznaku nadležnosti. Vrijednost <code>*</code> važi za sve ostale prijave.</p>
+            <div className="mt-3 space-y-2">
+              {routing.map((r, i) => (
+                <div key={i} className="grid gap-2 rounded-[12px] bg-[#fafafa] p-3 md:grid-cols-[1fr_1fr_1fr_1.2fr_auto] md:items-center">
+                  <select aria-label="Polje" className={input} value={r.field} disabled={locked} onChange={(e) => updRoute(i, { field: e.target.value })}><option value="">—</option>{toFields(fields).filter((f) => f.type === 'select').map((f) => <option key={f.key} value={f.key}>{f.label}</option>)}</select>
+                  <select aria-label="Vrijednost" className={input} value={r.equals} disabled={locked} onChange={(e) => updRoute(i, { equals: e.target.value })}>
+                    <option value="*">Bilo koja (*)</option>{(toFields(fields).find((f) => f.key === r.field)?.options ?? []).map((o) => <option key={o} value={o}>{o}</option>)}
+                  </select>
+                  <select aria-label="Sektor" className={input} value={r.sector ?? ''} disabled={locked} onChange={(e) => updRoute(i, { sector: e.target.value || null })}><option value="">Sektor obrasca</option>{sectors.filter((x) => x.active).map((x) => <option key={x.id} value={x.key}>{x.name}</option>)}</select>
+                  <input aria-label="Nadležnost" className={input} value={r.label} disabled={locked} onChange={(e) => updRoute(i, { label: e.target.value })} placeholder="npr. Tržišna inspekcija" />
+                  <button type="button" className="h-10 rounded-[8px] px-3 text-[14px] font-semibold text-[#b42318] hover:bg-[#fef3f2] disabled:opacity-50" disabled={locked} onClick={() => setRouting((rs) => rs.filter((_, j) => j !== i))}>Ukloni</button>
+                </div>
+              ))}
+              {!locked && <button type="button" className="text-[14px] font-semibold text-[#6941c6] hover:underline" onClick={() => setRouting((rs) => [...rs, { field: '', equals: '*', sector: null, label: '' }])}>+ Dodaj pravilo</button>}
+            </div>
+          </div>
         </div>
       </Card>
       <Card>
