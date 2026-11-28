@@ -451,6 +451,36 @@ export interface SchemaMigrations {
   id: string;
 }
 
+export interface SearchDocs {
+  body: Generated<string>;
+  date: Timestamp | null;
+  foldTitle: string;
+  isDemo: Generated<boolean>;
+  key: string;
+  kind: string;
+  meta: string | null;
+  sector: string | null;
+  tenantId: string;
+  title: string;
+  tsv: string;
+  url: string;
+}
+
+export interface SearchQueries {
+  count: Generated<number>;
+  day: Timestamp;
+  hits: Generated<number>;
+  query: string;
+  tenantId: Generated<string>;
+}
+
+export interface SearchState {
+  builtAt: Generated<Timestamp>;
+  docs: Generated<number>;
+  signature: string;
+  tenantId: string;
+}
+
 export interface Sectors {
   active: Generated<boolean>;
   createdAt: Generated<Timestamp>;
@@ -531,6 +561,9 @@ export interface DB {
   registries: Registries;
   registry_entries: RegistryEntries;
   schema_migrations: SchemaMigrations;
+  search_docs: SearchDocs;
+  search_queries: SearchQueries;
+  search_state: SearchState;
   sectors: Sectors;
   source_cache: SourceCache;
   tenants: Tenants;

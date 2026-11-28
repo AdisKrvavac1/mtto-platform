@@ -74,3 +74,22 @@ export function setGeoJSON(map: MLMap, id: string, features: GeoJSON.Feature[]) 
   if (src) src.setData(data); else map.addSource(id, { type: 'geojson', data });
 }
 export const point = (lng: number, lat: number, properties: Record<string, unknown>): GeoJSON.Feature => ({ type: 'Feature', geometry: { type: 'Point', coordinates: [lng, lat] }, properties });
+
+/**
+ * Karta u vlastitom podelementu domaćina. React (StrictMode, ponovno montiranje) može pokrenuti efekat dvaput;
+ * svaka karta tada ima svoj element, pa uklanjanje jedne ne kvari drugu. Vraća funkciju za čišćenje.
+ */
+export function mountMap(host: HTMLElement, o: CreateOptions, onReady: (r: { ml: MapLib; map: MLMap }) => void): () => void {
+  let off = false;
+  let map: MLMap | null = null;
+  const node = document.createElement('div');
+  node.style.cssText = 'position:absolute;inset:0';
+  if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
+  host.appendChild(node);
+  createMap(node, o).then((r) => {
+    if (off) { r.map.remove(); return; }
+    map = r.map;
+    onReady(r);
+  });
+  return () => { off = true; map?.remove(); node.remove(); };
+}

@@ -1,4 +1,5 @@
 'use client';
+import { SearchStats } from '@/components/admin/SearchStats';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { adminFetch, useCan } from '@/lib/adminApi';
@@ -153,6 +154,7 @@ export default function Dashboard() {
           </ul>
         </Card>
       )}
+      <SearchStats />
       {d.expiring.length === 0 && <p className="mt-6 flex items-center gap-2 text-[14px] text-[#525252]"><CheckCircle size={16} className="text-[#079455]" />Nijedna okolišna dozvola ne ističe u narednih 60 dana.</p>}
     </>
   );

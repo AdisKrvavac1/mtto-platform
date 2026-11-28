@@ -25,6 +25,7 @@ import { AdminController } from './admin.controller';
 import { MttoImporter } from './importer';
 import { AdminRiskController, RiskController, RiskService } from './risk';
 import { SourceHub } from './sources';
+import { AdminSearchController, SearchController, SearchIndexer } from './search';
 import { CallsController, PublicCallsController } from './calls.controller';
 import { AdminAirController, AirController, AirService } from './air';
 
@@ -35,7 +36,7 @@ if (!secret || secret.length < 32) {
 
 @Module({
   imports: [ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: 300 }]), JwtModule.register({ global: true, secret: secret || 'dev-only-secret-dev-only-secret-0000', signOptions: { expiresIn: '8h' } })],
-  controllers: [CasesController, PublicCasesController, RegistriesController, PublicRegistriesController, SectorsController, DocumentsController, PostsController, PreviewController, TenantController, AuditController, UsersController, SecurityController, HealthController, GeoController, AuthController, PublicController, AdminController, RiskController, AdminRiskController, AirController, AdminAirController, CallsController, PublicCallsController],
-  providers: [{ provide: APP_GUARD, useClass: IpThrottlerGuard }, Db, FileStore, AuditService, BackupScheduler, StorageMigrator, PostScheduler, MailScheduler, AuthGuard, SessionGuard, MttoImporter, SourceHub, AirService, RiskService],
+  controllers: [CasesController, PublicCasesController, RegistriesController, PublicRegistriesController, SectorsController, DocumentsController, PostsController, PreviewController, TenantController, AuditController, UsersController, SecurityController, HealthController, GeoController, AuthController, PublicController, AdminController, RiskController, AdminRiskController, AirController, AdminAirController, CallsController, PublicCallsController, SearchController, AdminSearchController],
+  providers: [{ provide: APP_GUARD, useClass: IpThrottlerGuard }, Db, FileStore, AuditService, BackupScheduler, StorageMigrator, PostScheduler, MailScheduler, AuthGuard, SessionGuard, MttoImporter, SourceHub, AirService, RiskService, SearchIndexer],
 })
 export class AppModule {}

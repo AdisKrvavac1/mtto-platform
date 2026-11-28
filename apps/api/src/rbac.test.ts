@@ -16,10 +16,11 @@ import { RegistriesController } from './registries.controller';
 import { CasesController } from './cases.controller';
 import { AdminAirController } from './air';
 import { CallsController } from './calls.controller';
+import { AdminSearchController } from './search';
 
 test('svaka admin ruta ima @Can (ruta bez prava ne smije proći CI)', () => {
   const missing: string[] = [];
-  for (const C of [AdminController, AdminRiskController, UsersController, AuditController, PostsController, DocumentsController, SectorsController, RegistriesController, CasesController, AdminAirController, CallsController] as any[]) {
+  for (const C of [AdminController, AdminRiskController, UsersController, AuditController, PostsController, DocumentsController, SectorsController, RegistriesController, CasesController, AdminAirController, CallsController, AdminSearchController] as any[]) {
     for (const name of Object.getOwnPropertyNames(C.prototype)) {
       const fn = C.prototype[name];
       if (name === 'constructor' || typeof fn !== 'function') continue;

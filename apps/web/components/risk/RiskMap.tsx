@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { RiskSummary } from '@/lib/risk';
 import { LS_STATUS, fireConfidence, fireTime, fmtTime, peakForecast } from '@/lib/risk';
-import { createMap, esc, point, setGeoJSON, type Engine } from '@/lib/map';
+import { esc, mountMap, point, setGeoJSON, type Engine } from '@/lib/map';
 import { ViewToggle } from '@/components/site/MapView';
 
 const EFFIS_WMS = 'https://maps.effis.emergency.copernicus.eu/effis';
@@ -58,10 +58,8 @@ export default function RiskMap({ data, height = 560, dark = false }: { data: Ri
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
     if (!el.current) return;
-    createMap(el.current, { dark, center: [17.82, 43.42], zoom: 8.3, onEngine: setEngine, label: 'Karta rizika Hercegovačko-neretvanskog kantona' }).then(({ ml: lib, map: m }) => {
-      if (cancelled) { m.remove(); return; }
+    const dispose = mountMap(el.current, { dark, center: [17.82, 43.42], zoom: 8.3, onEngine: setEngine, label: 'Karta rizika Hercegovačko-neretvanskog kantona' }, ({ ml: lib, map: m }) => {
       map.current = m; ml.current = lib;
       m.on('style.load', () => overlays(m));
       for (const id of ['r-fires', 'r-reports', 'r-rivers']) {
@@ -71,7 +69,7 @@ export default function RiskMap({ data, height = 560, dark = false }: { data: Ri
       }
       setReady(true);
     });
-    return () => { cancelled = true; markers.current.forEach((x) => x.remove()); markers.current = []; map.current?.remove(); map.current = null; };
+    return () => { markers.current.forEach((x) => x.remove()); markers.current = []; map.current = null; setReady(false); dispose(); };
   }, [dark, overlays]);
 
   // novi podaci → osvježi izvore; klizišta su HTML markeri (prežive promjenu podloge)
@@ -139,7 +137,7 @@ export default function RiskMap({ data, height = 560, dark = false }: { data: Ri
         </div>
       )}
       <div className={`relative ${view === 'tabela' ? 'hidden' : ''}`}>
-        <div ref={el} style={{ height }} className="w-full" data-engine={engine ?? ''} />
+        <div ref={el} style={{ height }} className="relative w-full" data-engine={engine ?? ''} />
         {on.fwi && legendOk && (
           <div className="absolute left-[12px] bottom-[12px] z-[2] bg-white/95 rounded-[4px] shadow p-[8px] max-w-[220px]">
             <p className="font-pub font-bold text-[#002042] text-[11px] tracking-[0.44px] uppercase leading-[14px] mb-[4px]">Indeks opasnosti od požara (FWI)</p>

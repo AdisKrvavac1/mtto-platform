@@ -1,11 +1,12 @@
 'use client';
 /* Kostur iz MTTO Figme (top bar + logo/pretraga + navigacijska traka), izveden u Untitled UI stilu. */
 import Link from 'next/link';
+import { SearchBox } from '@/components/site/SearchBox';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import {
   AlertTriangle, ArrowRight, ChevronRight, File06, Building07, CheckVerified01, ChevronDown, Clock, FileSearch02, Globe02, Image01, Map01, MarkerPin04, Menu02, Phone01,
-  Scales02, SearchLg, ShoppingCart01, Calendar, LineChartUp01, Sun, Ticket01, Trash03, User01, Users01, Waves, Wind01, XClose, Building02, Mail01, Edit05, Database01,
+  Scales02, ShoppingCart01, Calendar, LineChartUp01, Sun, Ticket01, Trash03, User01, Users01, Waves, Wind01, XClose, Building02, Mail01, Edit05, Database01,
 } from '@untitledui/icons';
 import type { Icon } from './index';
 
@@ -211,10 +212,7 @@ export default function SiteHeader({ info }: { info?: TopInfo }) {
         <div className="mx-auto flex h-[72px] max-w-[1376px] items-center justify-between gap-4 px-4 md:px-8">
           <Link href="/" className="shrink-0" aria-label="MTTO HNK – naslovna"><img src="/mtto-logo.svg" alt="Ministarstvo trgovine, turizma i zaštite okoliša HNK" className="h-10 w-auto md:h-12" /></Link>
           <div className="flex items-center gap-3">
-            <form action="/vijesti" role="search" className="hidden h-11 w-[360px] items-center gap-2 rounded-[8px] px-3.5 ring-1 ring-inset ring-[#d5d7da] shadow-[0_1px_2px_rgba(10,13,18,0.05)] focus-within:ring-2 focus-within:ring-[var(--br-500)] lg:flex xl:w-[420px]">
-              <SearchLg size={20} className="text-[#a4a7ae]" />
-              <input name="q" aria-label="Pretraga portala" placeholder="Pretraga vijesti, natječaja, propisa" className="min-w-0 flex-1 border-0 bg-transparent p-0 text-[16px] text-[#181d27] placeholder:text-[#717680] !shadow-none focus:outline-none focus:ring-0" />
-            </form>
+            <div className="hidden w-[360px] lg:block xl:w-[420px]"><SearchBox /></div>
             <Link href="/eko-rizik/prijava" className={`hidden h-11 items-center gap-2 rounded-[8px] px-4 text-[16px] font-semibold sm:inline-flex ${alarm}`}><span aria-hidden className="relative flex size-2.5"><span className="absolute inline-flex size-full animate-ping rounded-full bg-[#f04438] opacity-60" /><span className="relative inline-flex size-2.5 rounded-full bg-[#f04438]" /></span>Eko-alarm</Link>
             <Link href="/admin/prijava" className="hidden size-11 items-center justify-center rounded-[8px] text-[#535862] ring-1 ring-inset ring-[#d5d7da] shadow-[0_1px_2px_rgba(10,13,18,0.05)] hover:bg-[#fafafa] sm:flex" title="Prijava za službenike" aria-label="Prijava za službenike"><User01 size={20} /></Link>
             <button type="button" className="flex size-11 items-center justify-center rounded-[8px] text-[#414651] hover:bg-[#fafafa] xl:hidden" onClick={toggleMenu} aria-label={open ? 'Zatvori meni' : 'Otvori meni'} aria-expanded={open}>{open ? <XClose size={24} /> : <Menu02 size={24} />}</button>
@@ -240,7 +238,7 @@ export default function SiteHeader({ info }: { info?: TopInfo }) {
         <div className={`absolute inset-0 bg-[#0a0d12]/50 backdrop-blur-[2px] transition-opacity duration-300 ${open ? 'opacity-100' : 'opacity-0'}`} onClick={() => setOpen(false)} />
         <div role="dialog" aria-label="Meni" className={`relative flex max-h-full flex-col overflow-y-auto bg-white shadow-[0_20px_24px_-4px_rgba(10,13,18,0.08)] transition-all duration-300 ${open ? 'translate-y-0 opacity-100' : '-translate-y-3 opacity-0'}`}>
           <div className="px-4 pt-4">
-            <form action="/vijesti" role="search" className="flex h-11 items-center gap-2 rounded-[8px] px-3.5 ring-1 ring-inset ring-[#d5d7da] shadow-[0_1px_2px_rgba(10,13,18,0.05)]"><SearchLg size={20} className="text-[#a4a7ae]" /><input name="q" placeholder="Pretraga vijesti, natječaja, propisa" aria-label="Pretraga" className="min-w-0 flex-1 border-0 bg-transparent p-0 text-[16px] !shadow-none focus:outline-none focus:ring-0" /></form>
+            <SearchBox onNavigate={() => setOpen(false)} />
           </div>
           <ul className="flex flex-col px-2 py-3">
             {NAV.filter((n) => n.label !== 'Kontakt').map((n) => (

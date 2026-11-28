@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { MapPoint } from '@/lib/api';
-import { createMap, esc, type Engine } from '@/lib/map';
+import { esc, mountMap, type Engine } from '@/lib/map';
 
 export const LAYERS: Record<MapPoint['layer'], { label: string; color: string; icon: string }> = {
   TURIZAM: { label: 'Turizam', color: '#00abeb', icon: 'travel_explore' },
@@ -40,14 +40,12 @@ export default function MapView({ points, height = 520, compact = false, fill = 
 
   // inicijalizacija (MapLibre; rezerva OSM raster)
   useEffect(() => {
-    let cancelled = false;
-    if (!ref.current || mapRef.current) return;
-    createMap(ref.current, { center: CENTER, zoom: 8.4, onEngine: setEngine, label: 'Karta lokacija Ministarstva' }).then(({ ml, map }) => {
-      if (cancelled) { map.remove(); return; }
+    if (!ref.current) return;
+    const dispose = mountMap(ref.current, { center: CENTER, zoom: 8.4, onEngine: setEngine, label: 'Karta lokacija Ministarstva' }, ({ ml, map }) => {
       mapRef.current = map; mlRef.current = ml;
       setTick((t) => t + 1);
     });
-    return () => { cancelled = true; mapRef.current?.remove(); mapRef.current = null; };
+    return () => { markersRef.current = []; mapRef.current = null; dispose(); };
   }, []);
 
   // markeri
@@ -98,7 +96,7 @@ export default function MapView({ points, height = 520, compact = false, fill = 
       </div>
       {view === 'tabela' && <PointsTable points={shown} />}
       <div className={`${view === 'tabela' ? 'hidden' : ''} ${compact ? '' : 'grid grid-cols-1 lg:grid-cols-12'} ${fill ? 'flex-1 min-h-[420px] flex flex-col' : ''}`}>
-        <div ref={ref} style={fill ? undefined : { height }} className={`${compact ? 'w-full' : 'lg:col-span-8 w-full z-0'} ${fill ? 'flex-1 min-h-[420px]' : ''}`} />
+        <div ref={ref} style={fill ? undefined : { height }} className={`relative ${compact ? 'w-full' : 'lg:col-span-8 w-full z-0'} ${fill ? 'flex-1 min-h-[420px]' : ''}`} />
         {!compact && (
           <aside className="lg:col-span-4 border-t lg:border-t-0 lg:border-l border-slate-border p-space-md overflow-y-auto" style={{ maxHeight: height }}>
             {selected ? (
