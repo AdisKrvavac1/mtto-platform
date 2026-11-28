@@ -322,6 +322,7 @@ export interface LifeEvents {
   summary: Generated<string>;
   tenantId: Generated<string>;
   title: string;
+  translations: Generated<Json>;
   updatedAt: Generated<Timestamp>;
   verified: Generated<boolean>;
 }
@@ -413,6 +414,7 @@ export interface Posts {
   submittedBy: string | null;
   tenantId: Generated<string>;
   title: string;
+  translations: Generated<Json>;
   type: Generated<string>;
   unpublishAt: Timestamp | null;
   updatedAt: Generated<Timestamp>;

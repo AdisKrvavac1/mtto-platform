@@ -1,8 +1,19 @@
 // Server-side pozivi prema NestJS API-ju.
 const API = process.env.API_INTERNAL_URL || 'http://localhost:4000';
 
+/** F2-06: objave se traže na jeziku posjetioca (API vraća prijevod ako postoji). */
+async function withLang(path: string) {
+  if (!path.startsWith('/posts')) return path;
+  try {
+    const { getLang } = await import('./lang.server');
+    const { contentLang } = await import('./i18n');
+    const l = contentLang(await getLang());
+    return l ? `${path}${path.includes('?') ? '&' : '?'}lang=${l}` : path;
+  } catch { return path; }
+}
+
 export async function api<T = any>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${API}${path}`, { cache: 'no-store', ...init });
+  const res = await fetch(`${API}${await withLang(path)}`, { cache: 'no-store', ...init });
   if (res.status === 404) throw Object.assign(new Error('Nije pronađeno'), { status: 404 });
   if (!res.ok) throw new Error(`API ${path}: ${res.status}`);
   return res.json();

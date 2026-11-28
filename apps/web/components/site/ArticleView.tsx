@@ -5,14 +5,17 @@ import { dateLong, dateShort, dateTime, daysUntil, fileExt, fileSize, POST_TYPE,
 import { Badge, Button, CATEGORY_TONE, Card, CategoryBadge, Container, FeaturedIcon, FileTypeIcon, GRAD, Head, PostCard, Section, Tag } from '@/components/uui';
 import { AlertTriangle, Bell01, Building07, Calendar, Clock, Download01, Edit05, Eye, Mail01, Phone, RefreshCw01, ShieldTick } from '@untitledui/icons';
 import ShareButtons from '@/components/uui/ShareButtons';
+import { t } from '@/lib/i18n';
+import { getLang } from '@/lib/lang.server';
 
-export type ArticlePost = PostListItem & { body: string; formUrl: string | null; updatedAt: string; documents: Doc[]; status?: string; previewExpiresAt?: string | null };
+export type ArticlePost = PostListItem & { lang?: string; translated?: boolean; available?: string[]; body: string; formUrl: string | null; updatedAt: string; documents: Doc[]; status?: string; previewExpiresAt?: string | null };
 
 const SITE = 'https://mtto-platform.onrender.com';
 const SECTOR: Record<string, string> = { Turizam: 'Sektor za turizam i ugostiteljstvo', 'Zaštita okoliša': 'Sektor za zaštitu prirode i okoliša', Trgovina: 'Sektor za trgovinu' };
 
 /** Članak na portalu. Uz preview=true prikazuje traku „Pregled prije objave“ i ne dijeli link. */
 export default async function ArticleView({ post, preview = false }: { post: ArticlePost; preview?: boolean }) {
+  const lang = preview ? 'bs' : await getLang();
   const html = renderBody(post.body);
   const words = wordCount(post.body);
   const isCall = post.type === 'JAVNI_POZIV';
@@ -60,7 +63,8 @@ export default async function ArticleView({ post, preview = false }: { post: Art
               {isCall && <Badge tone={open ? 'success' : 'gray'} size="md" dot>{open ? (left !== null ? `Otvoren · još ${left} dana` : 'Otvoren') : 'Zatvoren'}</Badge>}
               {post.isDemo && <Badge tone="warning" size="md">Demo</Badge>}
             </div>
-            <h1 className="mt-4 text-[30px] leading-[38px] md:text-[40px] md:leading-[50px] font-semibold tracking-[-0.02em] text-[#171717] text-balance">{post.title}</h1>
+            <h1 lang={post.translated ? post.lang : 'bs'} className="mt-4 text-[30px] leading-[38px] md:text-[40px] md:leading-[50px] font-semibold tracking-[-0.02em] text-[#171717] text-balance">{post.title}</h1>
+            {lang === 'en' && !post.translated && <p className="mt-3 rounded-[8px] bg-[#eff8ff] px-3 py-2 text-[14px] text-[#175cd3] ring-1 ring-inset ring-[#b2ddff]" lang="en">{t('en', 'Ovaj tekst je dostupan samo na bosanskom jeziku.')}</p>}
 
             <dl className="mt-6 grid gap-x-6 gap-y-3 rounded-[12px] bg-white p-4 ring-1 ring-inset ring-[#e5e5e5] sm:grid-cols-2 md:p-5">
               {facts.map(([I, k, v]) => (
@@ -92,7 +96,7 @@ export default async function ArticleView({ post, preview = false }: { post: Art
               </div>
             )}
 
-            <div className="prose-uui mt-8" dangerouslySetInnerHTML={{ __html: html }} />
+            <div className="prose-uui mt-8" lang={post.translated ? post.lang : 'bs'} dangerouslySetInnerHTML={{ __html: html }} />
 
             {post.documents.length > 0 && (
               <div id="dokumenti" className="mt-12 scroll-mt-28">

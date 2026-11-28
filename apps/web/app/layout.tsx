@@ -20,6 +20,8 @@ import '@mtto/ui/tokens.css';
 import '@mtto/ui/styles.css';
 import './tokens.css';
 import './globals.css';
+import { htmlLang } from '@/lib/i18n';
+import { getLang } from '@/lib/lang.server';
 import './cms-theme.css';
 import '@fontsource-variable/inter';
 import './stitch.css';
@@ -38,9 +40,10 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false }, // staging / prototip
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const lang = await getLang();
   return (
-    <html lang="bs">
+    <html lang={htmlLang(lang)}>
       <body className="bg-background font-body-regular text-body min-h-screen">{children}</body>
     </html>
   );

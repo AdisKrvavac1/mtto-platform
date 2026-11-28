@@ -15,6 +15,7 @@ type Post = {
   unpublishAt?: string | null; reviewNote?: string | null; withdrawnReason?: string | null; submittedAt?: string | null;
   createdBy?: string | null; submittedBy?: string | null; version?: number; fourEyes?: boolean;
   documents?: { id: string; title: string; fileName: string; size: number; docType: string }[];
+  translations?: { en?: { title?: string; excerpt?: string; body?: string } };
 };
 type Ver = { version: number; status: string; userName: string; note: string | null; createdAt: string };
 type Wf = 'submit' | 'return' | 'publish' | 'schedule' | 'withdraw' | 'draft';
@@ -75,6 +76,14 @@ export default function PostEditor({ id }: { id?: string }) {
   }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const set = <K extends keyof Post>(k: K, v: Post[K]) => { setP((s) => ({ ...s, [k]: v })); setDirty(true); };
+  // F2-06: izvornik (bs) ili prijevod na engleski
+  const [editLang, setEditLang] = useState<'bs' | 'en'>('bs');
+  type TF = 'title' | 'excerpt' | 'body';
+  const val = (f: TF) => (editLang === 'bs' ? p[f] : p.translations?.en?.[f] ?? '');
+  const setVal = (f: TF, v: string) => {
+    if (editLang === 'bs') return set(f, v);
+    setP((s) => ({ ...s, translations: { ...s.translations, en: { ...s.translations?.en, [f]: v } } })); setDirty(true);
+  };
   // F2-22: objava tuđeg sektora je samo za čitanje
   const outOfScope = !!p.id && !inMySectors(getUser(), p.category);
   const publisher = canPublishRole && !outOfScope;
@@ -89,6 +98,7 @@ export default function PostEditor({ id }: { id?: string }) {
     const body = {
       type: p.type, category: p.category, title: p.title, excerpt: p.excerpt, body: p.body, coverImage: p.coverImage ?? '',
       publishedAt: p.publishedAt, deadline: p.deadline, formUrl: p.formUrl ?? '', unpublishAt: p.unpublishAt ?? null,
+      translations: p.translations ?? {},
     };
     try {
       let r: Post;
@@ -255,21 +265,27 @@ export default function PostEditor({ id }: { id?: string }) {
         <fieldset disabled={locked} className="flex min-w-0 flex-col gap-6 lg:col-span-8 disabled:opacity-90">
           <Card className="p-4 md:p-6">
             <div className="flex flex-col gap-5">
-              <Field label="Naslov" required hint={`${p.title.length}/140`}>
-                <textarea id="post-title" className={`${input} resize-none py-2.5 text-[18px] leading-7 font-semibold`} rows={2} maxLength={140} placeholder="Naslov vijesti ili javnog poziva" value={p.title} onChange={(e) => set('title', e.target.value)} />
+              <Field label={editLang === 'en' ? 'Naslov (engleski)' : 'Naslov'} required={editLang === 'bs'} hint={`${val('title').length}/140`}>
+                <textarea id="post-title" className={`${input} resize-none py-2.5 text-[18px] leading-7 font-semibold`} rows={2} maxLength={140} placeholder={editLang === 'en' ? 'Title in English' : 'Naslov vijesti ili javnog poziva'} lang={editLang} value={val('title')} onChange={(e) => setVal('title', e.target.value)} />
               </Field>
-              <Field label="Sažetak" hint={`${p.excerpt.length}/260`}>
-                <textarea id="post-lead" className={`${input} py-2.5`} rows={3} maxLength={260} placeholder="Kratki sažetak za naslovnu i društvene mreže" value={p.excerpt} onChange={(e) => set('excerpt', e.target.value)} />
+              <Field label={editLang === 'en' ? 'Sažetak (engleski)' : 'Sažetak'} hint={`${val('excerpt').length}/260`}>
+                <textarea id="post-lead" className={`${input} py-2.5`} rows={3} maxLength={260} placeholder="Kratki sažetak za naslovnu i društvene mreže" lang={editLang} value={val('excerpt')} onChange={(e) => setVal('excerpt', e.target.value)} />
               </Field>
               <div className="flex flex-wrap items-center justify-between gap-3 text-[14px] text-[#525252]">
-                <span className="inline-flex rounded-[8px] ring-1 ring-inset ring-[#d4d4d4]"><span className="rounded-l-[8px] bg-[#fafafa] px-3 py-2 font-semibold text-[#262626]">Bosanski / Hrvatski</span><span className="flex items-center gap-2 border-l border-[#d4d4d4] px-3 py-2 text-[#a3a3a3]">English <F2Badge /></span></span>
+                <span className="inline-flex rounded-[8px] ring-1 ring-inset ring-[#d4d4d4]" role="group" aria-label="Jezik sadržaja">
+                  {([['bs', 'Bosanski / Hrvatski / Srpski'], ['en', 'English']] as const).map(([l, label], i) => (
+                    <button key={l} type="button" aria-pressed={editLang === l} onClick={() => setEditLang(l)} className={`flex items-center gap-2 px-3 py-2 font-semibold ${i ? 'border-l border-[#d4d4d4] rounded-r-[8px]' : 'rounded-l-[8px]'} ${editLang === l ? 'bg-[#fafafa] text-[#262626]' : 'text-[#737373] hover:text-[#262626]'}`}>
+                      {label}{l === 'en' && <Badge tone={p.translations?.en?.title ? 'success' : 'gray'}>{p.translations?.en?.title ? 'preveden' : 'nema'}</Badge>}
+                    </button>
+                  ))}
+                </span>
                 <span className="flex items-center gap-1.5">{savedAt ? <CheckCircle size={16} className="text-[#079455]" /> : <Clock size={16} className="text-[#a3a3a3]" />}{savedAt ? `Spremljeno u ${savedAt}` : p.id ? 'Učitano iz baze' : 'Nije spremljeno'}</span>
               </div>
             </div>
           </Card>
 
           <Card className="overflow-hidden">
-            <RichEditor value={p.body} onChange={(html) => set('body', html)} docs={p.documents ?? []} onUpload={uploadImage} onError={(m) => toast.err(m)} disabled={locked} />
+            <RichEditor key={editLang} value={val('body')} onChange={(html) => setVal('body', html)} docs={p.documents ?? []} onUpload={uploadImage} onError={(m) => toast.err(m)} disabled={locked} />
           </Card>
 
           <Card>

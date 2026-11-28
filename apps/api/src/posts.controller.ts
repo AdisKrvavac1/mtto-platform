@@ -18,13 +18,14 @@ import { AuthGuard } from './auth';
 import { AuditService } from './audit';
 import { Can, can } from './rbac';
 import { slugify, toDate } from './util';
+import { cleanTranslations } from './i18n';
 import { logJson } from './observability';
 import { assertScope } from './sectors';
 
 export const POST_STATUS = ['NACRT', 'NA_ODOBRENJU', 'VRACENO', 'ZAKAZANO', 'OBJAVLJENO', 'POVUCENO'] as const;
 const POST_TYPES = ['VIJEST', 'JAVNI_POZIV', 'SAOPCENJE'];
 /** Polja koja čine sadržaj objave i ulaze u verziju. */
-export const CONTENT_FIELDS = ['type', 'category', 'title', 'excerpt', 'body', 'coverImage', 'publishedAt', 'deadline', 'formUrl', 'unpublishAt'] as const;
+export const CONTENT_FIELDS = ['type', 'category', 'title', 'excerpt', 'body', 'coverImage', 'publishedAt', 'deadline', 'formUrl', 'unpublishAt', 'translations'] as const;
 const LIVE = ['OBJAVLJENO', 'ZAKAZANO'];
 
 function postData(b: any) {
@@ -38,6 +39,8 @@ function postData(b: any) {
   if (d.title !== undefined && !d.title.trim()) throw new BadRequestException('Naslov je obavezan');
   if (d.formUrl && !/^https:\/\//.test(d.formUrl)) throw new BadRequestException('Link na formu mora počinjati s https://');
   for (const k of ['publishedAt', 'deadline', 'unpublishAt']) if (b[k] !== undefined) d[k] = toDate(b[k]);
+  // F2-06: prijevod (engleski): naslov, sažetak, tekst
+  if (b.translations !== undefined) d.translations = JSON.stringify(cleanTranslations(b.translations, { title: 140, excerpt: 260, body: 200_000 }));
   return d;
 }
 

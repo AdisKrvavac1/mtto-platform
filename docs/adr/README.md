@@ -24,3 +24,4 @@ Odluka se ne briše; kad se promijeni, piše se nova koja zamjenjuje staru.
 | [0017](0017-obrasci-i-predmeti.md) | Elektronski obrasci i predmeti (e-pisarnica) | Prihvaćena |
 | [0018](0018-sprint8-trgovina-inspekcija.md) | Trgovina, inspekcija i turističke informacije | Prihvaćena |
 | [0019](0019-sprint9-okolis-pozivi-karte.md) | Vanjski izvori, kvalitet zraka, javni pozivi, MapLibre karte | Prihvaćena |
+| [0020](0020-sprint10-portal.md) | Pretraga, životne situacije, transparentnost, jezici | Prihvaćena |

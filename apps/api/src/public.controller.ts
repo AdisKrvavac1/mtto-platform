@@ -1,3 +1,4 @@
+import { lang, localize } from './i18n';
 import { Controller, Get, NotFoundException, Param, Query, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import { FileStore } from './storage';
@@ -8,7 +9,7 @@ import { FACILITIES_SQL } from './registries.controller';
 export const DOC_COLS = `"id","title","docType","sector","number","issuedAt","status","description","fileName","mimeType","size","downloads","isDemo","postId","permitId","createdAt","updatedAt","publisher","gazette","validFrom","validUntil","keywords","language","replacedById","version"`;
 /** Javno je samo ono što nije interno ni izlučeno (F2-03). */
 const PUBLIC_DOC = `"accessLevel"='JAVNO' AND "disposedAt" IS NULL`;
-const POST_LIST_COLS = `"id","slug","type","category","title","excerpt","coverImage","publishedAt","deadline","views","authorName","isDemo"`;
+const POST_LIST_COLS = `"id","slug","type","category","title","excerpt","coverImage","publishedAt","deadline","views","authorName","isDemo","translations"`;
 const PUBLISHED = `"status" IN ('OBJAVLJENO','ZAKAZANO') AND "publishedAt" <= now() AND ("unpublishAt" IS NULL OR "unpublishAt" > now())`;
 
 @Controller()
@@ -29,15 +30,19 @@ export class PublicController {
     if (q.type) w.add(`"type"=?`, q.type);
     if (q.category) w.add(`"category"=?`, q.category);
     if (q.q) w.add(`("title" ILIKE ? OR "excerpt" ILIKE ?)`, `%${q.q}%`, `%${q.q}%`);
-    const items = await this.db.q(`SELECT ${POST_LIST_COLS}, (SELECT count(*)::int FROM documents d WHERE d."postId"=posts."id" AND d."accessLevel"='JAVNO' AND d."disposedAt" IS NULL) AS "attachmentCount" FROM posts ${w.sql} ORDER BY "publishedAt" DESC LIMIT ${take} OFFSET ${(page - 1) * take}`, w.params);
+    const l = lang(q.lang);
+    const rows = await this.db.q(`SELECT ${POST_LIST_COLS}, (SELECT count(*)::int FROM documents d WHERE d."postId"=posts."id" AND d."accessLevel"='JAVNO' AND d."disposedAt" IS NULL) AS "attachmentCount" FROM posts ${w.sql} ORDER BY "publishedAt" DESC LIMIT ${take} OFFSET ${(page - 1) * take}`, w.params);
+    const items = rows.map((r: any) => localize(r, l, ['title', 'excerpt']));
     const total = await this.db.count(`SELECT count(*) n FROM posts ${w.sql}`, w.params);
     return { items, total, page, pages: Math.max(1, Math.ceil(total / take)) };
   }
 
   @Get('posts/:slug')
-  async post(@Param('slug') slug: string) {
-    const post = await this.db.one(`UPDATE posts SET "views"="views"+1 WHERE "slug"=$1 AND ${PUBLISHED} RETURNING *`, [slug]);
-    if (!post) throw new NotFoundException();
+  async post(@Param('slug') slug: string, @Query('lang') ql?: string) {
+    const raw = await this.db.one(`UPDATE posts SET "views"="views"+1 WHERE "slug"=$1 AND ${PUBLISHED} RETURNING *`, [slug]);
+    if (!raw) throw new NotFoundException();
+    const post: any = localize(raw, lang(ql), ['title', 'excerpt', 'body']);
+    post.available = ['bs', ...Object.keys(raw.translations ?? {}).filter((k) => raw.translations[k]?.title)];
     post.documents = await this.db.q(`SELECT ${DOC_COLS} FROM documents WHERE "postId"=$1 AND ${PUBLIC_DOC} ORDER BY "createdAt"`, [post.id]);
     return post;
   }

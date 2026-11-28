@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { SearchBox } from '@/components/site/SearchBox';
 import { usePathname } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { LANGS, translator, type Lang } from '@/lib/i18n';
 import {
   AlertTriangle, ArrowRight, ChevronRight, File06, Building07, CheckVerified01, ChevronDown, Clock, FileSearch02, Globe02, Image01, Map01, MarkerPin04, Menu02, Phone01,
   Scales02, ShoppingCart01, Compass03, Calendar, LineChartUp01, Sun, Ticket01, Trash03, User01, Users01, Waves, Wind01, XClose, Building02, Mail01, Edit05, Database01,
@@ -160,18 +161,31 @@ function Clock24() {
 const AQI_RING = { success: 'bg-[var(--gr-500)]/15 text-[var(--gr-200)] ring-[var(--gr-500)]/40', warning: 'bg-[#f79009]/15 text-[#fedf89] ring-[#f79009]/40', error: 'bg-[#f04438]/15 text-[#fecdca] ring-[#f04438]/40', gray: 'bg-white/10 text-white/70 ring-white/20' };
 const LVL = { 1: ['bg-[var(--gr-400)]', 'uobičajeno stanje'], 2: ['bg-[#f79009]', 'pojačan oprez'], 3: ['bg-[#f04438]', 'visok rizik'] } as const;
 
-function Langs() {
+function Langs({ lang }: { lang: Lang }) {
+  const path = usePathname();
   return (
-    <span className="flex items-center rounded-[6px] bg-white/10 p-0.5 text-[12px] font-semibold" role="group" aria-label="Jezik">
-      <span className="rounded-[4px] bg-white px-2 py-0.5 text-[var(--br-900)]" aria-current="true">BS</span>
-      <span className="px-2 py-0.5 text-white/80" title="Hrvatski – Faza 2">HR</span>
-      <span className="px-2 py-0.5 text-white/50" title="English – Faza 2">EN</span>
+    <span className="flex items-center rounded-[6px] bg-white/10 p-0.5 text-[12px] font-semibold" role="group" aria-label={translator(lang)('Jezik')}>
+      {LANGS.map((l) => (
+        <a key={l.code} href={`/${l.prefix}${path === '/' ? '' : path}`} lang={l.html} hrefLang={l.html} title={l.name} aria-current={l.code === lang ? 'true' : undefined}
+          className={`rounded-[4px] px-1.5 py-0.5 sm:px-2 ${l.code === lang ? 'bg-white text-[var(--br-900)]' : 'text-white/80 hover:text-white'}`} translate="no">{l.label}</a>
+      ))}
     </span>
   );
 }
 
-export default function SiteHeader({ info }: { info?: TopInfo }) {
+/** Meni na odabranom jeziku (F2-06). */
+function localizeNav(nav: Nav[], tr: (s: string) => string): Nav[] {
+  return nav.map((n) => ({
+    ...n, label: tr(n.label),
+    groups: n.groups?.map((g) => ({ ...g, title: tr(g.title), items: g.items.map((i) => ({ ...i, label: tr(i.label), desc: i.desc && tr(i.desc) })) })),
+    feature: n.feature && { ...n.feature, title: tr(n.feature.title), more: n.feature.more && { ...n.feature.more, label: tr(n.feature.more.label) }, cards: n.feature.cards.map((c) => ({ ...c, title: tr(c.title), text: tr(c.text), cta: tr(c.cta) })) },
+  }));
+}
+
+export default function SiteHeader({ info, lang = 'bs' }: { info?: TopInfo; lang?: Lang }) {
   const path = usePathname();
+  const tr = useMemo(() => translator(lang), [lang]);
+  const nav = useMemo(() => localizeNav(NAV, tr), [tr]);
   const [open, setOpen] = useState(false);
   const [sub, setSub] = useState<string | null>(null);
   const [mega, setMega] = useState<string | null>(null);
@@ -190,21 +204,21 @@ export default function SiteHeader({ info }: { info?: TopInfo }) {
   const lv = LVL[info?.level ?? 1];
   const alarm = 'bg-white text-[#414651] ring-1 ring-inset ring-[#d5d7da] shadow-[0_1px_2px_rgba(10,13,18,0.05),inset_0_-2px_0_rgba(10,13,18,0.05)] hover:bg-[#fafafa] hover:text-[#252b37] transition-colors';
   const primary = 'bg-[var(--br-600)] text-white shadow-[0_1px_2px_rgba(10,13,18,0.05),inset_0_-2px_0_rgba(10,13,18,0.05),inset_0_0_0_1px_rgba(10,13,18,0.18)] ring-2 ring-inset ring-white/10 hover:bg-[var(--br-700)] transition-colors';
-  const megaNav = NAV.find((n) => n.label === mega && n.groups);
+  const megaNav = nav.find((n) => n.label === mega && n.groups);
 
   return (
     <>
       {/* TOP BAR */}
       <div className="bg-[#062343] text-[var(--br-100)]">
         <div className="mx-auto flex h-10 max-w-[1376px] items-center justify-between gap-3 px-4 md:px-8">
-          <span className="hidden items-center gap-2 text-[13px] font-medium sm:flex"><CheckVerified01 size={16} className="text-[var(--gr-400)]" />Službeni portal Ministarstva · Hercegovačko-neretvanski kanton</span>
+          <span className="hidden items-center gap-2 text-[13px] font-medium sm:flex"><CheckVerified01 size={16} className="text-[var(--gr-400)]" />{tr('Službeni portal Ministarstva')} · {tr('Hercegovačko-neretvanski kanton')}</span>
           <div className="flex w-full items-center justify-between gap-4 sm:w-auto sm:justify-end">
             <Link href="/eko-rizik" className={`flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[12px] font-medium ring-1 ring-inset ${AQI_RING[info?.aqiTone ?? 'gray']}`} title="Europski indeks kvalitete zraka (Copernicus CAMS)">
-              <Wind01 size={14} />Zrak Mostar{info?.aqi != null ? `: AQI ${info.aqi} · ${info.aqiLabel.toLowerCase()}` : ''}
+              <Wind01 size={14} />{tr('Zrak Mostar')}{info?.aqi != null ? `: AQI ${info.aqi} · ${info.aqiLabel.toLowerCase()}` : ''}
             </Link>
-            <Link href="/eko-rizik" className="hidden items-center gap-1.5 text-[12px] hover:text-white md:flex"><span className={`size-1.5 rounded-full ${lv[0]}`} />Eko-rizik: {lv[1]}</Link>
+            <Link href="/eko-rizik" className="hidden items-center gap-1.5 text-[12px] hover:text-white md:flex"><span className={`size-1.5 rounded-full ${lv[0]}`} />{tr('Eko-rizik')}: {tr(lv[1])}</Link>
             <Clock24 />
-            <Langs />
+            <Langs lang={lang} />
           </div>
         </div>
       </div>
@@ -214,15 +228,15 @@ export default function SiteHeader({ info }: { info?: TopInfo }) {
         <div className="mx-auto flex h-[72px] max-w-[1376px] items-center justify-between gap-4 px-4 md:px-8">
           <Link href="/" className="shrink-0" aria-label="MTTO HNK – naslovna"><img src="/mtto-logo.svg" alt="Ministarstvo trgovine, turizma i zaštite okoliša HNK" className="h-10 w-auto md:h-12" /></Link>
           <div className="flex items-center gap-3">
-            <div className="hidden w-[360px] lg:block xl:w-[420px]"><SearchBox /></div>
-            <Link href="/eko-rizik/prijava" className={`hidden h-11 items-center gap-2 rounded-[8px] px-4 text-[16px] font-semibold sm:inline-flex ${alarm}`}><span aria-hidden className="relative flex size-2.5"><span className="absolute inline-flex size-full animate-ping rounded-full bg-[#f04438] opacity-60" /><span className="relative inline-flex size-2.5 rounded-full bg-[#f04438]" /></span>Eko-alarm</Link>
-            <Link href="/admin/prijava" className="hidden size-11 items-center justify-center rounded-[8px] text-[#535862] ring-1 ring-inset ring-[#d5d7da] shadow-[0_1px_2px_rgba(10,13,18,0.05)] hover:bg-[#fafafa] sm:flex" title="Prijava za službenike" aria-label="Prijava za službenike"><User01 size={20} /></Link>
-            <button type="button" className="flex size-11 items-center justify-center rounded-[8px] text-[#414651] hover:bg-[#fafafa] xl:hidden" onClick={toggleMenu} aria-label={open ? 'Zatvori meni' : 'Otvori meni'} aria-expanded={open}>{open ? <XClose size={24} /> : <Menu02 size={24} />}</button>
+            <div className="hidden w-[360px] lg:block xl:w-[420px]"><SearchBox placeholder={tr('Pretraga vijesti, propisa, registara, usluga')} /></div>
+            <Link href="/eko-rizik/prijava" className={`hidden h-11 items-center gap-2 rounded-[8px] px-4 text-[16px] font-semibold sm:inline-flex ${alarm}`}><span aria-hidden className="relative flex size-2.5"><span className="absolute inline-flex size-full animate-ping rounded-full bg-[#f04438] opacity-60" /><span className="relative inline-flex size-2.5 rounded-full bg-[#f04438]" /></span>{tr('Eko-alarm')}</Link>
+            <Link href="/admin/prijava" className="hidden size-11 items-center justify-center rounded-[8px] text-[#535862] ring-1 ring-inset ring-[#d5d7da] shadow-[0_1px_2px_rgba(10,13,18,0.05)] hover:bg-[#fafafa] sm:flex" title={tr('Prijava za službenike')} aria-label={tr('Prijava za službenike')}><User01 size={20} /></Link>
+            <button type="button" className="flex size-11 items-center justify-center rounded-[8px] text-[#414651] hover:bg-[#fafafa] xl:hidden" onClick={toggleMenu} aria-label={tr(open ? 'Zatvori meni' : 'Otvori meni')} aria-expanded={open}>{open ? <XClose size={24} /> : <Menu02 size={24} />}</button>
           </div>
         </div>
-        <nav aria-label="Glavna navigacija" className="hidden border-t border-[#f5f5f5] xl:block">
+        <nav aria-label={tr('Glavna navigacija')} className="hidden border-t border-[#f5f5f5] xl:block">
           <div className="mx-auto flex h-14 max-w-[1376px] items-center gap-0.5 px-4 md:px-8">
-            {NAV.map((n) => n.groups ? <Trigger key={n.label} n={n} active={isActive(n)} open={mega === n.label} onOpen={(v) => setMega(v ? n.label : null)} /> : (
+            {nav.map((n) => n.groups ? <Trigger key={n.label} n={n} active={isActive(n)} open={mega === n.label} onOpen={(v) => setMega(v ? n.label : null)} /> : (
               <Link key={n.label} href={n.href!} aria-current={isActive(n) ? 'page' : undefined} onMouseEnter={() => setMega(null)}
                 className={`rounded-[6px] px-3 py-2 text-[15px] leading-6 font-semibold whitespace-nowrap ${isActive(n) ? 'bg-[var(--br-50)] text-[var(--br-700)]' : 'text-[#414651] hover:bg-[#fafafa] hover:text-[#181d27]'}`}>{n.label}</Link>
             ))}
@@ -240,10 +254,10 @@ export default function SiteHeader({ info }: { info?: TopInfo }) {
         <div className={`absolute inset-0 bg-[#0a0d12]/50 backdrop-blur-[2px] transition-opacity duration-300 ${open ? 'opacity-100' : 'opacity-0'}`} onClick={() => setOpen(false)} />
         <div role="dialog" aria-label="Meni" className={`relative flex max-h-full flex-col overflow-y-auto bg-white shadow-[0_20px_24px_-4px_rgba(10,13,18,0.08)] transition-all duration-300 ${open ? 'translate-y-0 opacity-100' : '-translate-y-3 opacity-0'}`}>
           <div className="px-4 pt-4">
-            <SearchBox onNavigate={() => setOpen(false)} />
+            <SearchBox onNavigate={() => setOpen(false)} placeholder={tr('Pretraga vijesti, propisa, registara, usluga')} />
           </div>
           <ul className="flex flex-col px-2 py-3">
-            {NAV.filter((n) => n.label !== 'Kontakt').map((n) => (
+            {nav.filter((_, i) => NAV[i].label !== 'Kontakt').map((n) => (
               <li key={n.label}>
                 {n.groups ? (
                   <>
