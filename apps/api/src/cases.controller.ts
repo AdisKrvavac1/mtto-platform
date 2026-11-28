@@ -24,6 +24,19 @@ import { THROTTLE_PUBLIC_FORM, verifyAltcha } from './security';
 import { sniffImage } from './risk';
 import { slugify, toInt } from './util';
 import { Field, SchemaError, normalizeFields, validateEntry } from './registry-core';
+import { footer, queueMail } from './mail';
+
+const site = () => (process.env.PUBLIC_URL || 'https://mtto-platform.onrender.com').replace(/\/$/, '');
+const fmtDate = (d: string | Date) => new Date(d).toLocaleDateString('bs-BA', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Sarajevo' });
+const statusLink = (number: string) => `${site()}/e-usluge/status?broj=${encodeURIComponent(number)}`;
+
+/** Poruke podnosiocu za javne korake predmeta. */
+const STATUS_MAIL: Record<string, string> = {
+  U_OBRADI: 'Vaš zahtjev je u obradi.',
+  DOPUNA: 'Za nastavak obrade potrebna je dopuna zahtjeva. Dopunu dostavljate na stranici za praćenje statusa, brojem predmeta i kodom s potvrde.',
+  RIJESEN: 'Vaš zahtjev je riješen.',
+  ODBIJEN: 'Vaš zahtjev je odbijen.',
+};
 
 export const CASE_STATUS: Record<string, string> = {
   ZAPRIMLJEN: 'Zaprimljen', U_OBRADI: 'U obradi', DOPUNA: 'Čeka dopunu', RIJESEN: 'Riješen', ODBIJEN: 'Odbijen',
@@ -156,7 +169,20 @@ export class PublicCasesController {
     const r = await receiveCase(this.db, this.files, form, {
       data, applicantName: name.slice(0, 160), applicantEmail: email.slice(0, 200) || null, applicantPhone: phone.slice(0, 40) || null, attachments: checkUploads(up),
     });
-    return { number: r.number, code: r.code, dueAt: r.dueAt, form: form.title };
+    if (email) {
+      await queueMail(this.db, {
+        to: email, ref: r.id, subject: `Potvrda o prijemu zahtjeva ${r.number}`,
+        text: [
+          `Poštovani/a ${name},`, '',
+          `zaprimili smo Vaš zahtjev: ${form.title}.`, '',
+          `Broj predmeta: ${r.number}`, `Kod za praćenje: ${r.code}`, `Rok za rješavanje: ${fmtDate(r.dueAt)}`, '',
+          `Status pratite na: ${statusLink(r.number)}`,
+          'Sačuvajte ovu poruku: broj i kod trebaju Vam za praćenje i dopunu. Kod se ne može ponovo izdati putem portala.',
+          footer(),
+        ].join('\n'),
+      });
+    }
+    return { number: r.number, code: r.code, dueAt: r.dueAt, form: form.title, emailQueued: !!email };
   }
 
   private async find(number: unknown, code: unknown) {
@@ -196,6 +222,13 @@ export class PublicCasesController {
       await this.db.insert('case_files', { id: id(), caseId: k.id, fileName: a.name, mimeType: a.type, size: a.buf.length, ...s, source: 'PODNOSILAC' }, `"id"`);
     }
     await this.db.insert('case_events', { id: id(), caseId: k.id, kind: 'DOPUNA_PODNOSIOCA', note: note || `Dostavljeno priloga: ${att.length}`, public: true, actorName: 'Podnosilac' }, `"id"`);
+    if (k.assigneeId) {
+      const u = await this.db.one<{ email: string; name: string }>(`SELECT "email","name" FROM users WHERE "id"=$1 AND "active"`, [k.assigneeId]);
+      if (u) await queueMail(this.db, {
+        to: u.email, ref: k.id, subject: `Dopuna stigla: ${k.number}`,
+        text: [`${u.name},`, '', `podnosilac je dostavio dopunu za predmet ${k.number} (${k.formTitle}).`, note ? `Poruka: ${note}` : '', `Priloga: ${att.length}`, '', `Predmet: ${site()}/admin/predmeti/${k.id}`, footer()].filter((x) => x !== '').join('\n'),
+      });
+    }
     await this.db.q(`UPDATE cases SET "updatedAt"=now() WHERE "id"=$1`, [k.id]);
     return { ok: true, files: att.length };
   }
@@ -341,6 +374,20 @@ export class CasesController {
     if (!k.assigneeId && to === 'U_OBRADI') d.assigneeId = req.user.sub;
     const updated = await this.db.update<Case>('cases', cid, d, true);
     await this.event(k, req, { kind: 'STATUS', fromStatus: k.status, toStatus: to, note: message || (to === 'U_OBRADI' ? 'Predmet je u obradi.' : ''), public: true });
+    if (k.applicantEmail && STATUS_MAIL[to]) {
+      const form = await this.db.one<{ title: string }>(`SELECT "title" FROM forms WHERE "id"=$1`, [k.formId]);
+      await queueMail(this.db, {
+        to: k.applicantEmail, ref: k.id, subject: `Predmet ${k.number}: ${CASE_STATUS[to].toLowerCase()}`,
+        text: [
+          `Poštovani/a ${k.applicantName},`, '',
+          `${STATUS_MAIL[to]}`, '', `Predmet: ${k.number} (${form?.title ?? 'zahtjev'})`,
+          ...(message ? ['', 'Poruka Ministarstva:', message] : []),
+          ...(OPEN.includes(to) && to !== 'DOPUNA' ? ['', `Rok za rješavanje: ${fmtDate(updated!.dueAt)}`] : []),
+          '', `Status i historija: ${statusLink(k.number)}`,
+          footer(),
+        ].join('\n'),
+      });
+    }
     await this.audit.log(req, { action: `Predmet: ${CASE_STATUS[k.status]} → ${CASE_STATUS[to]}`, entity: 'predmeti', entityId: cid, target: k.number, before: { status: k.status, dueAt: k.dueAt }, after: { status: to, dueAt: updated!.dueAt } });
     return this.get(cid);
   }
@@ -360,6 +407,13 @@ export class CasesController {
     }
     await this.db.update('cases', cid, { assigneeId: uid }, true);
     await this.event(k, req, { kind: 'DODJELA', note: uid ? `Dodijeljeno: ${name}` : 'Dodjela uklonjena' });
+    if (uid && uid !== req.user.sub) {
+      const u = await this.db.one<{ email: string }>(`SELECT "email" FROM users WHERE "id"=$1`, [uid]);
+      if (u) await queueMail(this.db, {
+        to: u.email, ref: k.id, subject: `Dodijeljen Vam je predmet ${k.number}`,
+        text: [`${name},`, '', `${req.user.name} Vam je dodijelio/la predmet ${k.number} (podnosilac: ${k.applicantName}).`, `Rok: ${fmtDate(k.dueAt)}`, '', `Predmet: ${site()}/admin/predmeti/${k.id}`, footer()].join('\n'),
+      });
+    }
     await this.audit.log(req, { action: 'Dodijelio/la predmet', entity: 'predmeti', entityId: cid, target: `${k.number} → ${name}` });
     return this.get(cid);
   }

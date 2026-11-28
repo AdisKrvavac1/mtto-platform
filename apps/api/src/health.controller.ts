@@ -3,6 +3,7 @@ import type { Response } from 'express';
 import { sql } from 'kysely';
 import { Db, currentTenant } from './db';
 import { FileStore } from './storage';
+import { mailConfigured } from './mail';
 
 const STARTED = Date.now();
 
@@ -25,6 +26,7 @@ export class HealthController {
         migrations: rows.map((r) => r.id),
         storage: await this.files.check(),
         tenant: currentTenant(),
+        mail: { configured: mailConfigured(), ...(await this.db.system(() => this.db.one<{ waiting: number; failed: number }>(`SELECT count(*) FILTER (WHERE "status"='CEKA')::int "waiting", count(*) FILTER (WHERE "status"='NEUSPJELO')::int "failed" FROM mail_outbox`)).catch(() => null)) },
         geo: rows.some((r) => r.id === '0003_postgis'),
         version: (process.env.RENDER_GIT_COMMIT ?? 'local').slice(0, 7),
         uptimeS: Math.round((Date.now() - STARTED) / 1000),

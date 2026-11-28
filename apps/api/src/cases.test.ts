@@ -78,6 +78,15 @@ test('predmeti: obrazac, prijem, status, dopuna i rješenje', { skip: !process.e
 
       st = await pub.status({ number: r.number, code: r.code });
       assert.equal(st.status, 'RIJESEN');
+      // e-mail obavještenja podnosiocu: potvrda (s kodom), dopuna, ponovo u obradi, rješenje
+      const mails = await db.q<any>(`SELECT "to","subject","text" FROM mail_outbox WHERE "ref"=$1 ORDER BY "createdAt"`, [cid]);
+      const toApplicant = mails.filter((m) => m.to === 'ana@example.org');
+      assert.equal(toApplicant.length, 5, 'prijem, u obradi, dopuna, ponovo u obradi, riješen');
+      assert.ok(mails.some((m) => m.to === `${admin.user.sub}@test.local` && /Dopuna stigla/.test(m.subject)), 'referent dobija obavijest o dopuni');
+      assert.ok(mails[0].text.includes(r.code) && mails[0].subject.includes(r.number), 'potvrda sadrži broj i kod');
+      assert.ok(mails.some((m) => /dopuna/i.test(m.subject) || /dopuna/i.test(m.text)));
+      assert.ok(mails.at(-1).text.includes('Rješenje o kategorizaciji izdato'));
+      assert.ok(!mails.some((m) => m.text.includes('Interna bilješka')), 'interne bilješke ne idu podnosiocu');
       assert.ok(!st.events.some((e: any) => /Interna bilješka/.test(e.note)), 'interne bilješke se ne vide javno');
       assert.ok(st.events.some((e: any) => /dokaz o pravu/.test(e.note)));
       assert.ok(st.events.some((e: any) => /ugovor o zakupu/.test(e.note)));
@@ -85,7 +94,7 @@ test('predmeti: obrazac, prijem, status, dopuna i rješenje', { skip: !process.e
     });
   } finally {
     await withTenant('mtto', async () => {
-      if (fid) { await db.q(`DELETE FROM cases WHERE "formId"=$1`, [fid]); await db.q(`DELETE FROM forms WHERE "id"=$1`, [fid]); }
+      if (fid) { await db.q(`DELETE FROM mail_outbox WHERE "ref" IN (SELECT "id" FROM cases WHERE "formId"=$1)`, [fid]); await db.q(`DELETE FROM cases WHERE "formId"=$1`, [fid]); await db.q(`DELETE FROM forms WHERE "id"=$1`, [fid]); }
       await db.q(`DELETE FROM users WHERE "id"=$1`, [admin.user.sub]);
     });
     await db.onModuleDestroy();

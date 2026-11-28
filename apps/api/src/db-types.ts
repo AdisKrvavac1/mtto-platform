@@ -245,6 +245,22 @@ export interface Landslides {
   updatedAt: Generated<Timestamp>;
 }
 
+export interface MailOutbox {
+  attempts: Generated<number>;
+  createdAt: Generated<Timestamp>;
+  id: string;
+  lastError: string | null;
+  nextAttemptAt: Generated<Timestamp>;
+  ref: string | null;
+  replyTo: string | null;
+  sentAt: Timestamp | null;
+  status: Generated<string>;
+  subject: string;
+  tenantId: Generated<string>;
+  text: string;
+  to: string;
+}
+
 export interface MapLocations {
   createdAt: Generated<Timestamp>;
   description: Generated<string>;
@@ -432,6 +448,7 @@ export interface DB {
   facilities: Facilities;
   forms: Forms;
   landslides: Landslides;
+  mail_outbox: MailOutbox;
   map_locations: MapLocations;
   media: Media;
   permits: Permits;

@@ -72,7 +72,7 @@ function Control({ f, err }: { f: RegField; err?: string }) {
   }
 }
 
-type Done = { number: string; code: string; dueAt: string; form: string };
+type Done = { number: string; code: string; dueAt: string; form: string; emailQueued?: boolean };
 
 export default function CaseForm({ form }: { form: PublicForm }) {
   const [files, setFiles] = useState<File[]>([]);
@@ -114,7 +114,7 @@ export default function CaseForm({ form }: { form: PublicForm }) {
     <div className="rounded-[16px] bg-white p-6 ring-1 ring-inset ring-[#e5e5e5] md:p-10 print:ring-0" role="status">
       <span className="flex size-12 items-center justify-center rounded-full bg-[#dcfae6] text-[#079455] ring-8 ring-[#ecfdf3] print:hidden"><CheckCircle size={24} /></span>
       <h2 className="mt-6 text-[24px] font-semibold leading-8 text-[#171717]">Zahtjev je zaprimljen</h2>
-      <p className="mt-2 text-[16px] text-[#525252]">{done.form}. Sačuvajte ili odštampajte ovu potvrdu: broj predmeta i kod trebaju vam za praćenje statusa i dopunu.</p>
+      <p className="mt-2 text-[16px] text-[#525252]">{done.form}. Sačuvajte ili odštampajte ovu potvrdu: broj predmeta i kod trebaju vam za praćenje statusa i dopunu.{done.emailQueued && ' Istu potvrdu šaljemo i na vaš e-mail, kao i obavijesti o promjeni statusa.'}</p>
       <dl className="mt-6 grid gap-4 sm:grid-cols-3">
         <div className="rounded-[12px] bg-[#fafafa] p-4 ring-1 ring-inset ring-[#e5e5e5]"><dt className="text-[14px] text-[#525252]">Broj predmeta</dt><dd className="mt-1 font-mono text-[20px] font-semibold text-[#171717]">{done.number}</dd></div>
         <div className="rounded-[12px] bg-[#fafafa] p-4 ring-1 ring-inset ring-[#e5e5e5]"><dt className="text-[14px] text-[#525252]">Kod za praćenje</dt><dd className="mt-1 font-mono text-[20px] font-semibold text-[#171717]">{done.code}</dd></div>
