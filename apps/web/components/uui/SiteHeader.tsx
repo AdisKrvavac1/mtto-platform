@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import {
   AlertTriangle, ArrowRight, ChevronRight, File06, Building07, CheckVerified01, ChevronDown, Clock, FileSearch02, Globe02, Image01, Map01, MarkerPin04, Menu02, Phone01,
-  Scales02, ShoppingCart01, Calendar, LineChartUp01, Sun, Ticket01, Trash03, User01, Users01, Waves, Wind01, XClose, Building02, Mail01, Edit05, Database01,
+  Scales02, ShoppingCart01, Compass03, Calendar, LineChartUp01, Sun, Ticket01, Trash03, User01, Users01, Waves, Wind01, XClose, Building02, Mail01, Edit05, Database01,
 } from '@untitledui/icons';
 import type { Icon } from './index';
 
@@ -20,9 +20,10 @@ export const NAV: Nav[] = [
   { label: 'Vijesti', href: '/vijesti', match: ['/vijesti'] },
   { label: 'O nama', href: '/o-nama', match: ['/o-nama'] },
   {
-    label: 'E-usluge i registri', match: ['/e-usluge', '/registri'],
+    label: 'E-usluge i registri', match: ['/e-usluge', '/registri', '/zivotne-situacije'],
     groups: [
       { title: 'E-usluge', items: [
+        { href: '/zivotne-situacije', label: 'Životne situacije', desc: 'Šta vam treba, korak po korak.', icon: Compass03 },
         { href: '/e-usluge', label: 'Centar e-usluga', desc: 'Registri, obrasci i javni uvidi na jednom mjestu.', icon: Globe02 },
         { href: '/e-usluge/obrasci', label: 'Elektronski zahtjevi', desc: 'Podnesite zahtjev i pratite status predmeta.', icon: Edit05 },
         { href: '/javni-pozivi', label: 'Javni pozivi', desc: 'Otvoreni pozivi, rokovi i online prijava.', icon: Ticket01 },

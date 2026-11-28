@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { can, getUser, isSignedIn, logout, refreshUser, type CmsUser, type Module } from '@/lib/adminApi';
-import { AlertTriangle, Announcement01, BarChartSquare02, Building07, ClockRewind, Folder, Image01, Inbox01, LinkExternal01, LogOut01, Map01, Menu02, SearchLg, Database01, ShieldTick, Users01, XClose, Ticket01 } from '@untitledui/icons';
+import { AlertTriangle, Announcement01, BarChartSquare02, Building07, ClockRewind, Folder, Image01, Inbox01, LinkExternal01, LogOut01, Map01, Menu02, SearchLg, Database01, ShieldTick, Users01, XClose, Ticket01, Compass03 } from '@untitledui/icons';
 
 type Icon = React.FC<React.SVGProps<SVGSVGElement> & { size?: number }>;
 type Item = { href: string; label: string; icon: Icon; f2?: boolean; perm?: Module };
@@ -14,6 +14,7 @@ const NAV: { group?: string; items: Item[] }[] = [
     group: 'Sadržaj portala',
     items: [
       { href: '/admin/objave', label: 'Objave i vijesti', icon: Announcement01, perm: 'objave' },
+      { href: '/admin/zivotne-situacije', label: 'Životne situacije', icon: Compass03, perm: 'objave' },
       { href: '/admin/dokumenti', label: 'Dokumenti i propisi', icon: Folder, perm: 'dokumenti' },
       { href: '/admin/multimedija', label: 'Multimedija', icon: Image01, perm: 'mediji', f2: true },
       { href: '/admin/mapa', label: 'Lokacije na karti', icon: Map01, perm: 'registri' },

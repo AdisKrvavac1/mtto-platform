@@ -16,7 +16,7 @@ import { Can } from './rbac';
 import { logJson } from './observability';
 
 export const KINDS: Record<string, string> = {
-  STRANICA: 'Stranice i usluge', VIJEST: 'Vijesti i obavještenja', DOKUMENT: 'Dokumenti i propisi',
+  STRANICA: 'Stranice i usluge', SITUACIJA: 'Životne situacije', VIJEST: 'Vijesti i obavještenja', DOKUMENT: 'Dokumenti i propisi',
   REGISTAR: 'Registri', POZIV: 'Javni pozivi', USLUGA: 'Elektronski zahtjevi',
 };
 
@@ -42,6 +42,7 @@ export const PAGES: { url: string; title: string; body: string; sector?: string 
   { url: '/mapa', title: 'GIS karta', body: 'karta, lokacije, dozvole, objekti, zaštićena područja', sector: undefined },
   { url: '/o-nama', title: 'O Ministarstvu', body: 'ministar, kontakt, adresa, telefon, e-mail, sektori, organizacija, radno vrijeme ministarstva', sector: undefined },
   { url: '/vijesti', title: 'Vijesti', body: 'novosti, saopćenja, obavještenja, aktuelnosti', sector: undefined },
+  { url: '/zivotne-situacije', title: 'Životne situacije', body: 'šta mi treba, kako da, korak po korak, vodič, upute za građane i privredu', sector: undefined },
 ];
 
 const CYR: Record<string, string> = {
@@ -153,7 +154,8 @@ export class SearchIndexer implements OnModuleInit {
       (SELECT count(*)||'/'||coalesce(max(e."updatedAt")::text,'')||'/'||coalesce(max(r."updatedAt")::text,'') FROM registry_entries e JOIN registries r ON r."id"=e."registryId" WHERE r."public" AND e."status"='AKTIVAN') r,
       (SELECT count(*)||'/'||coalesce(max("updatedAt")::text,'') FROM permits) pe,
       (SELECT count(*)||'/'||coalesce(max("updatedAt")::text,'') FROM calls WHERE "published") c,
-      (SELECT count(*)||'/'||coalesce(max("updatedAt")::text,'') FROM forms WHERE "active") f`);
+      (SELECT count(*)||'/'||coalesce(max("updatedAt")::text,'') FROM forms WHERE "active") f,
+      (SELECT count(*)||'/'||coalesce(max("updatedAt")::text,'') FROM life_events WHERE "published") l`);
     return `v2|${PAGES.length}|${Object.values(r).join('|')}`;
   }
 
@@ -182,6 +184,8 @@ export class SearchIndexer implements OnModuleInit {
     for (const c of calls) out.push({ key: `call:${c.id}`, kind: 'POZIV', title: c.title, body: [c.summary, c.body, c.eligibility].join(' '), url: `/javni-pozivi/${c.slug}`, meta: 'Javni poziv', sector: c.sector, date: c.opensAt, isDemo: c.isDemo });
     const forms = await this.db.q<any>(`SELECT f."id",f."slug",f."title",f."description",f."sector",f."isDemo" FROM forms f WHERE f."active" AND NOT EXISTS (SELECT 1 FROM calls c WHERE c."formId"=f."id")`);
     for (const f of forms) out.push({ key: `form:${f.id}`, kind: 'USLUGA', title: f.title, body: f.description ?? '', url: f.slug === 'prijava-inspekciji' ? '/e-usluge/prijava-inspekciji' : `/e-usluge/obrasci/${f.slug}`, meta: 'Elektronski zahtjev', sector: f.sector, date: null, isDemo: f.isDemo });
+    const life = await this.db.q<any>(`SELECT "id","slug","title","summary","steps","keywords","sector","audience" FROM life_events WHERE "published"`);
+    for (const l of life) out.push({ key: `life:${l.id}`, kind: 'SITUACIJA', title: l.title, body: [l.summary, ...(l.steps ?? []).map((s: any) => `${s.title}. ${s.text}`), l.keywords].join(' '), url: `/zivotne-situacije/${l.slug}`, meta: l.audience === 'PRIVREDA' ? 'Za privredu' : 'Za građane', sector: l.sector, date: null, isDemo: false });
     return out.filter((d) => d.title);
   }
 }
@@ -253,7 +257,7 @@ export class SearchController {
       `SELECT "key","kind","sector", extract(year FROM "date" AT TIME ZONE 'Europe/Sarajevo')::int "year",
          ts_rank("tsv", q, 1) * 10
          + CASE WHEN "foldTitle" = $2 THEN 6 WHEN "foldTitle" LIKE $2 || '%' THEN 3 ELSE 0 END
-         + CASE "kind" WHEN 'STRANICA' THEN 1.5 WHEN 'USLUGA' THEN 1.2 WHEN 'POZIV' THEN 1 ELSE 0 END
+         + CASE "kind" WHEN 'SITUACIJA' THEN 2 WHEN 'STRANICA' THEN 1.5 WHEN 'USLUGA' THEN 1.2 WHEN 'POZIV' THEN 1 ELSE 0 END
          + CASE WHEN "date" IS NULL THEN 0 ELSE greatest(0, 1 - extract(epoch FROM now() - "date") / (86400 * 730)) END
          - CASE WHEN "isDemo" THEN 0.5 ELSE 0 END AS "rank"
        FROM search_docs, to_tsquery('simple', $1) q

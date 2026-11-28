@@ -306,6 +306,26 @@ export interface Landslides {
   updatedAt: Generated<Timestamp>;
 }
 
+export interface LifeEvents {
+  audience: Generated<string>;
+  contact: Generated<string>;
+  createdAt: Generated<Timestamp>;
+  icon: Generated<string>;
+  id: string;
+  keywords: Generated<string>;
+  links: Generated<Json>;
+  position: Generated<number>;
+  published: Generated<boolean>;
+  sector: string | null;
+  slug: string;
+  steps: Generated<Json>;
+  summary: Generated<string>;
+  tenantId: Generated<string>;
+  title: string;
+  updatedAt: Generated<Timestamp>;
+  verified: Generated<boolean>;
+}
+
 export interface MailOutbox {
   attempts: Generated<number>;
   createdAt: Generated<Timestamp>;
@@ -552,6 +572,7 @@ export interface DB {
   facilities: Facilities;
   forms: Forms;
   landslides: Landslides;
+  life_events: LifeEvents;
   mail_outbox: MailOutbox;
   map_locations: MapLocations;
   media: Media;

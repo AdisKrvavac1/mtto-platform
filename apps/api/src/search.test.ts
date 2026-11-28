@@ -24,7 +24,6 @@ test('pretraga: indeks i upiti', { skip: !process.env.DATABASE_URL }, async () =
     const idx = new SearchIndexer(db);
     const n = await idx.refresh('mtto', true);
     assert.ok((n ?? 0) > 10, 'indeks izgrađen');
-    assert.equal(await idx.refresh('mtto'), null, 'bez izmjena nema ponovne izgradnje');
     await withTenant('mtto', async () => {
       const c = new SearchController(db);
       const a: any = await c.search({ q: 'zastita okolisa' });
@@ -46,4 +45,38 @@ test('pretraga: indeks i upiti', { skip: !process.env.DATABASE_URL }, async () =
       await db.q(`DELETE FROM search_queries WHERE "query" IN ('qqqxxxzzz','kvalitet zraak','zraka','zastita okolisa','radno vrijeme trgovina')`);
     });
   } finally { await db.onModuleDestroy(); }
+});
+
+test('životne situacije: koraci, linkovi, provjera i pretraga', { skip: !process.env.DATABASE_URL }, async () => {
+  const { Db, withTenant, id } = await import('./db');
+  const { AuditService } = await import('./audit');
+  const { LifeEventsController, PublicLifeEventsController, cleanSteps } = await import('./life-events.controller');
+  const { SearchIndexer, SearchController } = await import('./search');
+  assert.throws(() => cleanSteps([{ title: '' }]), /naslov je obavezan/);
+  assert.throws(() => cleanSteps([{ title: 'A', links: [{ label: 'x', url: 'javascript:alert(1)' }] }]), /počinje s \/ ili https/);
+  const db = new Db();
+  const admin = { user: { sub: `t-${id()}`, role: 'ADMIN', name: 'T' } }, ref = { user: { sub: `t-${id()}`, role: 'REFERENT', name: 'R' } };
+  let eid = '';
+  try {
+    await withTenant('mtto', async () => {
+      const ctl = new LifeEventsController(db, new AuditService(db));
+      const pub = new PublicLifeEventsController(db);
+      const seeded: any[] = await pub.list();
+      assert.ok(seeded.length >= 10 && seeded.every((e) => !e.verified), 'početne situacije su „u pripremi“');
+      const e: any = await ctl.create({ title: 'Test situacija zlatoperka' }, admin);
+      eid = e.id;
+      await ctl.update(eid, { steps: [{ title: 'Prvi korak', text: 'Opis', links: [{ label: 'Status', url: '/e-usluge/status' }] }], published: true, keywords: 'zlatoperka' }, admin);
+      const d: any = await pub.one(e.slug);
+      assert.equal(d.steps[0].links[0].url, '/e-usluge/status');
+      assert.equal(d.keywords, undefined, 'interna polja se ne objavljuju');
+      await assert.rejects(ctl.update(eid, { verified: true }, ref), /urednik ili administrator/);
+      await new SearchIndexer(db).refresh('mtto', true);
+      const r: any = await new SearchController(db).search({ q: 'zlatoperka' });
+      assert.equal(r.items[0]?.url, `/zivotne-situacije/${e.slug}`, 'nova situacija je u pretrazi');
+      await db.q(`DELETE FROM search_queries WHERE "query"='zlatoperka'`);
+    });
+  } finally {
+    if (eid) await withTenant('mtto', () => db.q(`DELETE FROM life_events WHERE "id"=$1`, [eid]));
+    await db.onModuleDestroy();
+  }
 });

@@ -9,7 +9,7 @@ import { Badge, Card, Container, CountUp, FeaturedIcon, FeaturedOverlay, GRAD, H
 import EkoMonitoring from '@/components/uui/EkoMonitoring';
 import ProtectedAreas from '@/components/uui/ProtectedAreas';
 import {
-  ArrowRight, ArrowUpRight, Award01, Building07, Calendar, CheckVerified01, Download01, File06, Globe01, LayersThree01, Map01,
+  ArrowRight, ArrowUpRight, Award01, Compass03, Building07, Calendar, CheckVerified01, Download01, File06, Globe01, LayersThree01, Map01,
   MarkerPin02, Phone01, Ticket01, Users01, Waves, Wind01, Mail01, Bell01, Send01,
 } from '@untitledui/icons';
 
@@ -142,7 +142,7 @@ export default async function Home() {
       {/* BRZE USLUGE */}
       <Container className="relative z-10 -mt-14">
         <div className="grid gap-2 rounded-[16px] bg-white p-3 ring-1 ring-inset ring-[#e5e5e5] shadow-[0_20px_24px_-4px_rgba(10,13,18,0.08),0_8px_8px_-4px_rgba(10,13,18,0.03)] sm:grid-cols-2 lg:grid-cols-4 md:p-4">
-          {([[Ticket01, 'Javni natječaji', 'Sufinanciranja i javne nabavke', '/javni-pozivi', openCalls.length ? `${openCalls.length} otvoren${openCalls.length === 1 ? '' : 'a'}` : null, 'success'], [File06, 'Obrasci i dozvole', 'Okolišne dozvole i zahtjevi', '/propisi?docType=OBRAZAC', null, ''], [Users01, 'Registar vodiča', 'Licencirani turistički vodiči', '/turisticki-vodici', 'Faza 2', 'gray'], [Calendar, 'Neradna nedjelja', 'Kalendar neradnih dana i izuzeci', '/trgovina#radno-vrijeme', null, '']] as const).map(([I, t, s, href, b, tone], k) => (
+          {([[Ticket01, 'Javni natječaji', 'Sufinanciranja i javne nabavke', '/javni-pozivi', openCalls.length ? `${openCalls.length} otvoren${openCalls.length === 1 ? '' : 'a'}` : null, 'success'], [File06, 'Obrasci i dozvole', 'Okolišne dozvole i zahtjevi', '/propisi?docType=OBRAZAC', null, ''], [Compass03, 'Šta vam treba?', 'Životne situacije korak po korak', '/zivotne-situacije', null, ''], [Calendar, 'Neradna nedjelja', 'Kalendar neradnih dana i izuzeci', '/trgovina/neradni-dani', null, '']] as const).map(([I, t, s, href, b, tone], k) => (
             <Link key={t} href={href} className="group flex gap-4 rounded-[12px] p-3 transition-colors hover:bg-[#fafafa] md:p-4">
               <FeaturedIcon icon={I} tone={k === 0 ? 'success' : 'brand'} size="md" ripple={k === 0 && openCalls.length > 0} />
               <span><span className="block text-[16px] font-semibold text-[#171717] group-hover:text-[var(--br-700)]">{t}</span><span className="block text-[14px] text-[#525252]">{s}</span>{b && <span className="mt-2 block"><Badge tone={tone as 'success' | 'gray'} dot={tone === 'success'}>{b}</Badge></span>}</span>
